@@ -1143,6 +1143,7 @@ function openReportPanel(title) {
   const panel = document.getElementById('reportPanel');
   document.getElementById('reportTitle').textContent = title || '燃气监测运营月度报告';
   panel.classList.add('open');
+  document.querySelector('.app-layout').classList.add('report-open');
 
   const body = document.getElementById('reportBody');
   // Show skeleton first
