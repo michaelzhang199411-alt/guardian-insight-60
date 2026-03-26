@@ -8,11 +8,11 @@
 /* ========== Reset & Base ========== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-family: "Inter", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
   font-size: 14px;
-  color: #5d6b81;
+  color: #4B5563;
   line-height: 1.5;
-  background: #f2f3f7;
+  background: #FFFFFF;
   min-width: 1280px;
   overflow: hidden;
   height: 100vh;
@@ -29,15 +29,15 @@ body {
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: #ffffff;
-  border-right: 1px solid rgba(93,107,129,0.54);
+  background: #F9FAFB;
+  border-right: 1px solid #E5E7EB;
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 .sidebar-header {
-  padding: 20px 16px 12px;
-  border-bottom: 1px solid rgba(213,217,227,0.54);
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid #E5E7EB;
 }
 .sidebar-logo {
   display: flex;
@@ -47,16 +47,16 @@ body {
 }
 .sidebar-logo-icon {
   width: 32px; height: 32px;
-  background: #2395ff;
-  border-radius: 4px;
+  background: #2563EB;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px; font-weight: bold;
+  color: #fff; font-size: 14px; font-weight: 600;
 }
 .sidebar-title {
-  font-size: 18px; font-weight: bold; color: #23313e;
+  font-size: 18px; font-weight: 600; color: #1F2937; line-height: 1.3;
 }
 .sidebar-subtitle {
-  font-size: 12px; color: #8693a1; margin-left: 42px; margin-top: -2px;
+  font-size: 12px; color: #9CA3AF; margin-left: 42px; margin-top: -2px;
 }
 
 .sidebar-actions {
@@ -64,8 +64,8 @@ body {
   display: flex; flex-direction: column; gap: 8px;
 }
 .btn-new-chat, .btn-console {
-  height: 40px;
-  border-radius: 4px;
+  height: 36px;
+  border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -74,14 +74,14 @@ body {
   width: 100%;
 }
 .btn-new-chat {
-  background: #2395ff; color: #fff;
+  background: #2563EB; color: #fff; font-weight: 500;
 }
-.btn-new-chat:hover { background: #1e7ed8; }
+.btn-new-chat:hover { background: #1D4ED8; }
 .btn-console {
-  background: #fff; color: #5d6b81;
-  border: 1px solid rgba(93,107,129,0.54);
+  background: #fff; color: #4B5563;
+  border: 1px solid #E5E7EB;
 }
-.btn-console:hover { background: #f5f5f5; color: #2395ff; }
+.btn-console:hover { background: #EFF6FF; color: #2563EB; border-color: #2563EB; }
 
 .sidebar-history {
   flex: 1;
@@ -89,44 +89,46 @@ body {
   padding: 8px 0;
 }
 .history-group-label {
-  font-size: 12px; color: #afb6be;
-  padding: 8px 16px 4px;
+  font-size: 12px; color: #9CA3AF;
+  padding: 10px 16px 4px; font-weight: 500;
 }
 .history-item {
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  margin: 0 8px;
+  border-radius: 8px;
 }
-.history-item:hover { background: #f5f5f5; }
-.history-item.active { background: #e6f7ff; border-right: 2px solid #2395ff; }
+.history-item:hover { background: #F3F4F6; }
+.history-item.active { background: #EFF6FF; }
 .history-item-title {
-  font-size: 14px; color: #23313e; font-weight: bold;
+  font-size: 14px; color: #1F2937; font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.history-item.active .history-item-title { color: #2395ff; }
+.history-item.active .history-item-title { color: #2563EB; }
 .history-item-summary {
-  font-size: 12px; color: #8693a1;
+  font-size: 12px; color: #9CA3AF;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-top: 2px;
 }
 .history-item-time {
-  font-size: 12px; color: #afb6be; margin-top: 2px;
+  font-size: 12px; color: #D1D5DB; margin-top: 2px;
 }
 
 .sidebar-footer {
   padding: 12px 16px;
-  border-top: 1px solid rgba(213,217,227,0.54);
+  border-top: 1px solid #E5E7EB;
   display: flex; align-items: center; gap: 10px;
 }
 .user-avatar {
   width: 36px; height: 36px;
-  background: #2395ff; border-radius: 4px;
+  background: #2563EB; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 14px; font-weight: bold;
+  color: #fff; font-size: 14px; font-weight: 600;
 }
-.user-info-name { font-size: 14px; color: #23313e; font-weight: bold; }
-.user-info-role { font-size: 12px; color: #8693a1; }
+.user-info-name { font-size: 14px; color: #1F2937; font-weight: 500; }
+.user-info-role { font-size: 12px; color: #9CA3AF; }
 
 /* ========== Middle Main Area ========== */
 .main-area {
@@ -135,41 +137,41 @@ body {
   flex-direction: column;
   height: 100vh;
   min-width: 0;
-  background: #f2f3f7;
+  background: #FFFFFF;
 }
 
 /* Top Status Bar */
 .top-bar {
   height: 48px; min-height: 48px;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(213,217,227,0.54);
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px;
 }
 .status-indicator {
   display: flex; align-items: center; gap: 6px;
-  font-size: 14px; color: #23313e;
+  font-size: 14px; color: #1F2937;
 }
 .status-dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: #0cf50;
+  background: #10B981;
   display: inline-block;
 }
-.status-dot.error { background: #fc3336; }
+.status-dot.error { background: #EF4444; }
 .top-bar-actions {
   display: flex; align-items: center; gap: 16px;
 }
 .top-bar-icon {
   width: 20px; height: 20px; cursor: pointer;
-  color: #b0b8c2; transition: color 0.2s;
+  color: #6B7280; transition: color 0.2s;
   display: flex; align-items: center; justify-content: center;
   position: relative;
 }
-.top-bar-icon:hover { color: #2395ff; }
+.top-bar-icon:hover { color: #2563EB; }
 .notification-badge {
   position: absolute; top: -4px; right: -4px;
   width: 8px; height: 8px;
-  background: #fc3336; border-radius: 50%;
+  background: #EF4444; border-radius: 50%;
 }
 
 /* Chat Area */
@@ -184,10 +186,10 @@ body {
 
 /* Welcome Card */
 .welcome-card {
-  background: #ffffff;
-  border-radius: 4px;
+  background: #FFFFFF;
+  border-radius: 8px;
   padding: 24px;
-  border: 1px solid rgba(213,217,227,0.4);
+  border: 1px solid #E5E7EB;
 }
 .welcome-header {
   display: flex; align-items: center; gap: 12px;
@@ -195,16 +197,16 @@ body {
 }
 .welcome-ai-avatar {
   width: 40px; height: 40px;
-  background: linear-gradient(135deg, #2395ff, #1e7ed8);
-  border-radius: 4px;
+  background: linear-gradient(135deg, #2563EB, #3B82F6);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 18px; font-weight: bold;
+  color: #fff; font-size: 16px; font-weight: 600;
 }
 .welcome-title {
-  font-size: 18px; font-weight: bold; color: #23313e;
+  font-size: 18px; font-weight: 600; color: #1F2937; line-height: 1.3;
 }
 .welcome-desc {
-  font-size: 14px; color: #5d6b81;
+  font-size: 14px; color: #4B5563;
   margin-bottom: 16px;
 }
 .welcome-features {
@@ -214,16 +216,16 @@ body {
 .feature-item {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 14px; color: #5d6b81;
+  background: #F9FAFB;
+  border-radius: 8px;
+  font-size: 14px; color: #4B5563;
 }
 .feature-icon {
   width: 28px; height: 28px;
-  background: rgba(35,149,255,0.1);
-  border-radius: 4px;
+  background: #EFF6FF;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #2395ff; font-size: 14px;
+  color: #2563EB; font-size: 14px;
 }
 
 /* Quick Questions */
@@ -233,15 +235,15 @@ body {
 .quick-q-card {
   padding: 10px 16px;
   background: #fff;
-  border: 1px solid rgba(213,217,227,0.54);
-  border-radius: 4px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px; color: #5d6b81;
+  font-size: 14px; color: #4B5563;
   transition: all 0.2s;
 }
 .quick-q-card:hover {
-  background: #e6f7ff; color: #2395ff;
-  border-color: #2395ff;
+  background: #EFF6FF; color: #2563EB;
+  border-color: #2563EB;
 }
 
 /* Chat Bubbles */
@@ -257,58 +259,63 @@ body {
 .chat-msg.ai { align-self: flex-start; }
 .msg-avatar {
   width: 32px; height: 32px; min-width: 32px;
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: bold; color: #fff;
+  font-size: 12px; font-weight: 600; color: #fff;
 }
-.msg-avatar.user-av { background: #23313e; }
-.msg-avatar.ai-av { background: #2395ff; }
+.msg-avatar.user-av { background: #1F2937; }
+.msg-avatar.ai-av { background: #2563EB; }
 .msg-bubble {
-  padding: 12px 16px;
-  border-radius: 4px;
+  padding: 16px;
+  border-radius: 8px;
   font-size: 14px; line-height: 1.5;
 }
 .msg-bubble.user-bubble {
-  background: #2395ff; color: #fff;
+  background: #2563EB; color: #FFFFFF;
 }
 .msg-bubble.ai-bubble {
-  background: #ffffff; color: #5d6b81;
-  border: 1px solid rgba(213,217,227,0.4);
+  background: #F3F4F6; color: #4B5563;
 }
+.msg-time {
+  font-size: 12px; color: #9CA3AF; margin-top: 4px;
+}
+.chat-msg.user .msg-time { text-align: right; }
+.chat-msg.ai .msg-time { text-align: left; }
 
 /* AI Bubble Actions */
 .ai-bubble-actions {
   display: flex; gap: 12px; margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(213,217,227,0.4);
+  border-top: 1px solid #E5E7EB;
 }
 .ai-bubble-actions button {
   background: none; border: none;
-  font-size: 12px; color: #8693a1;
+  font-size: 12px; color: #9CA3AF;
   cursor: pointer; display: flex; align-items: center; gap: 4px;
   transition: color 0.2s;
 }
-.ai-bubble-actions button:hover { color: #2395ff; }
+.ai-bubble-actions button:hover { color: #2563EB; }
 
 /* Data Card in AI bubble */
 .data-card {
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: #FFFFFF;
+  border-radius: 8px;
   padding: 12px 16px;
   margin-top: 12px;
+  border: 1px solid #E5E7EB;
 }
 .data-card-row {
   display: flex; justify-content: space-between; align-items: center;
   padding: 6px 0;
 }
 .data-card-row:not(:last-child) {
-  border-bottom: 1px solid rgba(213,217,227,0.4);
+  border-bottom: 1px solid #E5E7EB;
 }
-.data-label { font-size: 14px; color: #5d6b81; }
-.data-value { font-size: 18px; font-weight: bold; color: #2395ff; }
+.data-label { font-size: 14px; color: #4B5563; }
+.data-value { font-size: 18px; font-weight: 600; color: #2563EB; }
 .data-trend { font-size: 12px; margin-left: 6px; }
-.data-trend.up { color: #fc3336; }
-.data-trend.down { color: #0cf50; }
+.data-trend.up { color: #EF4444; }
+.data-trend.down { color: #10B981; }
 
 /* Quick Action Buttons in AI bubble */
 .ai-quick-actions {
@@ -316,26 +323,26 @@ body {
 }
 .ai-quick-btn {
   padding: 6px 14px;
-  border: 1px solid #2395ff;
-  border-radius: 4px;
+  border: 1px solid #2563EB;
+  border-radius: 8px;
   background: #fff;
-  color: #2395ff;
+  color: #2563EB;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
 .ai-quick-btn:hover {
-  background: #e6f7ff;
+  background: #EFF6FF;
 }
 
 /* Loading indicator */
 .typing-indicator {
   display: flex; align-items: center; gap: 4px;
-  color: #ff8603; font-size: 14px;
+  color: #3B82F6; font-size: 14px;
 }
 .typing-dot {
   width: 6px; height: 6px;
-  background: #ff8603; border-radius: 50%;
+  background: #3B82F6; border-radius: 50%;
   animation: blink 1.4s infinite both;
 }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -347,8 +354,8 @@ body {
 
 /* ========== Bottom Input Area ========== */
 .input-area {
-  background: #ffffff;
-  border-top: 1px solid rgba(213,217,227,0.54);
+  background: #FFFFFF;
+  border-top: 1px solid #E5E7EB;
   padding: 12px 40px 16px;
 }
 .shortcut-btns {
@@ -358,21 +365,21 @@ body {
 .shortcut-btn {
   height: 32px;
   padding: 0 14px;
-  border-radius: 4px;
-  border: 1px solid rgba(93,107,129,0.54);
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
   background: #fff;
-  font-size: 14px; color: #5d6b81;
+  font-size: 14px; color: #4B5563;
   cursor: pointer;
   display: flex; align-items: center; gap: 4px;
   transition: all 0.2s;
 }
 .shortcut-btn:hover {
-  background: #f5f5f5; color: #2395ff;
-  border-color: #2395ff;
+  background: #EFF6FF; color: #2563EB;
+  border-color: #2563EB;
 }
 .shortcut-btn.active {
-  background: #e6f7ff; color: #2395ff;
-  border-color: #2395ff;
+  background: #EFF6FF; color: #2563EB;
+  border-color: #2563EB;
 }
 .input-row {
   display: flex; gap: 8px; align-items: flex-end;
@@ -380,56 +387,58 @@ body {
 .input-box {
   flex: 1;
   min-height: 40px; max-height: 120px;
-  border: 1px solid rgba(93,107,129,0.54);
-  border-radius: 4px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
   padding: 8px 12px;
-  font-size: 14px; color: #5d6b81;
-  background: #f5f5f5;
+  font-size: 14px; color: #4B5563;
+  background: #F9FAFB;
   resize: none;
   font-family: inherit;
   line-height: 1.5;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
+.input-box:hover { border-color: #2563EB; }
 .input-box:focus {
-  border-color: #2395ff;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
   background: #fff;
 }
-.input-box::placeholder { color: #afb6be; }
+.input-box::placeholder { color: #D1D5DB; }
 .input-actions {
   display: flex; gap: 8px; align-items: center;
 }
 .btn-upload {
   width: 40px; height: 40px;
-  border: 1px solid rgba(93,107,129,0.54);
-  border-radius: 4px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #b0b8c2;
+  color: #6B7280;
   transition: all 0.2s;
 }
-.btn-upload:hover { color: #2395ff; border-color: #2395ff; }
+.btn-upload:hover { color: #2563EB; border-color: #2563EB; }
 .btn-send {
   width: 40px; height: 40px;
   border: none;
-  border-radius: 4px;
-  background: #2395ff;
+  border-radius: 8px;
+  background: #2563EB;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #fff;
   transition: all 0.2s;
 }
-.btn-send:hover { background: #1e7ed8; }
-.btn-send.stop { background: #fc3336; }
-.btn-send.stop:hover { background: #d12b2e; }
+.btn-send:hover { background: #1D4ED8; }
+.btn-send.stop { background: #EF4444; }
+.btn-send.stop:hover { background: #DC2626; }
 
 /* ========== Right Report Panel ========== */
 .report-panel {
   width: 0;
   overflow: hidden;
-  background: #ffffff;
-  border-left: 1px solid rgba(93,107,129,0.54);
+  background: #FFFFFF;
+  border-left: 1px solid #E5E7EB;
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -442,11 +451,11 @@ body {
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(213,217,227,0.54);
+  border-bottom: 1px solid #E5E7EB;
   min-height: 48px;
 }
 .report-title {
-  font-size: 16px; font-weight: bold; color: #23313e;
+  font-size: 16px; font-weight: 500; color: #1F2937;
   white-space: nowrap;
 }
 .report-header-actions {
@@ -454,14 +463,14 @@ body {
 }
 .report-header-actions button {
   width: 28px; height: 28px;
-  border: none; border-radius: 4px;
+  border: none; border-radius: 8px;
   background: #fff; cursor: pointer;
-  color: #b0b8c2;
+  color: #6B7280;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
 .report-header-actions button:hover {
-  background: #f5f5f5; color: #2395ff;
+  background: #F3F4F6; color: #2563EB;
 }
 .report-body {
   flex: 1; overflow-y: auto;
@@ -471,25 +480,25 @@ body {
   margin-bottom: 16px;
 }
 .report-section-title {
-  font-size: 14px; font-weight: bold; color: #23313e;
+  font-size: 14px; font-weight: 500; color: #1F2937;
   margin-bottom: 8px;
   padding-bottom: 6px;
-  border-bottom: 1px solid rgba(213,217,227,0.4);
+  border-bottom: 1px solid #E5E7EB;
 }
 .report-info-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
 }
 .report-info-item {
-  padding: 8px; background: #f5f5f5; border-radius: 4px;
+  padding: 8px; background: #F9FAFB; border-radius: 8px;
 }
-.report-info-label { font-size: 12px; color: #8693a1; }
-.report-info-value { font-size: 14px; color: #23313e; font-weight: bold; }
-.report-text { font-size: 14px; color: #5d6b81; line-height: 1.6; }
+.report-info-label { font-size: 12px; color: #9CA3AF; }
+.report-info-value { font-size: 14px; color: #1F2937; font-weight: 500; }
+.report-text { font-size: 14px; color: #4B5563; line-height: 1.6; }
 .report-conclusion {
-  background: #e6f7ff;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 14px; color: #2395ff;
+  background: #EFF6FF;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px; color: #2563EB; font-weight: 500;
   line-height: 1.6;
 }
 
@@ -500,41 +509,41 @@ body {
   font-size: 13px;
 }
 .report-table th {
-  background: #f5f5f5;
-  color: #23313e; font-weight: bold;
+  background: #F9FAFB;
+  color: #1F2937; font-weight: 500;
   padding: 8px 10px;
   text-align: left;
-  border: 1px solid rgba(93,107,129,0.54);
+  border: 1px solid #E5E7EB;
 }
 .report-table td {
   padding: 8px 10px;
-  border: 1px solid rgba(93,107,129,0.54);
-  color: #5d6b81;
+  border: 1px solid #E5E7EB;
+  color: #4B5563;
 }
 .report-table tr:nth-child(even) td {
-  background: rgba(245,245,245,0.54);
+  background: #F9FAFB;
 }
-.report-table tr:hover td { background: #e6f7ff; }
+.report-table tr:hover td { background: #EFF6FF; }
 
 .report-footer {
   padding: 12px 16px;
-  border-top: 1px solid rgba(213,217,227,0.54);
+  border-top: 1px solid #E5E7EB;
   display: flex; gap: 8px;
 }
 .report-footer button {
   flex: 1; height: 36px;
-  border-radius: 4px; font-size: 14px;
+  border-radius: 8px; font-size: 14px;
   cursor: pointer; transition: all 0.2s;
 }
 .btn-report-download {
-  background: #2395ff; color: #fff; border: none;
+  background: #2563EB; color: #fff; border: none;
 }
-.btn-report-download:hover { background: #1e7ed8; }
+.btn-report-download:hover { background: #1D4ED8; }
 .btn-report-refresh {
-  background: #fff; color: #5d6b81;
-  border: 1px solid rgba(93,107,129,0.54);
+  background: #fff; color: #4B5563;
+  border: 1px solid #E5E7EB;
 }
-.btn-report-refresh:hover { background: #f5f5f5; color: #2395ff; }
+.btn-report-refresh:hover { background: #EFF6FF; color: #2563EB; border-color: #2563EB; }
 
 /* Report status indicator */
 .report-status {
@@ -542,16 +551,16 @@ body {
   padding: 10px 16px;
   font-size: 13px;
 }
-.report-status.loading { color: #ff8603; }
-.report-status.done { color: #0cf50; }
-.report-status.error { color: #fc3336; }
+.report-status.loading { color: #F59E0B; }
+.report-status.done { color: #10B981; }
+.report-status.error { color: #EF4444; }
 
 /* Simple chart placeholder */
 .chart-placeholder {
   width: 100%;
   height: 160px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: #F9FAFB;
+  border-radius: 8px;
   display: flex;
   align-items: flex-end;
   padding: 12px;
@@ -559,18 +568,18 @@ body {
 }
 .chart-bar {
   flex: 1;
-  background: #2395ff;
-  border-radius: 2px 2px 0 0;
+  background: #2563EB;
+  border-radius: 4px 4px 0 0;
   min-height: 10px;
   transition: height 0.3s;
   position: relative;
 }
-.chart-bar:hover { background: #1e7ed8; }
+.chart-bar:hover { background: #1D4ED8; }
 .chart-bar .chart-tooltip {
   display: none;
-  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
-  background: #23313e; color: #fff;
-  padding: 2px 8px; border-radius: 4px;
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  background: #1F2937; color: #fff;
+  padding: 4px 8px; border-radius: 6px;
   font-size: 11px; white-space: nowrap;
 }
 .chart-bar:hover .chart-tooltip { display: block; }
@@ -579,27 +588,29 @@ body {
 .context-menu {
   position: fixed;
   background: #fff;
-  border: 1px solid rgba(213,217,227,0.54);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   z-index: 1000;
   display: none;
   min-width: 120px;
+  padding: 4px;
 }
 .context-menu-item {
   padding: 8px 16px;
-  font-size: 14px; color: #5d6b81;
+  font-size: 14px; color: #4B5563;
   cursor: pointer;
   transition: all 0.15s;
+  border-radius: 6px;
 }
-.context-menu-item:hover { background: #f5f5f5; color: #2395ff; }
-.context-menu-item.danger { color: #fc3336; }
-.context-menu-item.danger:hover { background: #fff0f0; }
+.context-menu-item:hover { background: #F3F4F6; color: #2563EB; }
+.context-menu-item.danger { color: #EF4444; }
+.context-menu-item.danger:hover { background: #FEF2F2; }
 
 /* Delete Confirm Dialog */
 .dialog-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.2);
   z-index: 2000;
   display: none;
   align-items: center; justify-content: center;
@@ -607,17 +618,17 @@ body {
 .dialog-overlay.show { display: flex; }
 .dialog-box {
   background: #fff;
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 24px;
   width: 360px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
 }
 .dialog-title {
-  font-size: 16px; font-weight: bold; color: #23313e;
+  font-size: 16px; font-weight: 500; color: #1F2937;
   margin-bottom: 12px;
 }
 .dialog-content {
-  font-size: 14px; color: #5d6b81;
+  font-size: 14px; color: #4B5563;
   margin-bottom: 20px;
 }
 .dialog-actions {
@@ -625,24 +636,24 @@ body {
 }
 .dialog-actions button {
   height: 36px; padding: 0 20px;
-  border-radius: 4px; font-size: 14px;
+  border-radius: 8px; font-size: 14px;
   cursor: pointer; transition: all 0.2s;
 }
 .btn-dialog-cancel {
-  background: #fff; color: #5d6b81;
-  border: 1px solid rgba(93,107,129,0.54);
+  background: #fff; color: #4B5563;
+  border: 1px solid #E5E7EB;
 }
-.btn-dialog-cancel:hover { background: #f5f5f5; }
+.btn-dialog-cancel:hover { background: #F3F4F6; }
 .btn-dialog-confirm {
-  background: #fc3336; color: #fff; border: none;
+  background: #EF4444; color: #fff; border: none;
 }
-.btn-dialog-confirm:hover { background: #d12b2e; }
+.btn-dialog-confirm:hover { background: #DC2626; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d5d9e3; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #b0b8c2; }
+::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
 
 /* SVG icon helper */
 .icon { display: inline-flex; align-items: center; justify-content: center; }
@@ -655,7 +666,7 @@ body {
     <div class="sidebar-header">
       <div class="sidebar-logo">
         <div class="sidebar-logo-icon">线</div>
-        <div class="sidebar-title">生命线监测</div>
+        <div class="sidebar-title">城市生命线安全</div>
       </div>
       <div class="sidebar-subtitle">运营助手</div>
     </div>
@@ -665,7 +676,7 @@ body {
         新对话
       </button>
       <button class="btn-console" onclick="location.href='console.html'">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="6" x2="8" y2="9"/><line x1="8" y1="9" x2="11" y2="6"/></svg>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="6" x2="8" y2="9"/><line x1="8" y1="9" x2="11" y2="6"/></svg>
         控制台
       </button>
     </div>
@@ -814,9 +825,7 @@ body {
       <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
       <span style="margin-left:6px;">报告生成中...</span>
     </div>
-    <div class="report-body" id="reportBody">
-      <!-- Report content populated by JS -->
-    </div>
+    <div class="report-body" id="reportBody"></div>
     <div class="report-footer">
       <button class="btn-report-download">下载报告</button>
       <button class="btn-report-refresh" onclick="refreshReport()">重新生成</button>
@@ -851,11 +860,8 @@ let deleteTargetId = null;
 // ========== New Chat ==========
 function newChat() {
   document.getElementById('welcomeCard').style.display = '';
-  // Remove all chat messages (not welcome card)
   const chatArea = document.getElementById('chatArea');
-  const msgs = chatArea.querySelectorAll('.chat-msg');
-  msgs.forEach(m => m.remove());
-  // Deselect sidebar
+  chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
   document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
   document.getElementById('inputBox').value = '';
   closeReport();
@@ -869,7 +875,6 @@ function sendQuickQ(text) {
 
 // ========== Shortcut Button ==========
 function clickShortcut(name, text, openReport) {
-  // highlight active
   document.querySelectorAll('.shortcut-btn').forEach(b => b.classList.remove('active'));
   event.currentTarget.classList.add('active');
   document.getElementById('inputBox').value = text;
@@ -882,15 +887,11 @@ function sendMessage(openReport) {
   const text = input.value.trim();
   if (!text || isGenerating) return;
 
-  // Hide welcome
   document.getElementById('welcomeCard').style.display = 'none';
-
-  // Add user bubble
   addBubble('user', text);
   input.value = '';
   input.style.height = 'auto';
 
-  // AI typing
   isGenerating = true;
   updateSendBtn();
   const typingEl = addTypingIndicator();
@@ -901,17 +902,15 @@ function sendMessage(openReport) {
     updateSendBtn();
 
     if (openReport) {
-      // AI response for report
       addBubble('ai', '好的，正在为您生成报告，请在右侧面板查看进度。', [
         { label: '查看详情', action: () => {} },
         { label: '导出数据', action: () => {} }
       ]);
       openReportPanel(text.includes('报表') ? '数据统计报表' : '运行分析报告');
     } else if (text.includes('运行状态') || text.includes('管网')) {
-      // Data card response
       addAIDataResponse();
     } else if (text.includes('报警')) {
-      addBubble('ai', '今日共收到 <strong>3条</strong> 报警信息：\n\n1. 【压力异常】城北片区B12监测点压力低于阈值（<span style="color:#fc3336">0.15MPa</span>），已持续2小时\n2. 【流量异常】城东DN800主管流量突增（<span style="color:#ff8603">+35%</span>），疑似用水高峰\n3. 【设备离线】城南片区S05流量计通信中断（<span style="color:#fc3336">已离线4小时</span>）', [
+      addBubble('ai', '今日共收到 <strong>3条</strong> 报警信息：\n\n1. 【压力异常】城北片区B12监测点压力低于阈值（<span style="color:#EF4444">0.15MPa</span>），已持续2小时\n2. 【流量异常】城东DN800主管流量突增（<span style="color:#F59E0B">+35%</span>），疑似用水高峰\n3. 【设备离线】城南片区S05流量计通信中断（<span style="color:#EF4444">已离线4小时</span>）', [
         { label: '生成详细报告', action: () => openReportPanel('报警分析报告') },
         { label: '查看详情', action: () => {} }
       ]);
@@ -934,6 +933,9 @@ function addBubble(role, html, quickActions) {
   const avClass = role === 'user' ? 'user-av' : 'ai-av';
   const avLabel = role === 'user' ? '张' : 'AI';
   const bubbleClass = role === 'user' ? 'user-bubble' : 'ai-bubble';
+
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 
   let actionsHtml = '';
   if (role === 'ai') {
@@ -958,10 +960,10 @@ function addBubble(role, html, quickActions) {
       <div class="msg-bubble ${bubbleClass}">${html.replace(/\n/g, '<br>')}</div>
       ${quickHtml}
       ${actionsHtml}
+      <div class="msg-time">${timeStr}</div>
     </div>
   `;
 
-  // Bind quick action clicks
   if (quickActions) {
     msg.querySelectorAll('.ai-quick-btn').forEach((btn, i) => {
       btn.addEventListener('click', quickActions[i].action);
@@ -976,6 +978,8 @@ function addAIDataResponse() {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   msg.innerHTML = `
     <div class="msg-avatar ai-av">AI</div>
     <div>
@@ -985,8 +989,8 @@ function addAIDataResponse() {
           <div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div>
           <div class="data-card-row"><span class="data-label">管线总长度</span><span><span class="data-value">3,842km</span></span></div>
           <div class="data-card-row"><span class="data-label">在线设备数</span><span><span class="data-value">1,204</span><span class="data-trend down">↓ 3</span></span></div>
-          <div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#fc3336">3</span></span></div>
-          <div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#0cf50;font-size:12px;margin-left:6px">正常</span></span></div>
+          <div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#EF4444">3</span></span></div>
+          <div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#10B981;font-size:12px;margin-left:6px">正常</span></span></div>
         </div>
         <div class="ai-quick-actions">
           <button class="ai-quick-btn" onclick="openReportPanel('供水管网运行报告')">生成详细报告</button>
@@ -1000,6 +1004,7 @@ function addAIDataResponse() {
         <button>👍</button>
         <button>👎</button>
       </div>
+      <div class="msg-time">${timeStr}</div>
     </div>
   `;
   chatArea.appendChild(msg);
@@ -1028,7 +1033,7 @@ function updateSendBtn() {
   const btn = document.getElementById('btnSend');
   if (isGenerating) {
     btn.classList.add('stop');
-    btn.innerHTML = '<svg width="14" height="14" fill="currentColor"><rect x="2" y="2" width="10" height="10" rx="1"/></svg>';
+    btn.innerHTML = '<svg width="14" height="14" fill="currentColor"><rect x="2" y="2" width="10" height="10" rx="2"/></svg>';
   } else {
     btn.classList.remove('stop');
     btn.innerHTML = '<svg width="18" height="18" fill="currentColor"><path d="M2 2l14 7-14 7V10.5l10-1.5-10-1.5V2z"/></svg>';
@@ -1079,7 +1084,6 @@ function openReportPanel(title) {
   document.getElementById('reportTitle').textContent = title || '运行分析报告';
   panel.classList.add('open');
 
-  // Show loading
   const status = document.getElementById('reportStatus');
   const body = document.getElementById('reportBody');
   status.style.display = 'flex';
@@ -1122,7 +1126,7 @@ function generateReportContent(title) {
     </div>
     <div class="report-section">
       <div class="report-section-title">运行概况</div>
-      <div class="report-text">本周城市供水管网整体运行平稳，管网平均压力维持在 <strong style="color:#2395ff">0.32MPa</strong>，较上周持平。在线监测点位 <strong style="color:#2395ff">1,286个</strong>，在线率 <strong style="color:#0cf50">93.6%</strong>。共产生报警 <strong style="color:#fc3336">17次</strong>，较上周下降12%。</div>
+      <div class="report-text">本周城市供水管网整体运行平稳，管网平均压力维持在 <strong style="color:#2563EB">0.32MPa</strong>，较上周持平。在线监测点位 <strong style="color:#2563EB">1,286个</strong>，在线率 <strong style="color:#10B981">93.6%</strong>。共产生报警 <strong style="color:#EF4444">17次</strong>，较上周下降12%。</div>
     </div>
     <div class="report-section">
       <div class="report-section-title">压力趋势（近7天）</div>
@@ -1141,10 +1145,10 @@ function generateReportContent(title) {
       <table class="report-table">
         <thead><tr><th>类型</th><th>次数</th><th>状态</th></tr></thead>
         <tbody>
-          <tr><td>压力异常</td><td style="color:#fc3336;font-weight:bold">8</td><td><span style="color:#0cf50">已处理</span></td></tr>
-          <tr><td>流量异常</td><td style="color:#ff8603;font-weight:bold">5</td><td><span style="color:#0cf50">已处理</span></td></tr>
-          <tr><td>设备离线</td><td style="color:#fc3336;font-weight:bold">3</td><td><span style="color:#ff8603">处理中</span></td></tr>
-          <tr><td>水质超标</td><td style="font-weight:bold">1</td><td><span style="color:#0cf50">已处理</span></td></tr>
+          <tr><td>压力异常</td><td style="color:#EF4444;font-weight:600">8</td><td><span style="color:#10B981">已处理</span></td></tr>
+          <tr><td>流量异常</td><td style="color:#F59E0B;font-weight:600">5</td><td><span style="color:#10B981">已处理</span></td></tr>
+          <tr><td>设备离线</td><td style="color:#EF4444;font-weight:600">3</td><td><span style="color:#F59E0B">处理中</span></td></tr>
+          <tr><td>水质超标</td><td style="font-weight:600">1</td><td><span style="color:#10B981">已处理</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -1204,7 +1208,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
       this.classList.add('active');
       currentChatId = this.dataset.id;
-      // Simulate loading history
       document.getElementById('welcomeCard').style.display = 'none';
       const chatArea = document.getElementById('chatArea');
       chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
