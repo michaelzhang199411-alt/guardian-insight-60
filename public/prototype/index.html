@@ -471,13 +471,22 @@ body {
   height: 100vh;
 }
 .report-panel.open {
+  flex: 0 0 60%;
   width: 60%;
   min-width: 0;
 }
-.report-panel.open ~ .main-area,
-.app-layout:has(.report-panel.open) .main-area {
+.app-layout.report-open .main-area {
+  flex: 0 0 calc(100% - 260px - 60%);
+  min-width: 0;
+}
+/* fallback: 60% of remaining space after sidebar */
+.app-layout.report-open .report-panel.open {
+  flex: 0 0 calc((100% - 260px) * 0.6);
+  width: calc((100% - 260px) * 0.6);
+}
+.app-layout.report-open .main-area {
   flex: 0 0 calc((100% - 260px) * 0.4);
-  max-width: calc((100% - 260px) * 0.4);
+  width: calc((100% - 260px) * 0.4);
 }
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
