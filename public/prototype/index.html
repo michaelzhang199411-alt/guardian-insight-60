@@ -471,8 +471,22 @@ body {
   height: 100vh;
 }
 .report-panel.open {
-  width: 480px;
-  min-width: 480px;
+  flex: 0 0 60%;
+  width: 60%;
+  min-width: 0;
+}
+.app-layout.report-open .main-area {
+  flex: 0 0 calc(100% - 260px - 60%);
+  min-width: 0;
+}
+/* fallback: 60% of remaining space after sidebar */
+.app-layout.report-open .report-panel.open {
+  flex: 0 0 calc((100% - 260px) * 0.6);
+  width: calc((100% - 260px) * 0.6);
+}
+.app-layout.report-open .main-area {
+  flex: 0 0 calc((100% - 260px) * 0.4);
+  width: calc((100% - 260px) * 0.4);
 }
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -1129,6 +1143,7 @@ function openReportPanel(title) {
   const panel = document.getElementById('reportPanel');
   document.getElementById('reportTitle').textContent = title || '燃气监测运营月度报告';
   panel.classList.add('open');
+  document.querySelector('.app-layout').classList.add('report-open');
 
   const body = document.getElementById('reportBody');
   // Show skeleton first
@@ -1150,6 +1165,7 @@ function openReportPanel(title) {
 
 function closeReport() {
   document.getElementById('reportPanel').classList.remove('open');
+  document.querySelector('.app-layout').classList.remove('report-open');
 }
 
 function generateReportContent(title) {
