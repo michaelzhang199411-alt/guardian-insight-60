@@ -471,8 +471,13 @@ body {
   height: 100vh;
 }
 .report-panel.open {
-  width: 480px;
-  min-width: 480px;
+  width: 60%;
+  min-width: 0;
+}
+.report-panel.open ~ .main-area,
+.app-layout:has(.report-panel.open) .main-area {
+  flex: 0 0 calc((100% - 260px) * 0.4);
+  max-width: calc((100% - 260px) * 0.4);
 }
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
