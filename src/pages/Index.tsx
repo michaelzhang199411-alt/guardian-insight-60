@@ -1,9 +1,6 @@
-// Update this page (the content is just a fallback if you fail to update the page)
-
-// IMPORTANT: Fully REPLACE this with your own code
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-content-center flex-col gap-6" style={{ backgroundColor: '#f2f3f7', justifyContent: 'center', alignItems: 'center' }}>
+    <div className="flex min-h-screen flex-col gap-6" style={{ backgroundColor: '#f2f3f7', justifyContent: 'center', alignItems: 'center' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#23313e' }}>城市生命线安全运行监测AI助手</h1>
       <p style={{ color: '#5d6b81', fontSize: '14px' }}>高保真原型已生成，请点击下方链接查看</p>
       <div style={{ display: 'flex', gap: '12px' }}>
@@ -17,7 +14,5 @@ const Index = () => {
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
