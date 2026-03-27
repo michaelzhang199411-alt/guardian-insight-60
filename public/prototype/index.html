@@ -191,35 +191,44 @@ body {
   width: 100%;
   padding: 40px 0 20px;
 }
-.welcome-greeting {
-  font-size: 20px; font-weight: 600; color: #1F2937;
+.welcome-intro {
+  background: #F3F4F6;
+  border-radius: 8px;
+  padding: 20px 24px;
+  color: #4B5563;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.welcome-intro-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 12px;
+}
+.welcome-intro-body {
+  margin-bottom: 16px;
+}
+.welcome-try-label {
+  font-size: 14px;
+  color: #1F2937;
+  font-weight: 500;
   margin-bottom: 8px;
 }
-.welcome-desc {
-  font-size: 14px; color: #9CA3AF;
-  margin-bottom: 24px;
+.welcome-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.welcome-features {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  margin-bottom: 20px;
-}
-.feature-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px;
-  background: #F9FAFB;
-  border-radius: 8px;
-  font-size: 14px; color: #4B5563;
+.welcome-suggestion-item {
+  color: #2563EB;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
+  font-size: 14px;
+  padding: 4px 0;
+  transition: color 0.2s;
 }
-.feature-item:hover {
-  background: #EFF6FF; border-color: #BFDBFE;
-}
-.feature-icon {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
+.welcome-suggestion-item:hover {
+  color: #1D4ED8;
+  text-decoration: underline;
 }
 
 /* Chat Messages */
@@ -755,15 +764,18 @@ body {
       <div class="chat-scroll" id="chatArea">
         <!-- Welcome Card -->
         <div class="welcome-card" id="welcomeCard">
-          <div class="welcome-greeting">您好，我是城市生命线监测运营助手 👋</div>
-          <div class="welcome-desc">我能帮您完成以下工作，请直接输入问题或选择功能开始：</div>
-          <div class="welcome-features">
-            <div class="feature-item" onclick="sendQuickQ('当前全市供水管网运行状态如何？')"><div class="feature-icon">📊</div>系统问答 — 查询监测数据</div>
-            <div class="feature-item" onclick="sendQuickQ('供水管网设计标准有哪些？')"><div class="feature-icon">📖</div>知识问答 — 行业标准规范</div>
-            <div class="feature-item" onclick="clickShortcut('智能报告','生成本月燃气监测运营月度报告', true)"><div class="feature-icon">📝</div>智能报告 — 生成分析报告</div>
-            <div class="feature-item" onclick="clickShortcut('智能报表','生成本周监测数据报表', true)"><div class="feature-icon">📈</div>智能报表 — 数据统计可视化</div>
-            <div class="feature-item" onclick="sendQuickQ('启动全系统智能巡检')"><div class="feature-icon">🔍</div>系统巡检 — 自动化巡检诊断</div>
-            <div class="feature-item" onclick="sendQuickQ('开启智能值守模式')"><div class="feature-icon">🛡️</div>帮我值守 — 智能告警监控</div>
+          <div class="welcome-intro">
+            <div class="welcome-intro-title">你好！我是你的城市生命线安全运营助手</div>
+            <div class="welcome-intro-body">我专注于为城市基础设施安全监测提供一站式智能支持——你可以随时向我询问实时监测数据、快速导航平台功能、自动生成专业报告与报表，还能获得风险预警和决策优化建议，让监测管理更高效、更智慧。</div>
+            <div class="welcome-try-label">你还可以尝试提问：</div>
+            <div class="welcome-suggestions">
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('近一个月燃气专项的预警趋势如何？')">"近一个月燃气专项的预警趋势如何？"</div>
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气专项安全运行月报。')">"帮我生成上个月的燃气专项安全运行月报。"</div>
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气二级以上的报警点位清单表。')">"帮我生成上个月的燃气二级以上的报警点位清单表。"</div>
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('城市生命线涵盖哪些领域？')">"城市生命线涵盖哪些领域？"</div>
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('介绍一下领导驾驶舱。')">"介绍一下领导驾驶舱。"</div>
+              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我打开燃气管网风险图层。')">"帮我打开燃气管网风险图层。"</div>
+            </div>
           </div>
         </div>
       </div>
