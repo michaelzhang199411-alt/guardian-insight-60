@@ -491,10 +491,12 @@ body {
   min-width: 0;
 }
 
-/* When report is open, collapse extra toolbar buttons */
-.report-panel.open ~ main .toolbar-btn.collapsible,
-.app-layout:has(.report-panel.open) .toolbar-btn.collapsible {
+/* When report is open, collapse extra toolbar buttons to keep one line */
+.app-layout.report-open .toolbar-btn.collapsible {
   display: none;
+}
+.app-layout.report-open .input-toolbar {
+  flex-wrap: nowrap;
 }
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
