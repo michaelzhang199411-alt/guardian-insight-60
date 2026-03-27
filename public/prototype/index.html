@@ -931,22 +931,19 @@ body {
       <div class="input-area">
         <div class="input-wrapper">
           <textarea class="input-box" id="inputBox" rows="1" placeholder="发消息..." onkeydown="handleKeydown(event)"></textarea>
-          <div class="agent-switcher" id="agentSwitcher">
+          <div class="input-toolbar">
             <button class="agent-btn active" data-agent="知识问答" onclick="switchAgent(this)">📖 知识问答</button>
             <button class="agent-btn" data-agent="系统问答" onclick="switchAgent(this)">📊 系统问答</button>
             <button class="agent-btn" data-agent="智能报告" onclick="switchAgent(this)">📝 智能报告</button>
             <button class="agent-btn" data-agent="智能报表" onclick="switchAgent(this)">📈 智能报表</button>
             <button class="agent-btn" data-agent="系统巡检" onclick="switchAgent(this)">🔍 系统巡检</button>
             <button class="agent-btn" data-agent="其他" onclick="switchAgent(this)">⊞ 其他</button>
-          </div>
-          <div class="input-toolbar">
-            <button class="toolbar-btn" title="附件" onclick="document.getElementById('fileInput').click()">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 7.5l-5.8 5.8a3 3 0 01-4.2-4.2L9.8 2.8a2 2 0 012.8 2.8L6.8 11.5a1 1 0 01-1.4-1.4L11 4.5"/></svg>
-              附件
-            </button>
+            <div class="toolbar-sep"></div>
             <button class="toolbar-btn" title="语音">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="6" height="8" rx="3"/><path d="M3 8a5 5 0 0010 0"/><line x1="8" y1="13" x2="8" y2="15"/></svg>
-              语音
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="1" width="6" height="8" rx="3"/><path d="M2.5 7a4.5 4.5 0 009 0"/><line x1="7" y1="11.5" x2="7" y2="13"/></svg>
+            </button>
+            <button class="toolbar-btn" title="附件" onclick="document.getElementById('fileInput').click()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.5l-5.3 5.3a2.5 2.5 0 01-3.5-3.5L9 2.5a1.5 1.5 0 012.1 2.1L5.5 10.2a.5.5 0 01-.7-.7L10 4"/></svg>
             </button>
             <div class="toolbar-spacer"></div>
             <button class="btn-send" title="发送" onclick="sendMessage()">
