@@ -1290,6 +1290,18 @@ function aiRewrite(type) {
   }
 }
 
+// ========== Rich Text Commands ==========
+function execCmd(cmd) {
+  document.execCommand(cmd, false, null);
+  document.getElementById('reportBody').focus();
+}
+function execFontSize(val) {
+  if (val) {
+    document.execCommand('fontSize', false, val);
+    document.getElementById('reportBody').focus();
+  }
+}
+
 function generateReportContent(title) {
   return `
     <div class="report-doc-title">${title || '燃气监测运营月度报告'}</div>
@@ -1298,12 +1310,12 @@ function generateReportContent(title) {
 
     <div class="report-section-title" id="section1-1">1.1 监测对象的健康状况</div>
     <div class="report-text">
-      <p><span class="var-tag time">时间</span> 期间，监测对象的整体评分为 <span class="var-tag">#(燃气监测月度评分)</span> 分，燃气管道整体健康状态为良好。本月风险评估结果显示 <span class="var-tag city">城市名称</span> 市监测范围内的燃气管道及其附属设施的整体风险维持在较低水平。</p>
+      <p>2025年2月期间，监测对象的整体评分为<strong>91.6</strong>分，燃气管道整体健康状态为良好。本月风险评估结果显示合肥市监测范围内的燃气管道及其附属设施的整体风险维持在较低水平。</p>
     </div>
 
     <div class="report-section-title" id="section1-2">1.2 报警统计</div>
     <div class="report-text">
-      <p>本月共监测到可燃气体浓度超标报警 <span class="var-tag">#(燃气报警总数)</span> 起，较上月（ <span class="var-tag">#(上月燃气报警数)</span> ）增加13起，环比上升30.23%，整体防控压力有所增大。</p>
+      <p>本月共监测到可燃气体浓度超标报警<strong>56</strong>起，较上月（43起）增加13起，环比上升30.23%，整体防控压力有所增大。</p>
     </div>
 
     <div class="report-table-wrap">
@@ -1324,12 +1336,12 @@ function generateReportContent(title) {
     </div>
 
     <div class="report-text">
-      <p>从报警级别进行分析：一级报警 <span class="var-tag">#(一级燃气预警总数)</span> 起，占比XX.XX%；二级报警 <span class="var-tag">#(二级燃气预警总数)</span> 起，占比XX.XX%；三级报警 <span class="var-tag">#(三级燃气预警总数)</span> 起。三类风险结论以低风险事件为主。</p>
+      <p>从报警级别进行分析：一级报警<strong>4</strong>起，占比6.90%；二级报警<strong>8</strong>起，占比13.79%；三级报警<strong>17</strong>起，占比29.31%。三类风险结论以低风险事件为主。</p>
     </div>
 
-    <div class="report-section-title" id="section1-3">1.3 预警情况说明 <span class="rule-badge">📋 已设置分析规则</span></div>
+    <div class="report-section-title" id="section1-3">1.3 预警情况说明</div>
     <div class="report-text">
-      <p><span class="var-tag time">时间</span> 内共发布 <span class="var-tag">#(燃气预警总数)</span> 起沼气聚集三级风险提醒，经技术人员现场勘查后进行技术分析，<span class="var-tag">#(燃气预警原因)</span>，确认均为管井内含量较高时短暂瞬间化反应产生沼气聚集所致，未发现风险数据源指标异常情况。</p>
+      <p>2025年2月内共发布<strong>12</strong>起沼气聚集三级风险提醒，经技术人员现场勘查后进行技术分析，初步判断为季节性温差导致管井内有机物分解加速，确认均为管井内含量较高时短暂瞬间化反应产生沼气聚集所致，未发现风险数据源指标异常情况。</p>
     </div>
 
     <div class="report-table-wrap">
@@ -1342,9 +1354,11 @@ function generateReportContent(title) {
           <tr><th>序号</th><th>管井编号</th><th>井类型</th><th>发布时间</th><th>风控等级</th><th>处置状态</th></tr>
         </thead>
         <tbody>
-          <tr><td>1</td><td>GJ-2024-001</td><td>燃气井</td><td>03-05 14:20</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>2</td><td>GJ-2024-002</td><td>排水井</td><td>03-08 09:15</td><td style="color:#EF4444;font-weight:500">一级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>3</td><td>GJ-2024-003</td><td>燃气井</td><td>03-12 16:40</td><td style="color:#F59E0B;font-weight:500">二级</td><td style="color:#F59E0B">处理中</td></tr>
+          <tr><td>1</td><td>GJ-2024-001</td><td>燃气井</td><td>02-05 14:20</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
+          <tr><td>2</td><td>GJ-2024-002</td><td>排水井</td><td>02-08 09:15</td><td style="color:#EF4444;font-weight:500">一级</td><td style="color:#10B981">已处置</td></tr>
+          <tr><td>3</td><td>GJ-2024-003</td><td>燃气井</td><td>02-12 16:40</td><td style="color:#F59E0B;font-weight:500">二级</td><td style="color:#10B981">已处置</td></tr>
+          <tr><td>4</td><td>GJ-2024-004</td><td>燃气井</td><td>02-15 08:30</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
+          <tr><td>5</td><td>GJ-2024-005</td><td>排水井</td><td>02-19 11:45</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
         </tbody>
       </table>
     </div>
@@ -1353,15 +1367,15 @@ function generateReportContent(title) {
 
     <div class="report-section-title" id="section2-1">2.1 风险等级分布</div>
     <div class="report-text">
-      <p>本月综合风险评估结果显示，监测区域内低风险点位占比 <span class="var-tag">82.5%</span>，中风险点位占比 <span class="var-tag">14.3%</span>，高风险点位占比 <span class="var-tag" style="background:#FEF2F2;border-color:#FECACA;color:#EF4444">3.2%</span>。高风险点位主要集中在城北老旧管网区域和城东工业园区周边。</p>
+      <p>本月综合风险评估结果显示，监测区域内低风险点位占比<strong>82.5%</strong>，中风险点位占比<strong>14.3%</strong>，高风险点位占比<strong style="color:#EF4444">3.2%</strong>。高风险点位主要集中在城北老旧管网区域和城东工业园区周边。</p>
       <p>与上月相比，低风险区域占比提升1.2个百分点，中风险区域占比下降0.8个百分点，高风险区域占比下降0.4个百分点，整体风险态势持续向好。</p>
     </div>
 
     <div class="report-section-title" id="section2-2">2.2 重点区域分析</div>
     <div class="report-text">
-      <p>城北片区：管网使用年限超过15年，本月检测到微量渗漏点 <span class="var-tag">3</span> 处，建议纳入年度改造计划。</p>
-      <p>城东工业园区：受周边施工影响，管道外部荷载变化较大，需加强监测频次，当前已提升至每日4次巡检。</p>
-      <p>城南新区：新铺设管网运行平稳，各项指标均在正常范围内，继续保持常规监测即可。</p>
+      <p><strong>城北片区：</strong>管网使用年限超过15年，本月检测到微量渗漏点3处，建议纳入年度改造计划。</p>
+      <p><strong>城东工业园区：</strong>受周边施工影响，管道外部荷载变化较大，需加强监测频次，当前已提升至每日4次巡检。</p>
+      <p><strong>城南新区：</strong>新铺设管网运行平稳，各项指标均在正常范围内，继续保持常规监测即可。</p>
     </div>
 
     <div class="report-chapter" id="chapter3">第三章 运维建议</div>
@@ -1370,13 +1384,13 @@ function generateReportContent(title) {
     <div class="report-text">
       <p>1. 针对城北片区3处微量渗漏点，建议在未来两周内安排专业检修团队进行精准定位和修复；</p>
       <p>2. 城东工业园区周边施工期间，建议将该区域监测预警阈值下调10%，提升预警灵敏度；</p>
-      <p>3. 对本月离线超过4小时的 <span class="var-tag">5</span> 台监测设备进行全面检修和通信链路排查。</p>
+      <p>3. 对本月离线超过4小时的5台监测设备进行全面检修和通信链路排查。</p>
     </div>
 
     <div class="report-section-title" id="section3-2">3.2 长期规划</div>
     <div class="report-text">
-      <p>1. 建议将城北片区老旧管网纳入2025年度城市基础设施改造专项计划，预计涉及管线总长 <span class="var-tag">12.6km</span>；</p>
-      <p>2. 推进监测设备智能化升级，计划年内完成 <span class="var-tag">200</span> 个点位的新一代传感器替换；</p>
+      <p>1. 建议将城北片区老旧管网纳入2025年度城市基础设施改造专项计划，预计涉及管线总长12.6km；</p>
+      <p>2. 推进监测设备智能化升级，计划年内完成200个点位的新一代传感器替换；</p>
       <p>3. 完善多源数据融合分析平台建设，实现气象、地质、交通等外部数据与管网监测数据的联动分析。</p>
     </div>
 
