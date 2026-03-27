@@ -35,21 +35,38 @@ body {
   flex-direction: column;
   height: 100vh;
 }
-.sidebar-user-top {
-  padding: 16px 16px 12px;
+.sidebar-brand-top {
+  padding: 14px 16px 12px;
   display: flex; align-items: center; gap: 10px;
   border-bottom: 1px solid #E5E7EB;
 }
-.user-avatar {
-  width: 36px; height: 36px;
-  background: #2563EB; border-radius: 50%;
+.brand-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 14px; font-weight: 600;
+  color: #fff; font-size: 16px;
   flex-shrink: 0;
 }
-.user-top-info { display: flex; flex-direction: column; }
-.user-top-name { font-size: 14px; font-weight: 600; color: #1F2937; }
-.user-top-role { font-size: 12px; color: #9CA3AF; }
+.brand-name {
+  font-size: 14px; font-weight: 600; color: #1F2937;
+  line-height: 1.3;
+}
+/* Top-right user avatar */
+.top-right-user {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; padding: 4px 8px; border-radius: 8px;
+  transition: background 0.15s;
+}
+.top-right-user:hover { background: #F3F4F6; }
+.user-avatar {
+  width: 30px; height: 30px;
+  background: #2563EB; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 600;
+  flex-shrink: 0;
+}
+.top-right-user-name { font-size: 13px; color: #4B5563; }
 
 .sidebar-actions {
   padding: 12px 12px 4px;
@@ -207,64 +224,74 @@ body {
   gap: 20px;
 }
 
-/* Welcome Card */
+/* Welcome Card - Dark Blue Gradient Style */
 .welcome-card {
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
   width: 100%;
   padding: 60px 0 20px;
 }
+.welcome-hero {
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #1A3152 100%);
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
 .welcome-greeting {
-  font-size: 22px; font-weight: 600; color: #1F2937;
-  margin-bottom: 8px;
+  font-size: 22px; font-weight: 600; color: #FFFFFF;
+  margin-bottom: 10px;
 }
 .welcome-desc {
-  font-size: 14px; color: #9CA3AF;
+  font-size: 14px; color: rgba(255,255,255,0.65);
   margin-bottom: 28px;
+  line-height: 1.7;
 }
-.welcome-features {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+.welcome-desc-main {
+  font-size: 14px; color: rgba(255,255,255,0.65);
   margin-bottom: 20px;
+  line-height: 1.7;
 }
-.feature-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px;
-  background: #F9FAFB;
-  border-radius: 8px;
-  font-size: 14px; color: #4B5563;
+.welcome-desc-hint {
+  font-size: 14px; color: rgba(255,255,255,0.5);
+  margin-bottom: 14px;
+}
+.welcome-prompts {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.welcome-prompt-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-size: 14px; color: rgba(255,255,255,0.85);
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid transparent;
 }
-.feature-item:hover {
-  background: #EFF6FF; border-color: #BFDBFE;
+.welcome-prompt-item:hover {
+  background: rgba(37,99,235,0.15);
+  border-color: rgba(37,99,235,0.4);
+  color: #fff;
 }
-.feature-icon {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
+.welcome-prompt-item .prompt-quote {
+  color: rgba(255,255,255,0.4);
+  font-size: 16px;
+  margin-right: 2px;
 }
 
-/* Quick Questions Grid */
-.quick-questions {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-  margin-top: 16px;
-}
-.quick-q-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 13px; color: #4B5563;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-.quick-q-btn:hover {
-  background: #EFF6FF; color: #2563EB; border-color: #BFDBFE;
-}
-.quick-q-icon { font-size: 14px; flex-shrink: 0; }
+/* Legacy quick questions - hidden in new design */
+.welcome-features { display: none; }
+.quick-questions { display: none; }
 
 /* Chat Messages */
 .chat-msg {
@@ -450,11 +477,11 @@ body {
 }
 .input-box::placeholder { color: #D1D5DB; }
 
-/* Agent switcher */
-.agent-switcher {
+/* Input bottom toolbar - single row with agents, attachments, voice, send */
+.input-toolbar {
   display: flex; align-items: center; gap: 4px;
-  padding: 4px 12px 4px;
-  flex-wrap: wrap;
+  padding: 6px 10px 8px;
+  flex-wrap: nowrap;
 }
 .agent-btn {
   height: 28px; padding: 0 10px;
@@ -466,42 +493,29 @@ body {
 }
 .agent-btn:hover { border-color: #BFDBFE; color: #2563EB; background: #EFF6FF; }
 .agent-btn.active { border-color: #2563EB; color: #2563EB; background: #EFF6FF; font-weight: 500; }
-
-.input-toolbar {
-  display: flex; align-items: center; gap: 0;
-  padding: 4px 8px 8px;
-  flex-wrap: wrap;
-}
+.toolbar-sep { width: 1px; height: 18px; background: #E5E7EB; margin: 0 4px; flex-shrink: 0; }
 .toolbar-btn {
-  height: 30px; padding: 0 10px;
+  height: 28px; padding: 0 8px;
   border: none; background: none;
-  font-size: 13px; color: #9CA3AF;
+  font-size: 12px; color: #9CA3AF;
   cursor: pointer;
-  display: flex; align-items: center; gap: 4px;
+  display: flex; align-items: center; gap: 3px;
   border-radius: 6px;
   transition: all 0.15s;
   white-space: nowrap;
 }
 .toolbar-btn:hover { color: #4B5563; background: #F3F4F6; }
-.toolbar-sep { width: 1px; height: 16px; background: #E5E7EB; margin: 0 4px; }
 .toolbar-spacer { flex: 1; }
 .btn-send {
-  width: 32px; height: 32px;
+  width: 30px; height: 30px;
   border: none; background: #2563EB;
   color: #fff; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px; transition: all 0.15s;
+  flex-shrink: 0;
 }
 .btn-send:hover { background: #1D4ED8; }
 .btn-send:disabled { background: #93C5FD; cursor: not-allowed; }
-.btn-mic {
-  width: 30px; height: 30px;
-  border: none; background: none;
-  color: #9CA3AF; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 6px; transition: all 0.15s;
-}
-.btn-mic:hover { color: #4B5563; background: #F3F4F6; }
 
 /* ========== Right Report Panel ========== */
 .report-panel {
@@ -764,13 +778,10 @@ body {
 <div class="app-layout">
   <!-- ===== Left Sidebar ===== -->
   <aside class="sidebar">
-    <!-- User at Top -->
-    <div class="sidebar-user-top">
-      <div class="user-avatar">张</div>
-      <div class="user-top-info">
-        <div class="user-top-name">张工</div>
-        <div class="user-top-role">运维管理员</div>
-      </div>
+    <!-- System Brand at Top -->
+    <div class="sidebar-brand-top">
+      <div class="brand-logo">🏙️</div>
+      <div class="brand-name">城市生命线安全<br>运行监测系统</div>
     </div>
 
     <!-- Quick Actions -->
@@ -884,6 +895,10 @@ body {
         <div class="top-bar-icon" title="更多">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="13" r="1" fill="currentColor"/></svg>
         </div>
+        <div class="top-right-user">
+          <div class="user-avatar">张</div>
+          <span class="top-right-user-name">张工</span>
+        </div>
       </div>
     </div>
 
@@ -891,24 +906,18 @@ body {
       <div class="chat-scroll" id="chatArea">
         <!-- Welcome Card -->
         <div class="welcome-card" id="welcomeCard">
-          <div class="welcome-greeting">您好，我是城市生命线运营助手 👋</div>
-          <div class="welcome-desc">可以为您提供知识问答、系统查询、报告生成等服务</div>
-          <div class="welcome-features">
-            <div class="feature-item" onclick="switchAgentAndSend('系统问答','当前全市供水管网运行状态如何？')"><div class="feature-icon">📊</div>系统问答 — 查询监测数据</div>
-            <div class="feature-item" onclick="switchAgentAndSend('知识问答','供水管网设计标准有哪些？')"><div class="feature-icon">📖</div>知识问答 — 行业标准规范</div>
-            <div class="feature-item" onclick="switchAgentAndSend('智能报告','帮我生成上个月的燃气专项安全运行月报', true)"><div class="feature-icon">📝</div>智能报告 — 生成分析报告</div>
-            <div class="feature-item" onclick="switchAgentAndSend('智能报表','帮我生成上个月的燃气二级以上的报警点位清单表', true)"><div class="feature-icon">📈</div>智能报表 — 数据统计可视化</div>
-            <div class="feature-item" onclick="switchAgentAndSend('系统巡检','启动全系统智能巡检')"><div class="feature-icon">🔍</div>系统巡检 — 自动化巡检诊断</div>
-            <div class="feature-item" onclick="switchAgentAndSend('其他','开启智能值守模式')"><div class="feature-icon">🛡️</div>帮我值守 — 智能告警监控</div>
-          </div>
-          <!-- Quick Questions from PRD -->
-          <div class="quick-questions">
-            <div class="quick-q-btn" onclick="sendQuickQ('近一个月燃气专项的预警趋势如何？')"><span class="quick-q-icon">📈</span>近一个月燃气专项的预警趋势如何？</div>
-            <div class="quick-q-btn" onclick="clickShortcut('智能报告','帮我生成上个月的燃气专项安全运行月报。', true)"><span class="quick-q-icon">📝</span>帮我生成上个月的燃气专项安全运行月报</div>
-            <div class="quick-q-btn" onclick="clickShortcut('智能报表','帮我生成上个月的燃气二级以上的报警点位清单表。', true)"><span class="quick-q-icon">📊</span>帮我生成燃气二级以上报警点位清单表</div>
-            <div class="quick-q-btn" onclick="sendQuickQ('城市生命线涵盖哪些领域？')"><span class="quick-q-icon">🏙️</span>城市生命线涵盖哪些领域？</div>
-            <div class="quick-q-btn" onclick="sendQuickQ('介绍一下领导驾驶舱。')"><span class="quick-q-icon">🖥️</span>介绍一下领导驾驶舱</div>
-            <div class="quick-q-btn" onclick="sendQuickQ('帮我打开燃气管网风险图层。')"><span class="quick-q-icon">🗺️</span>帮我打开燃气管网风险图层</div>
+          <div class="welcome-hero">
+            <div class="welcome-greeting">你好！我是你的城市生命线安全运营助手</div>
+            <div class="welcome-desc-main">我专注于为城市基础设施安全监测提供一站式智能支持——你可以随时向我询问实时监测数据、快速导航平台功能、自动生成专业报告与报表，还能获得风险预警和决策优化建议，让监测管理更高效、更智慧。</div>
+            <div class="welcome-desc-hint">你还可以尝试问：</div>
+            <div class="welcome-prompts">
+              <div class="welcome-prompt-item" onclick="sendQuickQ('近一个月燃气专项的预警趋势如何？')"><span class="prompt-quote">"</span>近一个月燃气专项的预警趋势如何？<span class="prompt-quote">"</span></div>
+              <div class="welcome-prompt-item" onclick="clickShortcut('智能报告','帮我生成上个月的燃气专项安全运行月报。', true)"><span class="prompt-quote">"</span>帮我生成上个月的燃气专项安全运行月报。<span class="prompt-quote">"</span></div>
+              <div class="welcome-prompt-item" onclick="clickShortcut('智能报表','帮我生成上个月的燃气二级以上的报警点位清单表。', true)"><span class="prompt-quote">"</span>帮我生成上个月的燃气二级以上的报警点位清单表。<span class="prompt-quote">"</span></div>
+              <div class="welcome-prompt-item" onclick="sendQuickQ('城市生命线涵盖哪些领域？')"><span class="prompt-quote">"</span>城市生命线涵盖哪些领域？<span class="prompt-quote">"</span></div>
+              <div class="welcome-prompt-item" onclick="sendQuickQ('介绍一下领导驾驶舱。')"><span class="prompt-quote">"</span>介绍一下领导驾驶舱。<span class="prompt-quote">"</span></div>
+              <div class="welcome-prompt-item" onclick="sendQuickQ('帮我打开燃气管网风险图层。')"><span class="prompt-quote">"</span>帮我打开燃气管网风险图层。<span class="prompt-quote">"</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -922,22 +931,19 @@ body {
       <div class="input-area">
         <div class="input-wrapper">
           <textarea class="input-box" id="inputBox" rows="1" placeholder="发消息..." onkeydown="handleKeydown(event)"></textarea>
-          <div class="agent-switcher" id="agentSwitcher">
+          <div class="input-toolbar">
             <button class="agent-btn active" data-agent="知识问答" onclick="switchAgent(this)">📖 知识问答</button>
             <button class="agent-btn" data-agent="系统问答" onclick="switchAgent(this)">📊 系统问答</button>
             <button class="agent-btn" data-agent="智能报告" onclick="switchAgent(this)">📝 智能报告</button>
             <button class="agent-btn" data-agent="智能报表" onclick="switchAgent(this)">📈 智能报表</button>
             <button class="agent-btn" data-agent="系统巡检" onclick="switchAgent(this)">🔍 系统巡检</button>
             <button class="agent-btn" data-agent="其他" onclick="switchAgent(this)">⊞ 其他</button>
-          </div>
-          <div class="input-toolbar">
-            <button class="toolbar-btn" title="附件" onclick="document.getElementById('fileInput').click()">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 7.5l-5.8 5.8a3 3 0 01-4.2-4.2L9.8 2.8a2 2 0 012.8 2.8L6.8 11.5a1 1 0 01-1.4-1.4L11 4.5"/></svg>
-              附件
-            </button>
+            <div class="toolbar-sep"></div>
             <button class="toolbar-btn" title="语音">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="6" height="8" rx="3"/><path d="M3 8a5 5 0 0010 0"/><line x1="8" y1="13" x2="8" y2="15"/></svg>
-              语音
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="1" width="6" height="8" rx="3"/><path d="M2.5 7a4.5 4.5 0 009 0"/><line x1="7" y1="11.5" x2="7" y2="13"/></svg>
+            </button>
+            <button class="toolbar-btn" title="附件" onclick="document.getElementById('fileInput').click()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.5l-5.3 5.3a2.5 2.5 0 01-3.5-3.5L9 2.5a1.5 1.5 0 012.1 2.1L5.5 10.2a.5.5 0 01-.7-.7L10 4"/></svg>
             </button>
             <div class="toolbar-spacer"></div>
             <button class="btn-send" title="发送" onclick="sendMessage()">
