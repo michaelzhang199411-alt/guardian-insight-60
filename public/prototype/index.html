@@ -138,6 +138,10 @@ body {
   height: 100vh;
   min-width: 0;
   background: #FFFFFF;
+  transition: flex 0.3s ease;
+}
+.app-layout.report-open .main-area {
+  flex: 4;
 }
 
 /* Top bar - minimal */
@@ -471,17 +475,27 @@ body {
 /* ========== Right Report Panel ========== */
 .report-panel {
   width: 0;
+  flex: 0;
   overflow: hidden;
   background: #FFFFFF;
   border-left: 1px solid #E5E7EB;
-  transition: width 0.3s ease;
+  transition: flex 0.3s ease, width 0.3s ease;
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 .report-panel.open {
-  width: 970px;
-  min-width: 970px;
+  flex: 6;
+  width: auto;
+  min-width: 0;
+}
+
+/* When report is open, collapse extra toolbar buttons to keep one line */
+.app-layout.report-open .toolbar-btn.collapsible {
+  display: none;
+}
+.app-layout.report-open .input-toolbar {
+  flex-wrap: nowrap;
 }
 .report-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -847,9 +861,9 @@ body {
             <button class="toolbar-btn" onclick="sendQuickQ('城市生命线涵盖哪些领域？')">📖 知识问答</button>
             <button class="toolbar-btn" onclick="sendQuickQ('当前全市供水管网运行状态如何？')">💬 系统问答</button>
             <button class="toolbar-btn" onclick="clickShortcut('智能报告','帮我生成上个月的燃气专项安全运行月报', true)">📝 智能报告</button>
-            <button class="toolbar-btn" onclick="clickShortcut('智能报表','帮我生成上个月的燃气二级以上的报警点位清单表', true)">📊 智能报表</button>
-            <button class="toolbar-btn" onclick="sendQuickQ('启动全系统智能巡检')">🔍 系统巡检</button>
-            <button class="toolbar-btn" onclick="sendQuickQ('对当前报警数据进行分析研判')">🧠 分析决策</button>
+            <button class="toolbar-btn collapsible" onclick="clickShortcut('智能报表','帮我生成上个月的燃气二级以上的报警点位清单表', true)">📊 智能报表</button>
+            <button class="toolbar-btn collapsible" onclick="sendQuickQ('启动全系统智能巡检')">🔍 系统巡检</button>
+            <button class="toolbar-btn collapsible" onclick="sendQuickQ('对当前报警数据进行分析研判')">🧠 分析决策</button>
             <button class="toolbar-btn">⊞ 更多</button>
             <div class="toolbar-spacer"></div>
             <button class="btn-mic" title="语音输入">
@@ -1224,6 +1238,7 @@ function openReportPanel(title) {
   const panel = document.getElementById('reportPanel');
   document.getElementById('reportTitle').textContent = title || '燃气监测运营月度报告';
   panel.classList.add('open');
+  document.querySelector('.app-layout').classList.add('report-open');
 
   const body = document.getElementById('reportBody');
   const toc = document.getElementById('reportToc');
@@ -1279,6 +1294,7 @@ function bindTocClicks() {
 
 function closeReport() {
   document.getElementById('reportPanel').classList.remove('open');
+  document.querySelector('.app-layout').classList.remove('report-open');
 }
 
 function aiRewrite(type) {
