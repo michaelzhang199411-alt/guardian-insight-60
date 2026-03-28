@@ -187,52 +187,134 @@ body {
   flex-direction: column;
   gap: 20px;
 }
+.chat-scroll .chat-msg {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
 
 /* Welcome Card */
 .welcome-card {
-  max-width: 680px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
   padding: 40px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.welcome-intro {
-  background: #F3F4F6;
+.welcome-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 48px;
+  margin-top: 40px;
+}
+.welcome-robot {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  position: relative;
+}
+.welcome-robot-body {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, #E8F0FE 0%, #F0F4FF 100%);
+  border-radius: 24px;
+  margin: 10px auto 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.welcome-robot-face {
+  width: 60px; height: 36px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #2a5a8c 100%);
   border-radius: 8px;
-  padding: 20px 24px;
-  color: #4B5563;
-  font-size: 14px;
-  line-height: 1.6;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  position: relative;
 }
-.welcome-intro-title {
-  font-size: 16px;
-  font-weight: 600;
+.welcome-robot-eye {
+  width: 10px; height: 10px;
+  background: #4dd9e8;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(77, 217, 232, 0.6);
+}
+.welcome-robot-antenna {
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px; height: 16px;
+  background: #93c5fd;
+}
+.welcome-robot-antenna::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  background: #60a5fa;
+  border-radius: 50%;
+}
+.welcome-robot-arm-l, .welcome-robot-arm-r {
+  position: absolute; top: 50px;
+  width: 12px; height: 24px;
+  background: #E8F0FE;
+  border-radius: 6px;
+}
+.welcome-robot-arm-l { left: 4px; }
+.welcome-robot-arm-r { right: 4px; }
+
+.welcome-greeting {
+  font-size: 28px;
+  font-weight: 700;
   color: #1F2937;
-  margin-bottom: 12px;
+  white-space: nowrap;
 }
-.welcome-intro-body {
+
+.welcome-try-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   margin-bottom: 16px;
 }
 .welcome-try-label {
   font-size: 14px;
-  color: #1F2937;
-  font-weight: 500;
-  margin-bottom: 8px;
+  color: #6B7280;
 }
-.welcome-suggestions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.welcome-suggestion-item {
-  color: #2563EB;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px 0;
+.welcome-refresh-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #9CA3AF;
+  cursor: pointer; background: none; border: none;
   transition: color 0.2s;
 }
+.welcome-refresh-btn:hover { color: #2563EB; }
+.welcome-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+.welcome-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
 .welcome-suggestion-item:hover {
-  color: #1D4ED8;
-  text-decoration: underline;
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #2563EB;
+}
+.welcome-suggestion-icon {
+  color: #9CA3AF;
+  flex-shrink: 0;
 }
 
 /* Chat Messages */
@@ -926,17 +1008,47 @@ body {
       <div class="chat-scroll" id="chatArea">
         <!-- Welcome Card -->
         <div class="welcome-card" id="welcomeCard">
-          <div class="welcome-intro">
-            <div class="welcome-intro-title">你好！我是你的城市生命线安全运营助手</div>
-            <div class="welcome-intro-body">我专注于为城市基础设施安全监测提供一站式智能支持——你可以随时向我询问实时监测数据、快速导航平台功能、自动生成专业报告与报表，还能获得风险预警和决策优化建议，让监测管理更高效、更智慧。</div>
-            <div class="welcome-try-label">你还可以尝试提问：</div>
-            <div class="welcome-suggestions">
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('近一个月燃气专项的预警趋势如何？')">"近一个月燃气专项的预警趋势如何？"</div>
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气专项安全运行月报。')">"帮我生成上个月的燃气专项安全运行月报。"</div>
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气二级以上的报警点位清单表。')">"帮我生成上个月的燃气二级以上的报警点位清单表。"</div>
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('城市生命线涵盖哪些领域？')">"城市生命线涵盖哪些领域？"</div>
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('介绍一下领导驾驶舱。')">"介绍一下领导驾驶舱。"</div>
-              <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我打开燃气管网风险图层。')">"帮我打开燃气管网风险图层。"</div>
+          <div class="welcome-hero">
+            <div class="welcome-robot">
+              <div class="welcome-robot-body">
+                <div class="welcome-robot-antenna"></div>
+                <div class="welcome-robot-face">
+                  <div class="welcome-robot-eye"></div>
+                  <div class="welcome-robot-eye"></div>
+                </div>
+                <div class="welcome-robot-arm-l"></div>
+                <div class="welcome-robot-arm-r"></div>
+              </div>
+            </div>
+            <div class="welcome-greeting">你好，我是城市生命线AI助手</div>
+          </div>
+          <div class="welcome-try-row">
+            <span class="welcome-try-label">尝试这样问我：</span>
+            <button class="welcome-refresh-btn" onclick="refreshSuggestions()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg>
+              换一批
+            </button>
+          </div>
+          <div class="welcome-suggestions" id="welcomeSuggestions">
+            <div class="welcome-suggestion-item" onclick="sendQuickQ('近一个月燃气专项的预警趋势如何？')">
+              <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+              近一个月燃气专项的预警趋势如何？
+            </div>
+            <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气专项安全运行月报。')">
+              <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+              帮我生成上个月的燃气专项安全运行月报
+            </div>
+            <div class="welcome-suggestion-item" onclick="sendQuickQ('帮我生成上个月的燃气二级以上的报警点位清单表。')">
+              <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+              帮我生成上个月的燃气二级以上的报警点位清单表
+            </div>
+            <div class="welcome-suggestion-item" onclick="sendQuickQ('城市生命线涵盖哪些领域？')">
+              <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+              城市生命线涵盖哪些领域？
+            </div>
+            <div class="welcome-suggestion-item" onclick="sendQuickQ('介绍一下领导驾驶舱。')">
+              <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+              介绍一下领导驾驶舱
             </div>
           </div>
         </div>
@@ -1057,7 +1169,31 @@ let isGenerating = false;
 let currentChatId = null;
 let deleteTargetId = null;
 
-// ========== New Chat ==========
+// ========== Refresh Suggestions ==========
+const allSuggestions = [
+  { text: '近一个月燃气专项的预警趋势如何？' },
+  { text: '帮我生成上个月的燃气专项安全运行月报。' },
+  { text: '帮我生成上个月的燃气二级以上的报警点位清单表。' },
+  { text: '城市生命线涵盖哪些领域？' },
+  { text: '介绍一下领导驾驶舱。' },
+  { text: '帮我打开燃气管网风险图层。' },
+  { text: '液化气安全监管平台详细报价' },
+  { text: '排水安全业务的核心优势有哪些' },
+  { text: '燃气领域的预警成效案例有哪些' },
+  { text: '可燃气体智能监测仪的安装工艺' },
+  { text: '燃气管网监测布点规范' },
+];
+function refreshSuggestions() {
+  const container = document.getElementById('welcomeSuggestions');
+  const shuffled = allSuggestions.sort(() => Math.random() - 0.5).slice(0, 5);
+  container.innerHTML = shuffled.map(s => `
+    <div class="welcome-suggestion-item" onclick="sendQuickQ('${s.text}')">
+      <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+      ${s.text}
+    </div>
+  `).join('');
+}
+
 function newChat() {
   document.getElementById('welcomeCard').style.display = '';
   const chatArea = document.getElementById('chatArea');
