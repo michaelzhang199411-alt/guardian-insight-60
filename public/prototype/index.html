@@ -537,15 +537,78 @@ body {
   background: #F9FAFB;
   overflow-y: auto;
   padding: 16px 0;
+  transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+}
+.report-toc.collapsed {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border-right: none;
+  overflow: hidden;
+  opacity: 0;
+}
+.report-toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid #E5E7EB;
+  margin-bottom: 8px;
 }
 .report-toc-title {
   font-size: 13px;
   font-weight: 600;
   color: #1F2937;
-  padding: 0 16px 12px;
-  border-bottom: 1px solid #E5E7EB;
-  margin-bottom: 8px;
 }
+.toc-toggle-btn {
+  width: 22px; height: 22px;
+  border: none; background: none;
+  cursor: pointer; color: #9CA3AF;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; transition: all 0.15s;
+}
+.toc-toggle-btn:hover { color: #4B5563; background: #E5E7EB; }
+/* Expand button shown when TOC is collapsed */
+.toc-expand-btn {
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 20px; height: 40px;
+  border: 1px solid #E5E7EB;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background: #F9FAFB;
+  cursor: pointer; color: #9CA3AF;
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 10;
+  transition: all 0.15s;
+}
+.toc-expand-btn:hover { color: #2563EB; background: #EFF6FF; }
+.toc-expand-btn.visible { display: flex; }
+/* Download dropdown */
+.download-dropdown {
+  position: absolute;
+  top: 100%; right: 0;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  padding: 4px 0;
+  display: none;
+  z-index: 600;
+  min-width: 160px;
+}
+.download-dropdown.show { display: block; }
+.download-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px; color: #374151;
+  cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.download-dropdown-item:hover { background: #EFF6FF; color: #2563EB; }
+.download-dropdown-item svg { flex-shrink: 0; }
 .toc-item {
   display: block;
   padding: 8px 16px;
@@ -910,16 +973,29 @@ body {
   <aside class="report-panel" id="reportPanel">
     <div class="report-header">
       <div class="report-title-main" id="reportTitle">燃气监测运营月度报告</div>
-      <div class="report-header-actions">
-        <button title="下载">
+      <div class="report-header-actions" style="position:relative;">
+        <button title="下载" onclick="toggleDownloadDropdown(event)">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13h10M8 3v7M5 7l3 3 3-3"/></svg>
         </button>
+        <div class="download-dropdown" id="downloadDropdown">
+          <div class="download-dropdown-item" onclick="downloadReport('docx')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="#2563EB" stroke-width="1.2"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#2563EB" stroke-width="1" stroke-linecap="round"/></svg>
+            下载 Word 文档 (.docx)
+          </div>
+          <div class="download-dropdown-item" onclick="downloadReport('wps')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="#10B981" stroke-width="1.2"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#10B981" stroke-width="1" stroke-linecap="round"/></svg>
+            下载 WPS 文档 (.wps)
+          </div>
+        </div>
         <button title="关闭" onclick="closeReport()">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
         </button>
       </div>
     </div>
-    <div class="report-split">
+    <div class="report-split" style="position:relative;">
+      <button class="toc-expand-btn" id="tocExpandBtn" onclick="expandToc()" title="展开目录">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1.5l4 3.5-4 3.5"/></svg>
+      </button>
       <div class="report-toc" id="reportToc"></div>
       <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
         <div class="report-content-area" id="reportBody" contenteditable="true"></div>
@@ -1290,7 +1366,12 @@ function openReportPanel(title) {
 
 function generateReportToc() {
   return `
-    <div class="report-toc-title">目录</div>
+    <div class="report-toc-header">
+      <span class="report-toc-title">目录</span>
+      <button class="toc-toggle-btn" onclick="collapseToc()" title="收起目录">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 1.5L3.5 6l4 4.5"/></svg>
+      </button>
+    </div>
     <div class="toc-item active" data-target="chapter1">第一章 监测概况</div>
     <div class="toc-item sub" data-target="section1-1">1.1 监测对象健康状况</div>
     <div class="toc-item sub" data-target="section1-2">1.2 报警统计</div>
@@ -1318,9 +1399,97 @@ function bindTocClicks() {
   });
 }
 
+// ========== TOC Toggle ==========
+function collapseToc() {
+  document.getElementById('reportToc').classList.add('collapsed');
+  document.getElementById('tocExpandBtn').classList.add('visible');
+}
+function expandToc() {
+  document.getElementById('reportToc').classList.remove('collapsed');
+  document.getElementById('tocExpandBtn').classList.remove('visible');
+}
+
+// ========== Download ==========
+function toggleDownloadDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('downloadDropdown');
+  dd.classList.toggle('show');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.report-header-actions')) {
+    const dd = document.getElementById('downloadDropdown');
+    if (dd) dd.classList.remove('show');
+  }
+});
+
+function downloadReport(format) {
+  document.getElementById('downloadDropdown').classList.remove('show');
+  const title = document.getElementById('reportTitle').textContent || '报告';
+  const body = document.getElementById('reportBody');
+  const content = body.innerHTML;
+
+  // Build HTML document for Word/WPS
+  const htmlDoc = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <!--[if gte mso 9]>
+  <xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml>
+  <![endif]-->
+  <style>
+    body { font-family: "Microsoft YaHei", "SimSun", sans-serif; font-size: 14px; color: #333; line-height: 1.8; padding: 40px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #d1d5db; padding: 8px 12px; text-align: center; font-size: 13px; }
+    th { background: #f3f4f6; font-weight: 600; }
+    tr:nth-child(even) td { background: #f9fafb; }
+    h1 { font-size: 22px; text-align: center; margin-bottom: 24px; }
+    h2 { font-size: 17px; color: #1f2937; margin: 20px 0 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+    h3 { font-size: 15px; color: #374151; margin: 14px 0 8px; }
+    strong { color: #1f2937; }
+  </style>
+</head>
+<body>${content}</body>
+</html>`;
+
+  const ext = format === 'wps' ? 'wps' : 'docx';
+  const mimeType = 'application/msword';
+  const blob = new Blob(['\ufeff' + htmlDoc], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title + '.' + ext;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Show success toast
+  showDownloadToast(title, ext);
+}
+
+function showDownloadToast(title, ext) {
+  let toast = document.getElementById('downloadToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'downloadToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10B981;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;display:flex;align-items:center;gap:8px;';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = '✅ 「' + title + '.' + ext + '」已开始下载';
+  toast.style.opacity = '1';
+  toast.style.display = 'flex';
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 2500);
+}
+
 function closeReport() {
   document.getElementById('reportPanel').classList.remove('open');
   document.querySelector('.app-layout').classList.remove('report-open');
+  // Reset TOC state
+  document.getElementById('reportToc').classList.remove('collapsed');
+  document.getElementById('tocExpandBtn').classList.remove('visible');
 }
 
 function aiRewrite(type) {
