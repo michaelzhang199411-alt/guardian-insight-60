@@ -1169,7 +1169,31 @@ let isGenerating = false;
 let currentChatId = null;
 let deleteTargetId = null;
 
-// ========== New Chat ==========
+// ========== Refresh Suggestions ==========
+const allSuggestions = [
+  { text: '近一个月燃气专项的预警趋势如何？' },
+  { text: '帮我生成上个月的燃气专项安全运行月报。' },
+  { text: '帮我生成上个月的燃气二级以上的报警点位清单表。' },
+  { text: '城市生命线涵盖哪些领域？' },
+  { text: '介绍一下领导驾驶舱。' },
+  { text: '帮我打开燃气管网风险图层。' },
+  { text: '液化气安全监管平台详细报价' },
+  { text: '排水安全业务的核心优势有哪些' },
+  { text: '燃气领域的预警成效案例有哪些' },
+  { text: '可燃气体智能监测仪的安装工艺' },
+  { text: '燃气管网监测布点规范' },
+];
+function refreshSuggestions() {
+  const container = document.getElementById('welcomeSuggestions');
+  const shuffled = allSuggestions.sort(() => Math.random() - 0.5).slice(0, 5);
+  container.innerHTML = shuffled.map(s => `
+    <div class="welcome-suggestion-item" onclick="sendQuickQ('${s.text}')">
+      <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
+      ${s.text}
+    </div>
+  `).join('');
+}
+
 function newChat() {
   document.getElementById('welcomeCard').style.display = '';
   const chatArea = document.getElementById('chatArea');
