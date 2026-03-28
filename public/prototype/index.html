@@ -583,17 +583,22 @@ body {
   overflow-wrap: break-word;
 }
 
-/* Rich text toolbar */
-.richtext-toolbar {
-  display: flex;
+/* Floating toolbar */
+.floating-toolbar {
+  position: absolute;
+  display: none;
   align-items: center;
   gap: 2px;
-  padding: 6px 12px;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
-  flex-wrap: wrap;
+  padding: 4px 6px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  z-index: 500;
+  white-space: nowrap;
 }
-.rt-btn {
+.floating-toolbar.visible { display: flex; }
+.ft-btn {
   width: 30px; height: 28px;
   border: none; background: transparent;
   cursor: pointer; color: #6B7280;
@@ -601,18 +606,43 @@ body {
   border-radius: 4px;
   transition: all 0.15s;
   font-size: 13px; font-weight: 500;
+  position: relative;
 }
-.rt-btn:hover { background: #E5E7EB; color: #1F2937; }
-.rt-btn.active { background: #DBEAFE; color: #2563EB; }
-.rt-sep {
-  width: 1px; height: 18px; background: #E5E7EB; margin: 0 4px;
+.ft-btn:hover { background: #F3F4F6; color: #1F2937; }
+.ft-btn.active { background: #DBEAFE; color: #2563EB; }
+.ft-sep {
+  width: 1px; height: 18px; background: #E5E7EB; margin: 0 2px;
 }
-.rt-select {
+.ft-select {
   height: 28px; border: 1px solid #E5E7EB; border-radius: 4px;
   font-size: 12px; color: #4B5563; background: #fff;
   padding: 0 6px; cursor: pointer; outline: none;
 }
-.rt-select:hover { border-color: #2563EB; }
+.ft-select:hover { border-color: #2563EB; }
+
+/* AI dropdown */
+.ai-dropdown {
+  position: absolute;
+  left: 0; top: 34px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  display: none;
+  min-width: 130px;
+  padding: 4px;
+  z-index: 600;
+}
+.ai-dropdown.show { display: block; }
+.ai-dropdown-item {
+  padding: 8px 14px;
+  font-size: 13px; color: #4B5563;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.ai-dropdown-item:hover { background: #EFF6FF; color: #2563EB; }
 
 /* Report document styles */
 .report-doc-title {
