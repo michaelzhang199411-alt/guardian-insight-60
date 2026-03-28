@@ -276,7 +276,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Agent tag in input box */
+/* Agent tag in input box - positioned top-left inside input-wrapper */
 .input-agent-tag {
   display: inline-flex;
   align-items: center;
@@ -287,7 +287,7 @@ body {
   font-weight: 500;
   padding: 3px 8px 3px 10px;
   border-radius: 4px;
-  margin: 8px 0 0 12px;
+  margin: 10px 0 0 12px;
 }
 .input-agent-tag .tag-close {
   width: 16px; height: 16px;
@@ -320,6 +320,40 @@ body {
   font-size: 13px;
   color: #6B7280;
 }
+
+/* Thinking process section */
+.thinking-section {
+  margin: 8px 0 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #F9FAFB;
+  cursor: pointer;
+  font-size: 13px;
+  color: #6B7280;
+  user-select: none;
+  transition: background 0.15s;
+}
+.thinking-header:hover { background: #F3F4F6; }
+.thinking-header svg { flex-shrink: 0; transition: transform 0.2s; }
+.thinking-header.collapsed svg { transform: rotate(-90deg); }
+.thinking-header .thinking-label { font-weight: 500; color: #4B5563; }
+.thinking-header .thinking-duration { margin-left: auto; font-size: 12px; color: #9CA3AF; }
+.thinking-body {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.7;
+  border-top: 1px solid #E5E7EB;
+  background: #FAFBFC;
+}
+.thinking-body.hidden { display: none; }
 
 /* Chat Messages */
 .chat-msg {
@@ -1032,9 +1066,9 @@ body {
       <!-- Bottom Input -->
       <div class="input-area">
         <div class="input-wrapper">
+          <div id="agentTagArea"></div>
           <textarea class="input-box" id="inputBox" rows="1" placeholder="发消息..." onkeydown="handleKeydown(event)"></textarea>
           <div class="input-toolbar">
-            <div id="agentTagArea"></div>
             <button class="toolbar-btn" title="附件" onclick="document.getElementById('fileInput').click()">
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 7.5l-5.8 5.8a3 3 0 01-4.2-4.2L9.8 2.8a2 2 0 012.8 2.8L6.8 11.5a1 1 0 01-1.4-1.4L11 4.5"/></svg>
             </button>
@@ -1347,6 +1381,35 @@ function getAgentBadgeHtml(agent) {
   return `<div class="agent-badge-row"><span class="agent-badge">${agent}</span><span class="agent-badge-text">为您作答</span></div>`;
 }
 
+function getThinkingHtml(agent) {
+  const thinkingTexts = {
+    '知识问答': '正在检索知识库相关文档，匹配最佳答案...\n分析问题语义，关联产品资料、技术规范等知识源...\n整合检索结果，生成结构化回答。',
+    '系统问答': '正在连接监测数据平台，查询实时运行数据...\n解析用户查询意图，定位目标数据维度...\n汇总统计结果并进行数据校验。',
+    '智能报告': '正在采集相关监测数据和历史记录...\n分析数据趋势，提取关键指标...\n按报告模板组织内容，生成专业报告。',
+    '智能报表': '正在查询数据库获取统计数据...\n按维度分组汇总，计算关键指标...\n生成结构化报表数据。',
+    '系统巡检': '正在扫描系统各模块运行状态...\n检测设备连通性、数据链路完整性...\n汇总巡检结果并生成异常清单。',
+    '分析决策': '正在加载历史数据和当前运行参数...\n运行多维度分析模型，识别风险因子...\n综合研判并生成决策建议。',
+  };
+  const text = thinkingTexts[agent] || '正在分析您的问题，检索相关数据和知识...\n整合多源信息，生成最佳回答。';
+  const duration = (Math.random() * 3 + 1.5).toFixed(1);
+  return `
+    <div class="thinking-section">
+      <div class="thinking-header" onclick="toggleThinking(this)">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg>
+        <span class="thinking-label">思考过程</span>
+        <span class="thinking-duration">${duration}s</span>
+      </div>
+      <div class="thinking-body">${text.replace(/\n/g, '<br>')}</div>
+    </div>
+  `;
+}
+
+function toggleThinking(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  body.classList.toggle('hidden');
+}
+
 function addAITextResponse(html, suggestions, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
@@ -1362,6 +1425,7 @@ function addAITextResponse(html, suggestions, agent) {
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
       ${getAgentBadgeHtml(agent)}
+      ${getThinkingHtml(agent)}
       <div class="ai-content">${html.replace(/\n/g, '<br>')}</div>
       ${suggestHtml}
       ${getActionsRow()}
@@ -1391,6 +1455,7 @@ function addAIResponseWithReport(text, reportTitle, agent) {
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
       ${getAgentBadgeHtml(agent)}
+      ${getThinkingHtml(agent)}
       <div class="ai-content">好的，我将为您生成「${reportTitle}」，已整理相关数据并生成完整报告内容。</div>
       <div class="report-card-inline" onclick="openReportPanel('${reportTitle}')">
         <div class="report-card-icon">📄</div>
@@ -1428,6 +1493,7 @@ function addAIDataResponse(agent) {
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
       ${getAgentBadgeHtml(agent)}
+      ${getThinkingHtml(agent)}
       <div class="ai-content">当前全市供水管网运行状态概览：</div>
       <div class="data-card">
         <div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div>
@@ -1451,20 +1517,20 @@ function addAIDataResponse(agent) {
 function getActionsRow(refCount) {
   return `
     <div class="ai-actions-row">
-      <button class="ai-action-btn" title="复制" onclick="copyBubble(this)">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
-      </button>
-      <button class="ai-action-btn" title="重新生成" onclick="regenerate(this)">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg>
-      </button>
-      <button class="ai-action-btn" title="朗读">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg>
-      </button>
       <button class="ai-action-btn" title="点赞">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v5h1.5l1-1h2l1.5 1H12V7l-2.5-4h-1L7 5v2H4z"/></svg>
       </button>
       <button class="ai-action-btn" title="点踩">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V2h1.5l1 1h2L10 2h2v5l-2.5 4h-1L7 9V7H4z"/></svg>
+      </button>
+      <button class="ai-action-btn" title="重新生成" onclick="regenerate(this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg>
+      </button>
+      <button class="ai-action-btn" title="复制" onclick="copyBubble(this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+      </button>
+      <button class="ai-action-btn" title="朗读">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg>
       </button>
       <button class="ai-action-btn" title="分享">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h6M7 5l3 3-3 3"/></svg>
