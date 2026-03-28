@@ -1345,7 +1345,12 @@ function addUserBubble(text) {
   scrollChatBottom();
 }
 
-function addAITextResponse(html, suggestions) {
+function getAgentBadgeHtml(agent) {
+  if (!agent) return '';
+  return `<div class="agent-badge-row"><span class="agent-badge">${agent}</span><span class="agent-badge-text">为您作答</span></div>`;
+}
+
+function addAITextResponse(html, suggestions, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
@@ -1359,6 +1364,7 @@ function addAITextResponse(html, suggestions) {
 
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
+      ${getAgentBadgeHtml(agent)}
       <div class="ai-content">${html.replace(/\n/g, '<br>')}</div>
       ${suggestHtml}
       ${getActionsRow()}
