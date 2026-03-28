@@ -973,16 +973,29 @@ body {
   <aside class="report-panel" id="reportPanel">
     <div class="report-header">
       <div class="report-title-main" id="reportTitle">燃气监测运营月度报告</div>
-      <div class="report-header-actions">
-        <button title="下载">
+      <div class="report-header-actions" style="position:relative;">
+        <button title="下载" onclick="toggleDownloadDropdown(event)">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13h10M8 3v7M5 7l3 3 3-3"/></svg>
         </button>
+        <div class="download-dropdown" id="downloadDropdown">
+          <div class="download-dropdown-item" onclick="downloadReport('docx')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="#2563EB" stroke-width="1.2"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#2563EB" stroke-width="1" stroke-linecap="round"/></svg>
+            下载 Word 文档 (.docx)
+          </div>
+          <div class="download-dropdown-item" onclick="downloadReport('wps')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="#10B981" stroke-width="1.2"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#10B981" stroke-width="1" stroke-linecap="round"/></svg>
+            下载 WPS 文档 (.wps)
+          </div>
+        </div>
         <button title="关闭" onclick="closeReport()">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
         </button>
       </div>
     </div>
-    <div class="report-split">
+    <div class="report-split" style="position:relative;">
+      <button class="toc-expand-btn" id="tocExpandBtn" onclick="expandToc()" title="展开目录">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1.5l4 3.5-4 3.5"/></svg>
+      </button>
       <div class="report-toc" id="reportToc"></div>
       <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
         <div class="report-content-area" id="reportBody" contenteditable="true"></div>
