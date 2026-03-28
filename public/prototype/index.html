@@ -1281,12 +1281,6 @@ function sendQuickQ(text) {
   sendMessage();
 }
 
-// ========== Shortcut ==========
-function clickShortcut(name, text, openReport) {
-  document.getElementById('inputBox').value = text;
-  sendMessage(openReport);
-}
-
 // ========== Send Message ==========
 function sendMessage(openReport) {
   const input = document.getElementById('inputBox');
@@ -1298,20 +1292,24 @@ function sendMessage(openReport) {
   input.value = '';
   input.style.height = 'auto';
 
+  const agentAtSend = currentAgent; // capture current agent
   isGenerating = true;
   const typingEl = addTypingIndicator();
+
+  // Determine if should open report
+  const shouldOpenReport = openReport || (agentAtSend === '智能报告') || (agentAtSend === '智能报表');
 
   setTimeout(() => {
     typingEl.remove();
     isGenerating = false;
 
-    if (openReport) {
+    if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
       const reportTitle = text.includes('报表') ? '监测数据统计报表' :
                           text.includes('PPT') ? '运营数据展示PPT' : '燃气监测运营月度报告';
-      addAIResponseWithReport(text, reportTitle);
+      addAIResponseWithReport(text, reportTitle, agentAtSend);
       openReportPanel(reportTitle);
     } else if (text.includes('运行状态') || text.includes('管网')) {
-      addAIDataResponse();
+      addAIDataResponse(agentAtSend);
     } else if (text.includes('报警')) {
       addAITextResponse(
         '今日共收到 <strong>3条</strong> 报警信息：\n\n1. 【压力异常】城北片区B12监测点压力低于阈值（<span style="color:#EF4444">0.15MPa</span>），已持续2小时\n2. 【流量异常】城东DN800主管流量突增（<span style="color:#F59E0B">+35%</span>），疑似用水高峰\n3. 【设备离线】城南片区S05流量计通信中断（<span style="color:#EF4444">已离线4小时</span>）',
@@ -1319,7 +1317,8 @@ function sendMessage(openReport) {
           { label: '生成详细报警分析报告', action: () => openReportPanel('报警分析报告') },
           { label: '查看各区域报警分布', action: () => {} },
           { label: '导出报警记录', action: () => {} }
-        ]
+        ],
+        agentAtSend
       );
     } else {
       addAITextResponse(
@@ -1328,7 +1327,8 @@ function sendMessage(openReport) {
           { label: '查看各子系统运行概览', action: () => {} },
           { label: '生成综合分析报告', action: () => openReportPanel('综合分析报告') },
           { label: '导出运行数据', action: () => {} }
-        ]
+        ],
+        agentAtSend
       );
     }
     scrollChatBottom();
