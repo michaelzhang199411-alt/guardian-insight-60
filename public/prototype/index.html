@@ -187,52 +187,134 @@ body {
   flex-direction: column;
   gap: 20px;
 }
+.chat-scroll .chat-msg {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
 
 /* Welcome Card */
 .welcome-card {
-  max-width: 680px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
   padding: 40px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.welcome-intro {
-  background: #F3F4F6;
+.welcome-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 48px;
+  margin-top: 40px;
+}
+.welcome-robot {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  position: relative;
+}
+.welcome-robot-body {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, #E8F0FE 0%, #F0F4FF 100%);
+  border-radius: 24px;
+  margin: 10px auto 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.welcome-robot-face {
+  width: 60px; height: 36px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #2a5a8c 100%);
   border-radius: 8px;
-  padding: 20px 24px;
-  color: #4B5563;
-  font-size: 14px;
-  line-height: 1.6;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  position: relative;
 }
-.welcome-intro-title {
-  font-size: 16px;
-  font-weight: 600;
+.welcome-robot-eye {
+  width: 10px; height: 10px;
+  background: #4dd9e8;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(77, 217, 232, 0.6);
+}
+.welcome-robot-antenna {
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px; height: 16px;
+  background: #93c5fd;
+}
+.welcome-robot-antenna::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  background: #60a5fa;
+  border-radius: 50%;
+}
+.welcome-robot-arm-l, .welcome-robot-arm-r {
+  position: absolute; top: 50px;
+  width: 12px; height: 24px;
+  background: #E8F0FE;
+  border-radius: 6px;
+}
+.welcome-robot-arm-l { left: 4px; }
+.welcome-robot-arm-r { right: 4px; }
+
+.welcome-greeting {
+  font-size: 28px;
+  font-weight: 700;
   color: #1F2937;
-  margin-bottom: 12px;
+  white-space: nowrap;
 }
-.welcome-intro-body {
+
+.welcome-try-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   margin-bottom: 16px;
 }
 .welcome-try-label {
   font-size: 14px;
-  color: #1F2937;
-  font-weight: 500;
-  margin-bottom: 8px;
+  color: #6B7280;
 }
-.welcome-suggestions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.welcome-suggestion-item {
-  color: #2563EB;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px 0;
+.welcome-refresh-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #9CA3AF;
+  cursor: pointer; background: none; border: none;
   transition: color 0.2s;
 }
+.welcome-refresh-btn:hover { color: #2563EB; }
+.welcome-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+.welcome-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
 .welcome-suggestion-item:hover {
-  color: #1D4ED8;
-  text-decoration: underline;
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #2563EB;
+}
+.welcome-suggestion-icon {
+  color: #9CA3AF;
+  flex-shrink: 0;
 }
 
 /* Chat Messages */
