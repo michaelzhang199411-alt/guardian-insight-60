@@ -1335,17 +1335,82 @@ function aiRewrite(type) {
   }
 }
 
-// ========== Rich Text Commands ==========
-function execCmd(cmd) {
-  document.execCommand(cmd, false, null);
+// ========== Floating Toolbar ==========
+function ftCmd(cmd, val) {
+  document.execCommand(cmd, false, val || null);
   document.getElementById('reportBody').focus();
 }
-function execFontSize(val) {
+function ftFontSize(val) {
   if (val) {
     document.execCommand('fontSize', false, val);
     document.getElementById('reportBody').focus();
   }
 }
+function getSelectedText() {
+  return window.getSelection().toString() || '';
+}
+
+function toggleAiDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('aiDropdown');
+  dd.classList.toggle('show');
+}
+
+// Show floating toolbar on click/selection inside report body
+document.addEventListener('DOMContentLoaded', () => {
+  const reportBody = document.getElementById('reportBody');
+  const toolbar = document.getElementById('floatingToolbar');
+  const container = reportBody.closest('[style*="position:relative"]') || reportBody.parentElement;
+
+  reportBody.addEventListener('mouseup', (e) => {
+    setTimeout(() => showFloatingToolbar(e), 10);
+  });
+
+  reportBody.addEventListener('click', (e) => {
+    setTimeout(() => showFloatingToolbar(e), 10);
+  });
+
+  function showFloatingToolbar(e) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // Position above the click/selection
+    let top, left;
+    if (sel.toString().length > 0) {
+      // Has selection - show above selection
+      top = rect.top - containerRect.top - 40;
+      left = rect.left - containerRect.left + (rect.width / 2) - 140;
+    } else {
+      // Just clicked - show above click point
+      top = e.clientY - containerRect.top - 40;
+      left = e.clientX - containerRect.left - 140;
+    }
+    top = Math.max(4, top);
+    left = Math.max(4, Math.min(left, containerRect.width - 320));
+
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+    toolbar.classList.add('visible');
+  }
+
+  // Hide toolbar when clicking outside report area
+  document.addEventListener('mousedown', (e) => {
+    if (!toolbar.contains(e.target) && !reportBody.contains(e.target)) {
+      toolbar.classList.remove('visible');
+      document.getElementById('aiDropdown').classList.remove('show');
+    }
+  });
+
+  // Hide AI dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('ftAiBtn').contains(e.target)) {
+      document.getElementById('aiDropdown').classList.remove('show');
+    }
+  });
+});
 
 function generateReportContent(title) {
   return `
