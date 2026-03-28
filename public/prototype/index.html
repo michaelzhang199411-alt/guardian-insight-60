@@ -921,9 +921,26 @@ body {
     </div>
     <div class="report-split">
       <div class="report-toc" id="reportToc"></div>
-      <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
-        <div class="richtext-toolbar" id="richtextToolbar">
-          <select class="rt-select" onchange="execFontSize(this.value)" title="字号">
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
+        <div class="report-content-area" id="reportBody" contenteditable="true"></div>
+        <!-- Floating Toolbar -->
+        <div class="floating-toolbar" id="floatingToolbar">
+          <div class="ft-btn" id="ftAiBtn" onclick="toggleAiDropdown(event)" title="AI">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="2" width="10" height="10" rx="2"/><circle cx="6" cy="6.5" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="6.5" r="1" fill="currentColor" stroke="none"/><path d="M5 14v-2M11 14v-2"/><path d="M6 9.5c0 .8.9 1.5 2 1.5s2-.7 2-1.5"/></svg>
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" style="margin-left:1px"><path d="M2 3l2 2.5L6 3"/></svg>
+            <div class="ai-dropdown" id="aiDropdown">
+              <div class="ai-dropdown-item" onclick="aiRewrite('改写')">✏️ AI改写</div>
+              <div class="ai-dropdown-item" onclick="aiRewrite('扩写')">📝 AI扩写</div>
+              <div class="ai-dropdown-item" onclick="aiRewrite('润色')">🎨 AI润色</div>
+            </div>
+          </div>
+          <div class="ft-sep"></div>
+          <button class="ft-btn" onclick="ftCmd('bold')" title="加粗"><b>B</b></button>
+          <button class="ft-btn" onclick="ftCmd('italic')" title="斜体"><i>I</i></button>
+          <button class="ft-btn" onclick="ftCmd('underline')" title="下划线"><u>U</u></button>
+          <button class="ft-btn" onclick="ftCmd('strikeThrough')" title="删除线"><s>S</s></button>
+          <div class="ft-sep"></div>
+          <select class="ft-select" onchange="ftFontSize(this.value)" title="字号">
             <option value="">字号</option>
             <option value="1">12px</option>
             <option value="2">14px</option>
@@ -932,30 +949,9 @@ body {
             <option value="5">20px</option>
             <option value="6">24px</option>
           </select>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('bold')" title="加粗"><b>B</b></button>
-          <button class="rt-btn" onclick="execCmd('italic')" title="斜体"><i>I</i></button>
-          <button class="rt-btn" onclick="execCmd('underline')" title="下划线"><u>U</u></button>
-          <button class="rt-btn" onclick="execCmd('strikeThrough')" title="删除线"><s>S</s></button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('justifyLeft')" title="左对齐">≡</button>
-          <button class="rt-btn" onclick="execCmd('justifyCenter')" title="居中">≡</button>
-          <button class="rt-btn" onclick="execCmd('justifyRight')" title="右对齐">≡</button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('insertUnorderedList')" title="无序列表">•≡</button>
-          <button class="rt-btn" onclick="execCmd('insertOrderedList')" title="有序列表">1.</button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('undo')" title="撤销">↺</button>
-          <button class="rt-btn" onclick="execCmd('redo')" title="重做">↻</button>
+          <div class="ft-sep"></div>
+          <button class="ft-btn" onclick="ftCmd('insertHTML','<code style=&quot;background:#F3F4F6;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px&quot;>' + getSelectedText() + '</code>')" title="代码">&lt;/&gt;</button>
         </div>
-        <div class="report-content-area" id="reportBody" contenteditable="true"></div>
-      </div>
-    </div>
-    <div class="report-footer">
-      <div class="report-footer-toolbar">
-        <button class="toolbar-btn" onclick="aiRewrite('改写')">✏️ AI改写</button>
-        <button class="toolbar-btn" onclick="aiRewrite('扩写')">📝 AI扩写</button>
-        <button class="toolbar-btn" onclick="aiRewrite('润色')">🎨 AI润色</button>
       </div>
     </div>
   </aside>
