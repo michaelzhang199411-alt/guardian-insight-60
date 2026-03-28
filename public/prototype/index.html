@@ -1383,7 +1383,7 @@ function addAITextResponse(html, suggestions, agent) {
   scrollChatBottom();
 }
 
-function addAIResponseWithReport(text, reportTitle) {
+function addAIResponseWithReport(text, reportTitle, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
@@ -1393,6 +1393,7 @@ function addAIResponseWithReport(text, reportTitle) {
 
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
+      ${getAgentBadgeHtml(agent)}
       <div class="ai-content">好的，我将为您生成「${reportTitle}」，已整理相关数据并生成完整报告内容。</div>
       <div class="report-card-inline" onclick="openReportPanel('${reportTitle}')">
         <div class="report-card-icon">📄</div>
@@ -1423,12 +1424,13 @@ function addAIResponseWithReport(text, reportTitle) {
   scrollChatBottom();
 }
 
-function addAIDataResponse() {
+function addAIDataResponse(agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
   msg.innerHTML = `
     <div class="msg-bubble ai-bubble">
+      ${getAgentBadgeHtml(agent)}
       <div class="ai-content">当前全市供水管网运行状态概览：</div>
       <div class="data-card">
         <div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div>
