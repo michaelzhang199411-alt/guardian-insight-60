@@ -1147,40 +1147,133 @@ body {
 let isGenerating = false;
 let currentChatId = null;
 let deleteTargetId = null;
+let currentAgent = null; // null = default
 
-// ========== Refresh Suggestions ==========
-const allSuggestions = [
-  { text: '近一个月燃气专项的预警趋势如何？' },
-  { text: '帮我生成上个月的燃气专项安全运行月报。' },
-  { text: '帮我生成上个月的燃气二级以上的报警点位清单表。' },
-  { text: '城市生命线涵盖哪些领域？' },
-  { text: '介绍一下领导驾驶舱。' },
-  { text: '帮我打开燃气管网风险图层。' },
-  { text: '液化气安全监管平台详细报价' },
-  { text: '排水安全业务的核心优势有哪些' },
-  { text: '燃气领域的预警成效案例有哪些' },
-  { text: '可燃气体智能监测仪的安装工艺' },
-  { text: '燃气管网监测布点规范' },
-];
-function refreshSuggestions() {
+// ========== Agent Suggestions ==========
+const agentSuggestions = {
+  '默认': [
+    '近一个月燃气专项的预警趋势如何？',
+    '帮我生成上个月的燃气专项安全运行月报。',
+    '帮我生成上个月的燃气二级以上的报警点位清单表。',
+    '城市生命线涵盖哪些领域？',
+    '介绍一下领导驾驶舱。',
+    '帮我打开燃气管网风险图层。',
+  ],
+  '知识问答': [
+    '液化气安全监管平台详细报价',
+    '排水安全业务的核心优势有哪些？',
+    '燃气领域的预警成效案例有哪些？',
+    '可燃气体智能监测仪的安装工艺',
+    '燃气管网监测布点规范',
+  ],
+  '系统问答': [
+    '近一周的燃气专项预警总数？',
+    '上个月全市监测设备的在线率趋势如何？',
+    '各单位的预警处置效率排名？',
+    '目前各行业累计的预警数量占比？',
+    '全市各个区域的预警数量分布？',
+    '目前还未解除的预警有哪些？请帮我一一列举',
+  ],
+  '智能报告': [
+    '生成上个月的燃气专项安全运行月报',
+    '生成上个月的排水专项安全运行月报',
+    '生成上个月的桥梁专项安全运行月报',
+    '生成上个月的供水专项安全运行月报',
+  ],
+  '智能报表': [
+    '生成上个月的燃气二级以上报警点位清单表',
+    '生成本季度各专项预警数量统计报表',
+    '生成全市监测设备在线率月度报表',
+    '生成各区域报警处置时效汇总表',
+  ],
+  '系统巡检': [
+    '启动全系统智能巡检',
+    '检查燃气专项监测设备运行状态',
+    '巡检全市各区域数据采集链路',
+    '检查本月离线设备及异常传感器',
+  ],
+  '分析决策': [
+    '对当前报警数据进行分析研判',
+    '分析近三个月预警趋势变化原因',
+    '城北片区管网风险综合评估',
+    '基于历史数据预测下月报警趋势',
+  ],
+};
+
+function getSuggestionsForAgent(agent) {
+  const key = agent || '默认';
+  return agentSuggestions[key] || agentSuggestions['默认'];
+}
+
+// ========== Render Suggestions ==========
+function renderSuggestions(list) {
   const container = document.getElementById('welcomeSuggestions');
-  const shuffled = allSuggestions.sort(() => Math.random() - 0.5).slice(0, 5);
-  container.innerHTML = shuffled.map(s => `
-    <div class="welcome-suggestion-item" onclick="sendQuickQ('${s.text}')">
+  container.innerHTML = list.map(text => `
+    <div class="welcome-suggestion-item" onclick="sendQuickQ('${text}')">
       <svg class="welcome-suggestion-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7.5" x2="11" y2="7.5"/><line x1="5" y1="10" x2="9" y2="10"/></svg>
-      ${s.text}
+      ${text}
     </div>
   `).join('');
 }
 
+function refreshSuggestions() {
+  const pool = getSuggestionsForAgent(currentAgent);
+  const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
+  renderSuggestions(shuffled);
+}
+
+// ========== Switch Agent ==========
+function switchAgent(agentName) {
+  currentAgent = agentName;
+  // Clear chat
+  const chatArea = document.getElementById('chatArea');
+  chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
+  // Show welcome
+  document.getElementById('welcomeCard').style.display = '';
+  // Render agent-specific suggestions
+  const suggestions = getSuggestionsForAgent(agentName);
+  renderSuggestions(suggestions);
+  // Show agent tag in input
+  updateAgentTag();
+  // Close report if open
+  closeReport();
+}
+
+function clearAgent() {
+  currentAgent = null;
+  updateAgentTag();
+  // Reset to default welcome
+  const chatArea = document.getElementById('chatArea');
+  chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
+  document.getElementById('welcomeCard').style.display = '';
+  renderSuggestions(getSuggestionsForAgent(null));
+}
+
+function updateAgentTag() {
+  const area = document.getElementById('agentTagArea');
+  if (currentAgent) {
+    area.innerHTML = `<span class="input-agent-tag">${currentAgent}<button class="tag-close" onclick="clearAgent()"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l6 6M8 2l-6 6"/></svg></button></span>`;
+  } else {
+    area.innerHTML = '';
+  }
+}
+
 function newChat() {
+  currentAgent = null;
+  updateAgentTag();
   document.getElementById('welcomeCard').style.display = '';
   const chatArea = document.getElementById('chatArea');
   chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
   document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
   document.getElementById('inputBox').value = '';
+  renderSuggestions(getSuggestionsForAgent(null));
   closeReport();
 }
+
+// Init suggestions on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderSuggestions(getSuggestionsForAgent(null));
+});
 
 // ========== Quick Question ==========
 function sendQuickQ(text) {
