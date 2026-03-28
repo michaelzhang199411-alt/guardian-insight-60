@@ -583,17 +583,22 @@ body {
   overflow-wrap: break-word;
 }
 
-/* Rich text toolbar */
-.richtext-toolbar {
-  display: flex;
+/* Floating toolbar */
+.floating-toolbar {
+  position: absolute;
+  display: none;
   align-items: center;
   gap: 2px;
-  padding: 6px 12px;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
-  flex-wrap: wrap;
+  padding: 4px 6px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  z-index: 500;
+  white-space: nowrap;
 }
-.rt-btn {
+.floating-toolbar.visible { display: flex; }
+.ft-btn {
   width: 30px; height: 28px;
   border: none; background: transparent;
   cursor: pointer; color: #6B7280;
@@ -601,18 +606,43 @@ body {
   border-radius: 4px;
   transition: all 0.15s;
   font-size: 13px; font-weight: 500;
+  position: relative;
 }
-.rt-btn:hover { background: #E5E7EB; color: #1F2937; }
-.rt-btn.active { background: #DBEAFE; color: #2563EB; }
-.rt-sep {
-  width: 1px; height: 18px; background: #E5E7EB; margin: 0 4px;
+.ft-btn:hover { background: #F3F4F6; color: #1F2937; }
+.ft-btn.active { background: #DBEAFE; color: #2563EB; }
+.ft-sep {
+  width: 1px; height: 18px; background: #E5E7EB; margin: 0 2px;
 }
-.rt-select {
+.ft-select {
   height: 28px; border: 1px solid #E5E7EB; border-radius: 4px;
   font-size: 12px; color: #4B5563; background: #fff;
   padding: 0 6px; cursor: pointer; outline: none;
 }
-.rt-select:hover { border-color: #2563EB; }
+.ft-select:hover { border-color: #2563EB; }
+
+/* AI dropdown */
+.ai-dropdown {
+  position: absolute;
+  left: 0; top: 34px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  display: none;
+  min-width: 130px;
+  padding: 4px;
+  z-index: 600;
+}
+.ai-dropdown.show { display: block; }
+.ai-dropdown-item {
+  padding: 8px 14px;
+  font-size: 13px; color: #4B5563;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.ai-dropdown-item:hover { background: #EFF6FF; color: #2563EB; }
 
 /* Report document styles */
 .report-doc-title {
@@ -891,9 +921,26 @@ body {
     </div>
     <div class="report-split">
       <div class="report-toc" id="reportToc"></div>
-      <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
-        <div class="richtext-toolbar" id="richtextToolbar">
-          <select class="rt-select" onchange="execFontSize(this.value)" title="字号">
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative;">
+        <div class="report-content-area" id="reportBody" contenteditable="true"></div>
+        <!-- Floating Toolbar -->
+        <div class="floating-toolbar" id="floatingToolbar">
+          <div class="ft-btn" id="ftAiBtn" onclick="toggleAiDropdown(event)" title="AI">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="2" width="10" height="10" rx="2"/><circle cx="6" cy="6.5" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="6.5" r="1" fill="currentColor" stroke="none"/><path d="M5 14v-2M11 14v-2"/><path d="M6 9.5c0 .8.9 1.5 2 1.5s2-.7 2-1.5"/></svg>
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" style="margin-left:1px"><path d="M2 3l2 2.5L6 3"/></svg>
+            <div class="ai-dropdown" id="aiDropdown">
+              <div class="ai-dropdown-item" onclick="aiRewrite('改写')">✏️ AI改写</div>
+              <div class="ai-dropdown-item" onclick="aiRewrite('扩写')">📝 AI扩写</div>
+              <div class="ai-dropdown-item" onclick="aiRewrite('润色')">🎨 AI润色</div>
+            </div>
+          </div>
+          <div class="ft-sep"></div>
+          <button class="ft-btn" onclick="ftCmd('bold')" title="加粗"><b>B</b></button>
+          <button class="ft-btn" onclick="ftCmd('italic')" title="斜体"><i>I</i></button>
+          <button class="ft-btn" onclick="ftCmd('underline')" title="下划线"><u>U</u></button>
+          <button class="ft-btn" onclick="ftCmd('strikeThrough')" title="删除线"><s>S</s></button>
+          <div class="ft-sep"></div>
+          <select class="ft-select" onchange="ftFontSize(this.value)" title="字号">
             <option value="">字号</option>
             <option value="1">12px</option>
             <option value="2">14px</option>
@@ -902,30 +949,9 @@ body {
             <option value="5">20px</option>
             <option value="6">24px</option>
           </select>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('bold')" title="加粗"><b>B</b></button>
-          <button class="rt-btn" onclick="execCmd('italic')" title="斜体"><i>I</i></button>
-          <button class="rt-btn" onclick="execCmd('underline')" title="下划线"><u>U</u></button>
-          <button class="rt-btn" onclick="execCmd('strikeThrough')" title="删除线"><s>S</s></button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('justifyLeft')" title="左对齐">≡</button>
-          <button class="rt-btn" onclick="execCmd('justifyCenter')" title="居中">≡</button>
-          <button class="rt-btn" onclick="execCmd('justifyRight')" title="右对齐">≡</button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('insertUnorderedList')" title="无序列表">•≡</button>
-          <button class="rt-btn" onclick="execCmd('insertOrderedList')" title="有序列表">1.</button>
-          <div class="rt-sep"></div>
-          <button class="rt-btn" onclick="execCmd('undo')" title="撤销">↺</button>
-          <button class="rt-btn" onclick="execCmd('redo')" title="重做">↻</button>
+          <div class="ft-sep"></div>
+          <button class="ft-btn" onclick="ftCmd('insertHTML','<code style=&quot;background:#F3F4F6;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px&quot;>' + getSelectedText() + '</code>')" title="代码">&lt;/&gt;</button>
         </div>
-        <div class="report-content-area" id="reportBody" contenteditable="true"></div>
-      </div>
-    </div>
-    <div class="report-footer">
-      <div class="report-footer-toolbar">
-        <button class="toolbar-btn" onclick="aiRewrite('改写')">✏️ AI改写</button>
-        <button class="toolbar-btn" onclick="aiRewrite('扩写')">📝 AI扩写</button>
-        <button class="toolbar-btn" onclick="aiRewrite('润色')">🎨 AI润色</button>
       </div>
     </div>
   </aside>
@@ -1309,17 +1335,82 @@ function aiRewrite(type) {
   }
 }
 
-// ========== Rich Text Commands ==========
-function execCmd(cmd) {
-  document.execCommand(cmd, false, null);
+// ========== Floating Toolbar ==========
+function ftCmd(cmd, val) {
+  document.execCommand(cmd, false, val || null);
   document.getElementById('reportBody').focus();
 }
-function execFontSize(val) {
+function ftFontSize(val) {
   if (val) {
     document.execCommand('fontSize', false, val);
     document.getElementById('reportBody').focus();
   }
 }
+function getSelectedText() {
+  return window.getSelection().toString() || '';
+}
+
+function toggleAiDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('aiDropdown');
+  dd.classList.toggle('show');
+}
+
+// Show floating toolbar on click/selection inside report body
+document.addEventListener('DOMContentLoaded', () => {
+  const reportBody = document.getElementById('reportBody');
+  const toolbar = document.getElementById('floatingToolbar');
+  const container = reportBody.closest('[style*="position:relative"]') || reportBody.parentElement;
+
+  reportBody.addEventListener('mouseup', (e) => {
+    setTimeout(() => showFloatingToolbar(e), 10);
+  });
+
+  reportBody.addEventListener('click', (e) => {
+    setTimeout(() => showFloatingToolbar(e), 10);
+  });
+
+  function showFloatingToolbar(e) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // Position above the click/selection
+    let top, left;
+    if (sel.toString().length > 0) {
+      // Has selection - show above selection
+      top = rect.top - containerRect.top - 40;
+      left = rect.left - containerRect.left + (rect.width / 2) - 140;
+    } else {
+      // Just clicked - show above click point
+      top = e.clientY - containerRect.top - 40;
+      left = e.clientX - containerRect.left - 140;
+    }
+    top = Math.max(4, top);
+    left = Math.max(4, Math.min(left, containerRect.width - 320));
+
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+    toolbar.classList.add('visible');
+  }
+
+  // Hide toolbar when clicking outside report area
+  document.addEventListener('mousedown', (e) => {
+    if (!toolbar.contains(e.target) && !reportBody.contains(e.target)) {
+      toolbar.classList.remove('visible');
+      document.getElementById('aiDropdown').classList.remove('show');
+    }
+  });
+
+  // Hide AI dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('ftAiBtn').contains(e.target)) {
+      document.getElementById('aiDropdown').classList.remove('show');
+    }
+  });
+});
 
 function generateReportContent(title) {
   return `
