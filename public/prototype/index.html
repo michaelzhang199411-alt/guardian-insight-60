@@ -2426,7 +2426,7 @@ document.addEventListener('DOMContentLoaded', function() {
       chatArea.querySelectorAll('.chat-msg').forEach(function(m) { m.remove(); });
       var title = this.querySelector('.history-item-title').textContent;
       addUserBubble(title);
-      addAITextResponse('已为您加载该会话的历史记录。当前会话主题：<strong>' + title + '</strong>。请继续提问或选择功能。', [
+      addStreamingTextResponse('已为您加载该会话的历史记录。当前会话主题：<strong>' + title + '</strong>。请继续提问或选择功能。', [
         { label: '查看详细记录', action: function(){} },
         { label: '基于此主题继续分析', action: function(){} }
       ]);
