@@ -2251,15 +2251,9 @@ function addAIDataResponse(agent) {
   }, 100);
 }
 
+// getActionsRow kept for backward compatibility
 function getActionsRow(refCount) {
-  return '<div class="ai-actions-row">' +
-    '<button class="ai-action-btn" title="点赞"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v5h1.5l1-1h2l1.5 1H12V7l-2.5-4h-1L7 5v2H4z"/></svg></button>' +
-    '<button class="ai-action-btn" title="点踩"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V2h1.5l1 1h2L10 2h2v5l-2.5 4h-1L7 9V7H4z"/></svg></button>' +
-    '<button class="ai-action-btn" title="重新生成" onclick="regenerate(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg></button>' +
-    '<button class="ai-action-btn" title="复制" onclick="copyBubble(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg></button>' +
-    '<button class="ai-action-btn" title="朗读"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg></button>' +
-    '<button class="ai-action-btn" title="分享"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h6M7 5l3 3-3 3"/></svg></button>' +
-    '<button class="ai-action-btn" title="更多"><svg width="14" height="14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></button>' +
+  return '<div class="ai-actions-row">' + getActionsRowInner() +
     (refCount ? '<div class="ai-actions-sep"></div><span class="ai-ref-count">参考 ' + refCount + ' 篇资料</span>' : '') +
     '</div>';
 }
