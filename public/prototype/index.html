@@ -1774,6 +1774,17 @@ function matchSystemQA(text) {
   return null;
 }
 
+// ========== Common Response Functions ==========
+function addUserBubble(text) {
+  const chatArea = document.getElementById('chatArea');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg user';
+  msg.innerHTML = '<div class="msg-bubble user-bubble">' + escapeHtml(text) + '</div>';
+  chatArea.appendChild(msg);
+}
+
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
 // ========== Streaming Helper ==========
 function streamText(el, fullHtml, speed, callback) {
   // Strip HTML tags to get plain text length, but insert HTML progressively
