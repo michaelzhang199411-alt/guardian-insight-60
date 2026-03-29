@@ -2258,6 +2258,11 @@ function getActionsRow(refCount) {
     '</div>';
 }
 
+function toggleThinking(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('hidden');
+}
+
 function addTypingIndicator() {
   const chatArea = document.getElementById('chatArea');
   const el = document.createElement('div');
