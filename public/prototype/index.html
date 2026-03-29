@@ -1393,7 +1393,7 @@ body {
 let isGenerating = false;
 let currentChatId = null;
 let deleteTargetId = null;
-let currentAgent = null; // null = default
+let currentAgent = null;
 
 // ========== Agent Suggestions ==========
 const agentSuggestions = {
@@ -1451,7 +1451,6 @@ function getSuggestionsForAgent(agent) {
   return agentSuggestions[key] || agentSuggestions['默认'];
 }
 
-// ========== Render Suggestions ==========
 function renderSuggestions(list) {
   const container = document.getElementById('welcomeSuggestions');
   container.innerHTML = list.map(text => `
@@ -1468,27 +1467,19 @@ function refreshSuggestions() {
   renderSuggestions(shuffled);
 }
 
-// ========== Switch Agent ==========
 function switchAgent(agentName) {
   currentAgent = agentName;
-  // Clear chat
   const chatArea = document.getElementById('chatArea');
   chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
-  // Show welcome
   document.getElementById('welcomeCard').style.display = '';
-  // Render agent-specific suggestions
-  const suggestions = getSuggestionsForAgent(agentName);
-  renderSuggestions(suggestions);
-  // Show agent tag in input
+  renderSuggestions(getSuggestionsForAgent(agentName));
   updateAgentTag();
-  // Close report if open
   closeReport();
 }
 
 function clearAgent() {
   currentAgent = null;
   updateAgentTag();
-  // Reset to default welcome
   const chatArea = document.getElementById('chatArea');
   chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
   document.getElementById('welcomeCard').style.display = '';
@@ -1516,15 +1507,187 @@ function newChat() {
   closeReport();
 }
 
-// Init suggestions on load
-document.addEventListener('DOMContentLoaded', () => {
-  renderSuggestions(getSuggestionsForAgent(null));
-});
+document.addEventListener('DOMContentLoaded', () => { renderSuggestions(getSuggestionsForAgent(null)); });
 
-// ========== Quick Question ==========
 function sendQuickQ(text) {
   document.getElementById('inputBox').value = text;
   sendMessage();
+}
+
+// ========== System Q&A Response Data ==========
+const systemQAResponses = {
+  '近一周的燃气专项预警总数': {
+    filters: [
+      { label: '预警生成时间(day)', value: '2026-02-28 ~ 2026-03-06' },
+      { label: '专项', value: '燃气' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '根据用户的提问，用户想了解预警总数信息，通过结合指标库的业务定义的描述匹配到"预警数量"的指标，这个指标是计算统计范围内按预警编号去重的预警数量，同时我分析出关于这个指标的定义维度专项维度（燃气）。',
+        output: '关联指标：预警总数 | 指标维度：预警发布时间(day)(2026-02-28~2026-03-06)、专项（燃气）' },
+      { title: '指标与维度分析', icon: '2',
+        content: '用户希望了解近一周全市燃气专项的预警数量，"全市"表明不需要筛选区划，"预警数量"对应"预警总数"指标，"燃气专项"对应到"所属专项"字段为\'燃气\'的条件，而"近一周"则需要根据当前时间2026年3月5日来限定查询时间（即从2026年2月27日至2026年3月5日）。此问题可以通过单值输出范式呈现结果。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT sszx AS 专项,\n  COUNT(*) AS 预警总数,\n  SUM(CASE WHEN sjbtzt = 'D'\n    THEN 1 ELSE 0 END) AS 已处置数\nFROM dws_gsps_common_warn_info_view\nWHERE sjbtzt >= '2026-02-28'\n  AND sjbtzt <= '2026-03-06'\n  AND qhbm IN ('340100','340102','340103')\nGROUP BY sszx\nORDER BY 专项;" },
+      { title: '数据分析决策', icon: '4',
+        content: '在生成这段分析内容时，我首先从查询结果中提取关键信息：近一周（2月28日-3月6日）燃气专项预警共11起。随后推算出较上月同期增长约50%的对比结论。接着结合天气升温、沼气聚集等背景，判断当前主要风险源自地下密闭空间内有机物加速发酵引发的可燃气体浓度超限。' },
+      { title: '前端渲染', icon: '5',
+        content: '模拟数据：预警数量 11起。渲染方式：使用KPI卡片呈现最终的展示结果。' },
+      { title: '推荐问题', icon: '6',
+        content: '基于用户之前对"燃气专项预警总数"的查询习惯，我延续了"明细查看""统计分布""深度分析"三层递进思路。',
+        output: '1.帮我查看这11起预警的明细数据 2.帮我查看近一周的所有预警 3.帮我统计各类预警级别的预警数量分布' },
+      { title: '分析完毕', icon: '✓',
+        content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-kpi-card"><div class="sqa-kpi-inner"><div class="sqa-kpi-label">预警总数（起）</div><div class="sqa-kpi-value">11<span class="sqa-kpi-unit">起</span></div><div class="sqa-kpi-trend up">较上月同期 ↑ 50%</div></div></div>',
+    summary: '近一周燃气专项预警共11起，较上月同期上升50%。受近期持续升温及降雨影响，地下空间有机物发酵加速，以沼气聚集为主的可燃气体浓度超限风险显著增加，成为当前主要安全风险。',
+    recommendations: ['帮我查看这11起预警的明细数据','帮我查看近一周的所有预警','帮我统计各类预警级别的预警数量分布'],
+  },
+
+  '上个月全市监测设备的在线率趋势如何': {
+    filters: [
+      { label: '时间', value: '2026-02-01 ~ 2026-02-28' },
+      { label: '设备类型', value: '全部设备' },
+      { label: '区域', value: '全市' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '用户询问"上个月全市监测设备的在线率趋势"，意图明确为趋势分析。通过指标库匹配到"设备日在线率"指标，该指标定义为"当日至少一次在线设备数/设备总数"。时间"上个月"自动解析为2026年2月1日至2月28日。',
+        output: '关联指标：设备日在线率 | 指标维度：时间（日）、区域（全市）、设备类型（全部）' },
+      { title: '指标与维度分析', icon: '2',
+        content: '设备日在线率属于复合指标，需拆解为"在线设备数"和"设备总数"，按天计算。数据来源于 dws_gspsp_common_equip_info_view，需按日期分组统计。由于需展示趋势，采用折线图渲染。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT\n  DATE(sjbtzt) AS 日期,\n  COUNT(DISTINCT CASE WHEN sfzx = 1\n    THEN sb_id END) AS 在线设备数,\n  COUNT(DISTINCT sb_id) AS 总设备数,\n  ROUND(COUNT(DISTINCT CASE WHEN sfzx = 1\n    THEN sb_id END) * 100.0 /\n    COUNT(DISTINCT sb_id), 2) AS 在线率\nFROM dws_gspsp_common_equip_info_view\nWHERE sjbtzt BETWEEN '2026-02-01'\n  AND '2026-02-28'\nGROUP BY DATE(sjbtzt)\nORDER BY 日期;" },
+      { title: '数据分析决策', icon: '4',
+        content: '计算每日在线率后，识别出波动最大的日期（2月10-15日）。结合知识库中设备维护记录，发现该时段蜀山区有批次燃气设备升级维护，导致约1200台设备离线，拉低整体在线率。2月20日后维护完成，在线率回升。整体平均在线率97.2%，符合正常运行标准（>95%）。' },
+      { title: '前端渲染', icon: '5', content: '渲染方式：折线图，横轴为日期（按天），纵轴为在线率（百分比）。' },
+      { title: '推荐问题', icon: '6',
+        content: '基于当前趋势分析，用户可能希望进一步了解低在线率原因，故推荐查看离线设备明细；其次可对比各专项设备在线率差异；最后针对问题区域进行专项钻取。',
+        output: '1.查看在线率最低三天的设备明细 2.各专项设备在线率对比分析 3.蜀山区燃气设备近一个月的在线率趋势' },
+      { title: '分析完毕', icon: '✓', content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-chart-area"><div class="sqa-chart-title">全市监测设备日在线率趋势（2026年2月）</div><div style="position:relative;padding-left:40px;"><div class="sqa-chart-y-labels"><span>92%</span><span>94%</span><span>96%</span><span>98%</span><span>100%</span></div><div class="sqa-line-chart"><svg viewBox="0 0 560 180" preserveAspectRatio="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3B82F6" stop-opacity="0.15"/><stop offset="100%" stop-color="#3B82F6" stop-opacity="0.01"/></linearGradient></defs><path d="M0,18 L20,22 L40,27 L60,22 L80,27 L100,31 L120,36 L140,54 L160,72 L180,90 L200,108 L220,81 L240,63 L260,45 L280,27 L300,22 L320,18 L340,13 L360,18 L380,13 L400,9 L420,13 L440,9 L460,13 L480,9 L500,13 L520,9 L540,13 L560,9" fill="url(#lg1)" stroke="none"/><path d="M0,18 L20,22 L40,27 L60,22 L80,27 L100,31 L120,36 L140,54 L160,72 L180,90 L200,108 L220,81 L240,63 L260,45 L280,27 L300,22 L320,18 L340,13 L360,18 L380,13 L400,9 L420,13 L440,9 L460,13 L480,9 L500,13 L520,9 L540,13 L560,9" fill="none" stroke="#3B82F6" stroke-width="2"/><circle cx="200" cy="108" r="4" fill="#EF4444" stroke="#fff" stroke-width="2"/><text x="200" y="124" font-size="10" fill="#EF4444" text-anchor="middle">94.1%</text><line x1="0" y1="90" x2="560" y2="90" stroke="#E5E7EB" stroke-dasharray="4"/></svg></div><div class="sqa-chart-labels"><span>2/1</span><span>2/5</span><span>2/10</span><span>2/15</span><span>2/20</span><span>2/25</span><span>2/28</span></div></div></div>',
+    summary: '上个月全市设备平均在线率为97.2%，整体保持稳定。2月10日至15日出现明显波动，在线率最低降至94.1%，主要受蜀山区部分燃气设备维护影响。2月20日后逐步恢复至98%以上。',
+    recommendations: ['查看在线率最低三天的设备明细','各专项设备在线率对比分析','蜀山区燃气设备近一个月的在线率趋势'],
+  },
+
+  '各单位的预警处置效率排名': {
+    filters: [
+      { label: '时间', value: '近30天' },
+      { label: '单位', value: '按区县' },
+      { label: '排名方式', value: '处置时长升序' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '用户问题涉及"各单位"、"处置效率"、"排名"，意图为对比分析。需定义"处置效率"指标，通常用"平均预警处置时长"衡量。"各单位"应映射为责任单位维度（区县级）。',
+        output: '关联指标：平均预警处置时长 | 指标维度：责任单位（区县级）| 排序：处置时长升序 | 时间：近30天' },
+      { title: '指标与维度分析', icon: '2',
+        content: '平均预警处置时长 = 所有已完成预警的处置时长总和 / 已完成预警总数。需从预警表中提取已完成预警（状态为"已处置"或"办结"），计算每个责任单位的平均时长。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT\n  zrdw AS 责任单位,\n  AVG(处置时长) AS 平均处置时长,\n  COUNT(*) AS 处置总数\nFROM (\n  SELECT zrdw,\n    TIMESTAMPDIFF(HOUR,yjfssj,clwcsj)\n    AS 处置时长\n  FROM dws_gspsp_common_warn_info_view\n  WHERE yjzt = '已处置'\n    AND yjfssj BETWEEN\n      DATE_SUB(CURDATE(),INTERVAL 30 DAY)\n      AND CURDATE()\n) t\nGROUP BY zrdw\nORDER BY 平均处置时长 ASC;" },
+      { title: '数据分析决策', icon: '4',
+        content: '蜀山区平均处置时长最短，庐阳区最长。结合知识库中庐阳区近期管网改造工程较多，导致部分预警处置响应延迟。建议重点关注夜间处置效率，庐阳区22:00-6:00的平均处置时长达4.5小时。' },
+      { title: '前端渲染', icon: '5', content: '渲染方式：横向条形图，可鼠标悬浮显示具体数值和处置总数。' },
+      { title: '推荐问题', icon: '6',
+        content: '用户看到排名后，自然会对最差单位（庐阳区）的明细产生兴趣。其次可对比不同专项的处置效率。最后针对夜间场景分析。',
+        output: '1.查看庐阳区处置超时的预警明细 2.各专项处置效率排名 3.夜间（22:00-6:00）预警处置效率分析' },
+      { title: '分析完毕', icon: '✓', content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-bar-chart"><div class="sqa-chart-title">各单位平均预警处置时长排名（近30天）</div><div class="sqa-bar-item"><span class="sqa-bar-label">蜀山区</span><div class="sqa-bar-track"><div class="sqa-bar-fill" style="width:56%;background:linear-gradient(90deg,#10B981,#34D399)">1.8h</div></div><span class="sqa-bar-value">1.8小时</span></div><div class="sqa-bar-item"><span class="sqa-bar-label">包河区</span><div class="sqa-bar-track"><div class="sqa-bar-fill" style="width:66%;background:linear-gradient(90deg,#3B82F6,#60A5FA)">2.1h</div></div><span class="sqa-bar-value">2.1小时</span></div><div class="sqa-bar-item"><span class="sqa-bar-label">瑶海区</span><div class="sqa-bar-track"><div class="sqa-bar-fill" style="width:75%;background:linear-gradient(90deg,#F59E0B,#FBBF24)">2.4h</div></div><span class="sqa-bar-value">2.4小时</span></div><div class="sqa-bar-item"><span class="sqa-bar-label">庐阳区</span><div class="sqa-bar-track"><div class="sqa-bar-fill" style="width:100%;background:linear-gradient(90deg,#EF4444,#F87171)">3.2h</div></div><span class="sqa-bar-value">3.2小时</span></div></div>',
+    summary: '近30天各单位平均预警处置时长排名显示，蜀山区平均处置时长最短（1.8小时），效率最高；庐阳区最长（3.2小时），低于全市平均水平。建议重点关注庐阳区处置超时问题，尤其夜间预警响应。',
+    recommendations: ['查看庐阳区处置超时的预警明细','各专项处置效率排名（燃气/供水/桥梁）','夜间（22:00-6:00）预警处置效率分析'],
+  },
+
+  '目前各行业累计的预警数量占比': {
+    filters: [
+      { label: '时间', value: '近一年' },
+      { label: '行业', value: '全部专项' },
+      { label: '占比方式', value: '数量占比' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '用户问题明确"各行业"、"累计"、"占比"，意图为构成分析。需匹配"预警总数"指标，并按"专项"维度分组统计。',
+        output: '关联指标：预警总数 | 指标维度：专项 | 时间：近一年' },
+      { title: '指标与维度分析', icon: '2',
+        content: '预警总数按专项分组统计，计算公式为 SUM(yjcs) GROUP BY sszx。由于只展示占比，先计算各专项总数再计算百分比。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT\n  sszx AS 专项,\n  SUM(yjcs) AS 预警总数\nFROM dws_gspsp_common_warn_info_view\nWHERE sjbtzt >= DATE_SUB(\n  CURDATE(), INTERVAL 1 YEAR)\nGROUP BY sszx\nORDER BY 预警总数 DESC;" },
+      { title: '数据分析决策', icon: '4',
+        content: '燃气专项预警数量占比高达45%，远超其他行业。结合历史数据，燃气管道密集且环境敏感，易受施工扰动和地质变化影响。建议进一步分析燃气预警类型和区域分布。' },
+      { title: '前端渲染', icon: '5', content: '渲染方式：饼图/环形图，展示各专项预警数量的占比。' },
+      { title: '推荐问题', icon: '6',
+        content: '占比最高的燃气专项是用户最可能深入探索的方向，推荐查看其趋势、类型分布和区域分布。',
+        output: '1.查看燃气专项预警趋势（按月） 2.燃气预警的主要类型分布 3.各区县燃气预警数量排名' },
+      { title: '分析完毕', icon: '✓', content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-pie-chart"><svg class="sqa-pie-svg" width="180" height="180" viewBox="0 0 180 180"><circle cx="90" cy="90" r="70" fill="none" stroke="#3B82F6" stroke-width="28" stroke-dasharray="198 242" stroke-dashoffset="0" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="70" fill="none" stroke="#10B981" stroke-width="28" stroke-dasharray="110 330" stroke-dashoffset="-198" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="70" fill="none" stroke="#F59E0B" stroke-width="28" stroke-dasharray="66 374" stroke-dashoffset="-308" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="70" fill="none" stroke="#8B5CF6" stroke-width="28" stroke-dasharray="44 396" stroke-dashoffset="-374" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="70" fill="none" stroke="#EC4899" stroke-width="28" stroke-dasharray="13 427" stroke-dashoffset="-418" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="70" fill="none" stroke="#6B7280" stroke-width="28" stroke-dasharray="9 431" stroke-dashoffset="-431" transform="rotate(-90 90 90)"/><circle cx="90" cy="90" r="50" fill="#fff"/><text x="90" y="86" text-anchor="middle" font-size="14" font-weight="700" fill="#1F2937">总计</text><text x="90" y="104" text-anchor="middle" font-size="12" fill="#6B7280">1,260起</text></svg><div class="sqa-pie-legend"><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#3B82F6"></span>燃气<span class="sqa-pie-legend-pct">45% (567起)</span></div><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#10B981"></span>供水<span class="sqa-pie-legend-pct">25% (315起)</span></div><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#F59E0B"></span>桥梁<span class="sqa-pie-legend-pct">15% (189起)</span></div><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#8B5CF6"></span>排水<span class="sqa-pie-legend-pct">10% (126起)</span></div><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#EC4899"></span>热力<span class="sqa-pie-legend-pct">3% (38起)</span></div><div class="sqa-pie-legend-item"><span class="sqa-pie-legend-dot" style="background:#6B7280"></span>其他<span class="sqa-pie-legend-pct">2% (25起)</span></div></div></div>',
+    summary: '近一年全市各行业累计预警中，燃气专项占比最高（45%），供水次之（25%），桥梁占15%，排水占10%，其他专项占5%。燃气预警数量显著高于其他行业，需重点关注燃气安全运行。',
+    recommendations: ['查看燃气专项预警趋势（按月）','燃气预警的主要类型分布','各区县燃气预警数量排名'],
+  },
+
+  '全市各个区域的预警数量分布': {
+    filters: [
+      { label: '时间', value: '近一周' },
+      { label: '区域', value: '区县级' },
+      { label: '统计方式', value: '预警数量' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '用户问题涉及"全市"、"各个区域"、"预警数量分布"，意图为空间分布分析。需匹配"预警总数"指标，按"区域"维度分组统计。',
+        output: '关联指标：预警总数 | 指标维度：区域（区县）| 时间：近一周' },
+      { title: '指标与维度分析', icon: '2',
+        content: '按区县统计预警总数，需将物理字段 qhbm 映射为区县名称。数据表为 dws_gspsp_common_warn_info_view。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT\n  qhbm AS 区县代码,\n  SUM(yjcs) AS 预警总数\nFROM dws_gspsp_common_warn_info_view\nWHERE sjbtzt >= DATE_SUB(\n  CURDATE(), INTERVAL 7 DAY)\nGROUP BY qhbm\nORDER BY 预警总数 DESC;" },
+      { title: '数据分析决策', icon: '4',
+        content: '蜀山区预警数量最多，占全市30%。结合近期施工备案记录，蜀山区有燃气管道改造工程，导致施工影响类预警增加。建议立即调取蜀山区施工点附近设备数据。' },
+      { title: '前端渲染', icon: '5', content: '渲染方式：纵向柱状图，按降序排列。' },
+      { title: '推荐问题', icon: '6',
+        content: '用户看到蜀山区突出，会想了解该区预警明细、燃气专项情况以及区域处置效率。',
+        output: '1.查看蜀山区预警明细 2.蜀山区燃气专项预警趋势 3.各区县预警处置效率对比' },
+      { title: '分析完毕', icon: '✓', content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-vbar-chart"><div class="sqa-chart-title">各区县预警数量分布（近一周）</div><div class="sqa-vbar-container"><div class="sqa-vbar-item"><span class="sqa-vbar-value">56</span><div class="sqa-vbar-bar" style="height:100%;background:linear-gradient(180deg,#2563EB,#60A5FA)"></div><span class="sqa-vbar-label">蜀山区</span></div><div class="sqa-vbar-item"><span class="sqa-vbar-value">42</span><div class="sqa-vbar-bar" style="height:75%;background:linear-gradient(180deg,#3B82F6,#93C5FD)"></div><span class="sqa-vbar-label">庐阳区</span></div><div class="sqa-vbar-item"><span class="sqa-vbar-value">38</span><div class="sqa-vbar-bar" style="height:68%;background:linear-gradient(180deg,#3B82F6,#93C5FD)"></div><span class="sqa-vbar-label">包河区</span></div><div class="sqa-vbar-item"><span class="sqa-vbar-value">25</span><div class="sqa-vbar-bar" style="height:45%;background:linear-gradient(180deg,#60A5FA,#BFDBFE)"></div><span class="sqa-vbar-label">瑶海区</span></div><div class="sqa-vbar-item"><span class="sqa-vbar-value">18</span><div class="sqa-vbar-bar" style="height:32%;background:linear-gradient(180deg,#93C5FD,#DBEAFE)"></div><span class="sqa-vbar-label">经开区</span></div><div class="sqa-vbar-item"><span class="sqa-vbar-value">12</span><div class="sqa-vbar-bar" style="height:21%;background:linear-gradient(180deg,#93C5FD,#DBEAFE)"></div><span class="sqa-vbar-label">高新区</span></div></div></div>',
+    summary: '近一周预警主要集中在蜀山区（56起）、庐阳区（42起）和包河区（38起），三区合计占全市预警总数的68%。蜀山区预警数量突出，主要源于燃气管道施工影响，建议重点关注蜀山区施工区域。',
+    recommendations: ['查看蜀山区预警明细','蜀山区燃气专项预警趋势','各区县预警处置效率对比'],
+  },
+
+  '目前还未解除的预警有哪些': {
+    filters: [
+      { label: '预警状态', value: '处置中' },
+      { label: '排序方式', value: '预警时间倒序' },
+    ],
+    thinking: [
+      { title: '语义理解与实体识别分析', icon: '1',
+        content: '用户问题"未解除的预警"即状态为"处置中"或"未完成"的预警，需明细列表。意图为明细查询。',
+        output: '查询类型：明细列表 | 过滤条件：预警状态=处置中 | 排序：预警时间倒序' },
+      { title: '指标与维度分析', icon: '2',
+        content: '需要从预警表中提取未解除预警的完整记录。数据表为 dws_gspsp_common_warn_info_view，过滤 yjzt = \'处置中\' 且 sjtbzt != \'D\'。' },
+      { title: '问答转SQL与执行', icon: '3',
+        sql: "SELECT\n  yjbh AS 预警编号,\n  sszx AS 专项,\n  yjsj AS 预警时间,\n  yjjb AS 预警级别,\n  wzms AS 位置描述,\n  yjzt AS 状态,\n  clqx AS 处置时限\nFROM dws_gspsp_common_warn_info_view\nWHERE yjzt = '处置中'\n  AND sjtbzt != 'D'\nORDER BY yjsj DESC\nLIMIT 100;" },
+      { title: '数据分析决策', icon: '4',
+        content: '查询结果共23条，其中超期未处置5条，红色预警3条。根据业务规则，红色预警需立即处置，超期预警需通报责任单位。建议将红色预警和超期预警在表格中高亮显示。' },
+      { title: '前端渲染', icon: '5', content: '渲染方式：表格，支持排序、筛选、导出，红色预警行背景标红，超期预警标黄。' },
+      { title: '推荐问题', icon: '6',
+        content: '用户关注未解除预警，进一步可能会关心超期预警、区域分布和专项分布。',
+        output: '1.查看超期未处置预警的明细 2.按区域统计未解除预警分布 3.燃气专项未解除预警的级别分布' },
+      { title: '分析完毕', icon: '✓', content: '根据全部思考和分析过程，已生成回复消息，请在页面中查看。' },
+    ],
+    dataHtml: '<div class="sqa-table-wrap"><table class="sqa-table"><thead><tr><th>序号</th><th>预警编号</th><th>专项</th><th>预警时间</th><th>预警级别</th><th>位置描述</th><th>状态</th><th>处置时限</th></tr></thead><tbody><tr class="highlight-red"><td>1</td><td>YJ-2026-0312</td><td>燃气</td><td>03-06 08:15</td><td style="color:#DC2626;font-weight:600">红色</td><td>蜀山区长江西路156号</td><td>处置中</td><td>2h</td></tr><tr class="highlight-red"><td>2</td><td>YJ-2026-0309</td><td>燃气</td><td>03-05 22:40</td><td style="color:#DC2626;font-weight:600">红色</td><td>包河区望湖路89号</td><td>处置中</td><td>2h</td></tr><tr class="highlight-red"><td>3</td><td>YJ-2026-0305</td><td>供水</td><td>03-05 14:20</td><td style="color:#DC2626;font-weight:600">红色</td><td>庐阳区寿春路201号</td><td>处置中</td><td>2h</td></tr><tr class="highlight-yellow"><td>4</td><td>YJ-2026-0298</td><td>燃气</td><td>03-04 16:30</td><td style="color:#D97706;font-weight:600">橙色</td><td>瑶海区明光路67号</td><td>超期</td><td style="color:#DC2626">已超期</td></tr><tr class="highlight-yellow"><td>5</td><td>YJ-2026-0295</td><td>燃气</td><td>03-04 11:05</td><td style="color:#D97706;font-weight:600">橙色</td><td>蜀山区金寨路320号</td><td>超期</td><td style="color:#DC2626">已超期</td></tr><tr><td>6</td><td>YJ-2026-0291</td><td>桥梁</td><td>03-03 20:15</td><td style="color:#F59E0B">黄色</td><td>经开区锦绣大道桥梁</td><td>处置中</td><td>24h</td></tr><tr><td>7</td><td>YJ-2026-0288</td><td>燃气</td><td>03-03 15:50</td><td style="color:#F59E0B">黄色</td><td>蜀山区潜山路178号</td><td>处置中</td><td>12h</td></tr><tr><td>8</td><td>YJ-2026-0285</td><td>排水</td><td>03-03 09:30</td><td style="color:#F59E0B">黄色</td><td>庐阳区蒙城路120号</td><td>处置中</td><td>24h</td></tr><tr class="highlight-yellow"><td>9</td><td>YJ-2026-0280</td><td>供水</td><td>03-02 18:45</td><td style="color:#D97706;font-weight:600">橙色</td><td>包河区芜湖路256号</td><td>超期</td><td style="color:#DC2626">已超期</td></tr><tr class="highlight-yellow"><td>10</td><td>YJ-2026-0276</td><td>燃气</td><td>03-02 13:20</td><td style="color:#D97706;font-weight:600">橙色</td><td>瑶海区临泉路89号</td><td>超期</td><td style="color:#DC2626">已超期</td></tr></tbody></table><div style="font-size:12px;color:#9CA3AF;margin-top:8px;text-align:right;">显示前10条，共23条未解除预警</div></div>',
+    summary: '当前共有未解除预警23起，其中燃气专项占12起，红色预警3起，超期未处置5起。建议立即关注红色预警和超期预警，优先处置。',
+    recommendations: ['查看超期未处置预警的明细','按区域统计未解除预警分布','燃气专项未解除预警的级别分布'],
+  },
+};
+
+function matchSystemQA(text) {
+  const keys = Object.keys(systemQAResponses);
+  for (const key of keys) {
+    const keywords = key.replace(/[？?。，]/g, '').split('');
+    let matchCount = 0;
+    for (const ch of keywords) { if (text.includes(ch)) matchCount++; }
+    if (matchCount / keywords.length > 0.6) return systemQAResponses[key];
+  }
+  return null;
 }
 
 // ========== Send Message ==========
@@ -1538,91 +1701,124 @@ function sendMessage(openReport) {
   input.value = '';
   input.style.height = 'auto';
 
-  const agentAtSend = currentAgent; // capture current agent
+  const agentAtSend = currentAgent;
   isGenerating = true;
   const typingEl = addTypingIndicator();
-
-  // Determine if should open report
   const shouldOpenReport = openReport || (agentAtSend === '智能报告') || (agentAtSend === '智能报表');
 
   setTimeout(() => {
     typingEl.remove();
     isGenerating = false;
 
-    if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
-      const reportTitle = text.includes('报表') ? '监测数据统计报表' :
-                          text.includes('PPT') ? '运营数据展示PPT' : '燃气监测运营月度报告';
+    const sqaData = (agentAtSend === '系统问答') ? matchSystemQA(text) : null;
+
+    if (sqaData) {
+      addSystemQAResponse(sqaData, agentAtSend);
+    } else if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
+      const reportTitle = text.includes('报表') ? '监测数据统计报表' : '燃气监测运营月度报告';
       addAIResponseWithReport(text, reportTitle, agentAtSend);
       openReportPanel(reportTitle);
     } else if (text.includes('运行状态') || text.includes('管网')) {
       addAIDataResponse(agentAtSend);
     } else if (text.includes('报警')) {
-      addAITextResponse(
-        '今日共收到 <strong>3条</strong> 报警信息：\n\n1. 【压力异常】城北片区B12监测点压力低于阈值（<span style="color:#EF4444">0.15MPa</span>），已持续2小时\n2. 【流量异常】城东DN800主管流量突增（<span style="color:#F59E0B">+35%</span>），疑似用水高峰\n3. 【设备离线】城南片区S05流量计通信中断（<span style="color:#EF4444">已离线4小时</span>）',
-        [
-          { label: '生成详细报警分析报告', action: () => openReportPanel('报警分析报告') },
-          { label: '查看各区域报警分布', action: () => {} },
-          { label: '导出报警记录', action: () => {} }
-        ],
-        agentAtSend
-      );
+      addAITextResponse('根据近一个月的报警数据统计：\n\n• 总报警数：<strong>127 起</strong>\n• 一级报警：<strong style="color:#EF4444">8 起</strong>（占比 6.3%）\n• 二级报警：<strong style="color:#F59E0B">23 起</strong>（占比 18.1%）\n• 三级报警：<strong>96 起</strong>（占比 75.6%）\n\n三级报警占比最高，主要集中在<strong>城北片区</strong>和<strong>工业园区周边</strong>。', [
+        { label: '查看报警热力地图', action: () => sendQuickQ('展示报警热力分布图') },
+        { label: '导出报警明细表', action: () => sendQuickQ('导出近一个月报警明细报表') },
+      ], agentAtSend);
     } else {
-      addAITextResponse(
-        '已收到您的问题，正在分析中。根据系统数据分析结果如下：\n\n当前城市生命线各子系统运行平稳，未发现重大异常。如需进一步了解某个子系统的详细数据，请告诉我具体方向。',
-        [
-          { label: '查看各子系统运行概览', action: () => {} },
-          { label: '生成综合分析报告', action: () => openReportPanel('综合分析报告') },
-          { label: '导出运行数据', action: () => {} }
-        ],
-        agentAtSend
-      );
+      addAITextResponse('好的，我来为您分析。根据系统数据：\n\n当前城市生命线各监测专项运行平稳，暂未发现异常情况。如需深入了解某个专项的详细数据，请告诉我具体的分析方向。', [
+        { label: '查看各专项运行概况', action: () => sendQuickQ('各专项运行状态概况') },
+        { label: '近期预警趋势分析', action: () => sendQuickQ('近一个月的预警趋势如何？') },
+      ], agentAtSend);
     }
     scrollChatBottom();
-  }, 1500);
+  }, 1800);
 }
 
-// ========== Bubble Builders ==========
-function addUserBubble(text) {
+// ========== System Q&A Response ==========
+function addSystemQAResponse(data, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
-  msg.className = 'chat-msg user';
-  msg.innerHTML = `<div class="msg-bubble user-bubble">${escapeHtml(text)}</div>`;
+  msg.className = 'chat-msg ai';
+
+  const filtersHtml = data.filters.map(f =>
+    '<span class="sqa-filter-tag"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="8" height="8" rx="1.5"/></svg>' + f.label + '：' + f.value + '</span>'
+  ).join('');
+
+  const thinkingHtml = getSystemThinkingHtml(data.thinking);
+
+  const recommendHtml = data.recommendations.map(r =>
+    '<button class="sqa-recommend-btn" onclick="sendQuickQ(\'' + r.replace(/'/g, "\\'") + '\')">' + r + ' <span class="arrow" style="color:#9CA3AF;font-size:12px;margin-left:4px">→</span></button>'
+  ).join('');
+
+  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
+    '<div class="agent-badge-row"><span class="agent-badge">智能问数</span><span class="agent-badge-text">为您作答</span></div>' +
+    thinkingHtml +
+    '<div class="sqa-result-card">' +
+    '<div class="sqa-filter-bar">' + filtersHtml + '</div>' +
+    data.dataHtml +
+    '<div class="sqa-summary"><div class="sqa-summary-title"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="1.5"><path d="M2 7h4l2 3 3-8h3"/></svg>分析总结</div>' + data.summary + '</div>' +
+    '</div>' +
+    '<div class="sqa-recommend">' + recommendHtml + '</div>' +
+    getActionsRow() +
+    '</div>';
+
   chatArea.appendChild(msg);
   scrollChatBottom();
 }
 
+function getSystemThinkingHtml(steps) {
+  const stepsHtml = steps.map(function(s) {
+    let contentHtml = '';
+    if (s.content) contentHtml += '<div class="thinking-step-content">' + s.content + '</div>';
+    if (s.sql) contentHtml += '<div class="thinking-step-content"><code>' + s.sql + '</code></div>';
+    if (s.output) contentHtml += '<div class="thinking-step-output">📋 ' + s.output + '</div>';
+    return '<div class="thinking-step"><div class="thinking-step-title"><span class="step-icon">' + s.icon + '</span>' + s.title + '</div>' + contentHtml + '</div>';
+  }).join('');
+
+  return '<div class="thinking-section">' +
+    '<div class="thinking-header collapsed" onclick="toggleThinking(this)">' +
+    '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg>' +
+    '<span class="thinking-label">分析过程</span>' +
+    '<span class="thinking-duration">已完成 · 共' + steps.length + '个步骤</span>' +
+    '</div>' +
+    '<div class="thinking-body hidden"><div class="thinking-steps">' + stepsHtml + '</div></div>' +
+    '</div>';
+}
+
+// ========== Common Response Functions ==========
+function addUserBubble(text) {
+  const chatArea = document.getElementById('chatArea');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg user';
+  msg.innerHTML = '<div class="msg-bubble user-bubble">' + escapeHtml(text) + '</div>';
+  chatArea.appendChild(msg);
+}
+
 function getAgentBadgeHtml(agent) {
   if (!agent) return '';
-  return `<div class="agent-badge-row"><span class="agent-badge">${agent}</span><span class="agent-badge-text">为您作答</span></div>`;
+  const displayName = agent === '系统问答' ? '智能问数' : agent;
+  return '<div class="agent-badge-row"><span class="agent-badge">' + displayName + '</span><span class="agent-badge-text">为您作答</span></div>';
 }
 
 function getThinkingHtml(agent) {
-  const thinkingTexts = {
-    '知识问答': '正在检索知识库相关文档，匹配最佳答案...\n分析问题语义，关联产品资料、技术规范等知识源...\n整合检索结果，生成结构化回答。',
-    '系统问答': '正在连接监测数据平台，查询实时运行数据...\n解析用户查询意图，定位目标数据维度...\n汇总统计结果并进行数据校验。',
-    '智能报告': '正在采集相关监测数据和历史记录...\n分析数据趋势，提取关键指标...\n按报告模板组织内容，生成专业报告。',
-    '智能报表': '正在查询数据库获取统计数据...\n按维度分组汇总，计算关键指标...\n生成结构化报表数据。',
-    '系统巡检': '正在扫描系统各模块运行状态...\n检测设备连通性、数据链路完整性...\n汇总巡检结果并生成异常清单。',
-    '分析决策': '正在加载历史数据和当前运行参数...\n运行多维度分析模型，识别风险因子...\n综合研判并生成决策建议。',
+  if (!agent) agent = '系统';
+  const thinkTexts = {
+    '知识问答': '正在检索知识库...\n匹配到相关文档 3 篇\n综合分析并生成回答...',
+    '系统问答': '正在解析问题语义...\n查询系统数据库...\n数据分析与可视化...',
+    '智能报告': '正在收集相关数据...\n分析数据趋势...\n组织报告结构...\n生成报告内容...',
+    '智能报表': '正在查询数据表...\n汇总统计数据...\n生成报表格式...',
+    '系统巡检': '正在执行系统自检...\n检查设备连接状态...\n分析异常指标...',
+    '分析决策': '正在收集多维度数据...\n建立分析模型...\n推理与研判...',
   };
-  const text = thinkingTexts[agent] || '正在分析您的问题，检索相关数据和知识...\n整合多源信息，生成最佳回答。';
-  const duration = (Math.random() * 3 + 1.5).toFixed(1);
-  return `
-    <div class="thinking-section">
-      <div class="thinking-header" onclick="toggleThinking(this)">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg>
-        <span class="thinking-label">思考过程</span>
-        <span class="thinking-duration">${duration}s</span>
-      </div>
-      <div class="thinking-body">${text.replace(/\n/g, '<br>')}</div>
-    </div>
-  `;
+  const text = thinkTexts[agent] || '正在分析问题...\n检索相关信息...\n生成回复...';
+  const duration = (Math.random() * 2 + 1.5).toFixed(1);
+  return '<div class="thinking-section"><div class="thinking-header collapsed" onclick="toggleThinking(this)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg><span class="thinking-label">思考过程</span><span class="thinking-duration">' + duration + 's</span></div><div class="thinking-body hidden">' + text.replace(/\n/g, '<br>') + '</div></div>';
 }
 
 function toggleThinking(header) {
   header.classList.toggle('collapsed');
-  const body = header.nextElementSibling;
-  body.classList.toggle('hidden');
+  header.nextElementSibling.classList.toggle('hidden');
 }
 
 function addAITextResponse(html, suggestions, agent) {
@@ -1633,23 +1829,21 @@ function addAITextResponse(html, suggestions, agent) {
   let suggestHtml = '';
   if (suggestions && suggestions.length) {
     suggestHtml = '<div class="ai-suggestions">' +
-      suggestions.map((s, i) => `<button class="ai-suggest-btn" data-idx="${i}">${s.label} <span class="arrow">→</span></button>`).join('') +
+      suggestions.map(function(s, i) { return '<button class="ai-suggest-btn" data-idx="' + i + '">' + s.label + ' <span class="arrow">→</span></button>'; }).join('') +
       '</div>';
   }
 
-  msg.innerHTML = `
-    <div class="msg-bubble ai-bubble">
-      ${getAgentBadgeHtml(agent)}
-      ${getThinkingHtml(agent)}
-      <div class="ai-content">${html.replace(/\n/g, '<br>')}</div>
-      ${suggestHtml}
-      ${getActionsRow()}
-    </div>
-  `;
+  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
+    getAgentBadgeHtml(agent) +
+    getThinkingHtml(agent) +
+    '<div class="ai-content">' + html.replace(/\n/g, '<br>') + '</div>' +
+    suggestHtml +
+    getActionsRow() +
+    '</div>';
 
   if (suggestions) {
-    setTimeout(() => {
-      msg.querySelectorAll('.ai-suggest-btn').forEach((btn, i) => {
+    setTimeout(function() {
+      msg.querySelectorAll('.ai-suggest-btn').forEach(function(btn, i) {
         btn.addEventListener('click', suggestions[i].action);
       });
     }, 0);
@@ -1663,39 +1857,21 @@ function addAIResponseWithReport(text, reportTitle, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
-
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 
-  msg.innerHTML = `
-    <div class="msg-bubble ai-bubble">
-      ${getAgentBadgeHtml(agent)}
-      ${getThinkingHtml(agent)}
-      <div class="ai-content">好的，我将为您生成「${reportTitle}」，已整理相关数据并生成完整报告内容。</div>
-      <div class="report-card-inline" onclick="openReportPanel('${reportTitle}')">
-        <div class="report-card-icon">📄</div>
-        <div class="report-card-info">
-          <div class="report-card-title">${reportTitle}（...</div>
-          <div class="report-card-meta">创建时间: ${timeStr}</div>
-        </div>
-        <div class="report-card-thumb">
-          <div class="report-card-thumb-inner">
-            <div style="font-size:8px;font-weight:600;color:#374151;margin-bottom:2px">${reportTitle}</div>
-            <div style="font-size:6px;color:#9CA3AF">第一章 监测概况...</div>
-            <div style="font-size:6px;color:#9CA3AF">1.1 监测对象...</div>
-          </div>
-        </div>
-      </div>
-      <div class="switch-reply-link" onclick="toggleDirectReply(this)">改用对话直接回答 ›</div>
-      <div class="ai-content" style="margin-top:4px;">这份报告全面覆盖了监测区域的运行状况，包含报警统计、趋势分析和风险评估。需要我帮你<strong>调整报告章节</strong>，比如增加某个区域的详细分析吗？</div>
-      <div class="ai-suggestions">
-        <button class="ai-suggest-btn" onclick="sendQuickQ('增加城北片区的详细压力分析')">增加城北片区的详细压力分析 <span class="arrow">→</span></button>
-        <button class="ai-suggest-btn" onclick="sendQuickQ('添加近半年的趋势对比图表')">添加近半年的趋势对比图表 <span class="arrow">→</span></button>
-        <button class="ai-suggest-btn" onclick="sendQuickQ('导出PDF版本报告')">导出PDF版本报告 <span class="arrow">→</span></button>
-      </div>
-      ${getActionsRow(6)}
-    </div>
-  `;
+  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
+    getAgentBadgeHtml(agent) +
+    getThinkingHtml(agent) +
+    '<div class="ai-content">好的，我将为您生成「' + reportTitle + '」，已整理相关数据并生成完整报告内容。</div>' +
+    '<div class="report-card-inline" onclick="openReportPanel(\'' + reportTitle + '\')">' +
+    '<div class="report-card-icon">📄</div><div class="report-card-info"><div class="report-card-title">' + reportTitle + '（...</div><div class="report-card-meta">创建时间: ' + timeStr + '</div></div>' +
+    '<div class="report-card-thumb"><div class="report-card-thumb-inner"><div style="font-size:8px;font-weight:600;color:#374151;margin-bottom:2px">' + reportTitle + '</div><div style="font-size:6px;color:#9CA3AF">第一章 监测概况...</div></div></div></div>' +
+    '<div class="switch-reply-link" onclick="toggleDirectReply(this)">改用对话直接回答 ›</div>' +
+    '<div class="ai-content" style="margin-top:4px;">这份报告全面覆盖了监测区域的运行状况。需要我帮你<strong>调整报告章节</strong>吗？</div>' +
+    '<div class="ai-suggestions"><button class="ai-suggest-btn" onclick="sendQuickQ(\'增加城北片区的详细压力分析\')">增加城北片区的详细压力分析 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'添加近半年的趋势对比图表\')">添加近半年的趋势对比图表 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'导出PDF版本报告\')">导出PDF版本报告 <span class="arrow">→</span></button></div>' +
+    getActionsRow(6) +
+    '</div>';
 
   chatArea.appendChild(msg);
   scrollChatBottom();
@@ -1705,128 +1881,51 @@ function addAIDataResponse(agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
-  msg.innerHTML = `
-    <div class="msg-bubble ai-bubble">
-      ${getAgentBadgeHtml(agent)}
-      ${getThinkingHtml(agent)}
-      <div class="ai-content">当前全市供水管网运行状态概览：</div>
-      <div class="data-card">
-        <div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div>
-        <div class="data-card-row"><span class="data-label">管线总长度</span><span><span class="data-value">3,842km</span></span></div>
-        <div class="data-card-row"><span class="data-label">在线设备数</span><span><span class="data-value">1,204</span><span class="data-trend down">↓ 3</span></span></div>
-        <div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#EF4444">3</span></span></div>
-        <div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#10B981;font-size:12px;margin-left:6px">正常</span></span></div>
-      </div>
-      <div class="ai-suggestions">
-        <button class="ai-suggest-btn" onclick="openReportPanel('供水管网运行报告')">生成详细运行报告 <span class="arrow">→</span></button>
-        <button class="ai-suggest-btn" onclick="sendQuickQ('查看各区域压力分布详情')">查看各区域压力分布详情 <span class="arrow">→</span></button>
-        <button class="ai-suggest-btn">导出数据 <span class="arrow">→</span></button>
-      </div>
-      ${getActionsRow()}
-    </div>
-  `;
+  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
+    getAgentBadgeHtml(agent) +
+    getThinkingHtml(agent) +
+    '<div class="ai-content">当前全市供水管网运行状态概览：</div>' +
+    '<div class="data-card"><div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div><div class="data-card-row"><span class="data-label">管线总长度</span><span><span class="data-value">3,842km</span></span></div><div class="data-card-row"><span class="data-label">在线设备数</span><span><span class="data-value">1,204</span><span class="data-trend down">↓ 3</span></span></div><div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#EF4444">3</span></span></div><div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#10B981;font-size:12px;margin-left:6px">正常</span></span></div></div>' +
+    '<div class="ai-suggestions"><button class="ai-suggest-btn" onclick="openReportPanel(\'供水管网运行报告\')">生成详细运行报告 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'查看各区域压力分布详情\')">查看各区域压力分布详情 <span class="arrow">→</span></button><button class="ai-suggest-btn">导出数据 <span class="arrow">→</span></button></div>' +
+    getActionsRow() +
+    '</div>';
   chatArea.appendChild(msg);
   scrollChatBottom();
 }
 
 function getActionsRow(refCount) {
-  return `
-    <div class="ai-actions-row">
-      <button class="ai-action-btn" title="点赞">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v5h1.5l1-1h2l1.5 1H12V7l-2.5-4h-1L7 5v2H4z"/></svg>
-      </button>
-      <button class="ai-action-btn" title="点踩">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V2h1.5l1 1h2L10 2h2v5l-2.5 4h-1L7 9V7H4z"/></svg>
-      </button>
-      <button class="ai-action-btn" title="重新生成" onclick="regenerate(this)">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg>
-      </button>
-      <button class="ai-action-btn" title="复制" onclick="copyBubble(this)">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
-      </button>
-      <button class="ai-action-btn" title="朗读">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg>
-      </button>
-      <button class="ai-action-btn" title="分享">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h6M7 5l3 3-3 3"/></svg>
-      </button>
-      <button class="ai-action-btn" title="更多">
-        <svg width="14" height="14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg>
-      </button>
-      ${refCount ? `<div class="ai-actions-sep"></div><span class="ai-ref-count">参考 ${refCount} 篇资料</span>` : ''}
-    </div>
-  `;
+  return '<div class="ai-actions-row">' +
+    '<button class="ai-action-btn" title="点赞"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v5h1.5l1-1h2l1.5 1H12V7l-2.5-4h-1L7 5v2H4z"/></svg></button>' +
+    '<button class="ai-action-btn" title="点踩"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V2h1.5l1 1h2L10 2h2v5l-2.5 4h-1L7 9V7H4z"/></svg></button>' +
+    '<button class="ai-action-btn" title="重新生成" onclick="regenerate(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg></button>' +
+    '<button class="ai-action-btn" title="复制" onclick="copyBubble(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg></button>' +
+    '<button class="ai-action-btn" title="朗读"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg></button>' +
+    '<button class="ai-action-btn" title="分享"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h6M7 5l3 3-3 3"/></svg></button>' +
+    '<button class="ai-action-btn" title="更多"><svg width="14" height="14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></button>' +
+    (refCount ? '<div class="ai-actions-sep"></div><span class="ai-ref-count">参考 ' + refCount + ' 篇资料</span>' : '') +
+    '</div>';
 }
 
 function addTypingIndicator() {
   const chatArea = document.getElementById('chatArea');
   const el = document.createElement('div');
-  el.className = 'chat-msg ai';
-  el.id = 'typingMsg';
-  el.innerHTML = `
-    <div class="msg-bubble ai-bubble">
-      <div class="typing-indicator">
-        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-        <span style="margin-left:6px;color:#9CA3AF;">思考中...</span>
-      </div>
-    </div>
-  `;
+  el.className = 'chat-msg ai'; el.id = 'typingMsg';
+  el.innerHTML = '<div class="msg-bubble ai-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">思考中...</span></div></div>';
   chatArea.appendChild(el);
   scrollChatBottom();
   return el;
 }
 
-// ========== Helpers ==========
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+function scrollChatBottom() { const c = document.getElementById('chatArea'); c.scrollTop = c.scrollHeight; }
+function copyBubble(btn) { const b = btn.closest('.ai-bubble'); if (b) { const c = b.querySelector('.ai-content'); navigator.clipboard.writeText((c||b).innerText); } }
+function regenerate(btn) { const b = btn.closest('.ai-bubble'); if (!b) return; const c = b.querySelector('.ai-content'); if (c) { const o = c.innerHTML; c.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">重新生成中...</span></div>'; setTimeout(function() { c.innerHTML = '已为您重新分析。当前各项指标运行正常，暂无异常情况需要关注。'; }, 1200); } }
+function toggleDirectReply(el) { el.style.display = 'none'; }
+function handleKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
-function scrollChatBottom() {
-  const chatArea = document.getElementById('chatArea');
-  chatArea.scrollTop = chatArea.scrollHeight;
-}
-
-function copyBubble(btn) {
-  const bubble = btn.closest('.ai-bubble') || btn.closest('.msg-bubble');
-  if (bubble) {
-    const content = bubble.querySelector('.ai-content');
-    navigator.clipboard.writeText((content || bubble).innerText);
-  }
-}
-
-function regenerate(btn) {
-  const bubble = btn.closest('.ai-bubble');
-  if (!bubble) return;
-  const content = bubble.querySelector('.ai-content');
-  if (content) {
-    const orig = content.innerHTML;
-    content.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">重新生成中...</span></div>';
-    setTimeout(() => {
-      content.innerHTML = '已为您重新分析。当前各项指标运行正常，暂无异常情况需要关注。如需深入分析某个方面，请告诉我。';
-    }, 1200);
-  }
-}
-
-function toggleDirectReply(el) {
-  el.style.display = 'none';
-}
-
-function handleKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-// Auto-grow textarea
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   const input = document.getElementById('inputBox');
-  input.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-  });
+  input.addEventListener('input', function() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; });
 });
 
 // ========== Report Panel ==========
@@ -1835,400 +1934,149 @@ function openReportPanel(title) {
   document.getElementById('reportTitle').textContent = title || '燃气监测运营月度报告';
   panel.classList.add('open');
   document.querySelector('.app-layout').classList.add('report-open');
-
   const body = document.getElementById('reportBody');
   const toc = document.getElementById('reportToc');
-  // Show skeleton first
   toc.innerHTML = '';
-  body.innerHTML = `
-    <div class="skeleton-block" style="width:60%;height:24px;margin:0 auto 20px"></div>
-    <div class="skeleton-block" style="width:40%;height:18px;margin-bottom:16px"></div>
-    <div class="skeleton-block" style="width:100%;height:14px"></div>
-    <div class="skeleton-block" style="width:90%;height:14px"></div>
-    <div class="skeleton-block" style="width:95%;height:14px"></div>
-    <div class="skeleton-block" style="width:80%;height:14px;margin-bottom:20px"></div>
-    <div class="skeleton-block" style="width:45%;height:18px;margin-bottom:12px"></div>
-    <div class="skeleton-block" style="width:100%;height:80px"></div>
-  `;
-
-  setTimeout(() => {
-    body.innerHTML = generateReportContent(title);
-    toc.innerHTML = generateReportToc();
-    bindTocClicks();
-  }, 1800);
+  body.innerHTML = '<div class="skeleton-block" style="width:60%;height:24px;margin:0 auto 20px"></div><div class="skeleton-block" style="width:40%;height:18px;margin-bottom:16px"></div><div class="skeleton-block" style="width:100%;height:14px"></div><div class="skeleton-block" style="width:90%;height:14px"></div><div class="skeleton-block" style="width:95%;height:14px"></div><div class="skeleton-block" style="width:80%;height:14px;margin-bottom:20px"></div><div class="skeleton-block" style="width:45%;height:18px;margin-bottom:12px"></div><div class="skeleton-block" style="width:100%;height:80px"></div>';
+  setTimeout(function() { body.innerHTML = generateReportContent(title); toc.innerHTML = generateReportToc(); bindTocClicks(); }, 1800);
 }
 
 function generateReportToc() {
-  return `
-    <div class="report-toc-header">
-      <span class="report-toc-title">目录</span>
-      <button class="toc-toggle-btn" onclick="collapseToc()" title="收起目录">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 1.5L3.5 6l4 4.5"/></svg>
-      </button>
-    </div>
-    <div class="toc-item active" data-target="chapter1">第一章 监测概况</div>
-    <div class="toc-item sub" data-target="section1-1">1.1 监测对象健康状况</div>
-    <div class="toc-item sub" data-target="section1-2">1.2 报警统计</div>
-    <div class="toc-item sub" data-target="section1-3">1.3 预警情况说明</div>
-    <div class="toc-item" data-target="chapter2">第二章 风险评估</div>
-    <div class="toc-item sub" data-target="section2-1">2.1 风险等级分布</div>
-    <div class="toc-item sub" data-target="section2-2">2.2 重点区域分析</div>
-    <div class="toc-item" data-target="chapter3">第三章 运维建议</div>
-    <div class="toc-item sub" data-target="section3-1">3.1 短期措施</div>
-    <div class="toc-item sub" data-target="section3-2">3.2 长期规划</div>
-  `;
+  return '<div class="report-toc-header"><span class="report-toc-title">目录</span><button class="toc-toggle-btn" onclick="collapseToc()" title="收起目录"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 1.5L3.5 6l4 4.5"/></svg></button></div>' +
+    '<div class="toc-item active" data-target="chapter1">第一章 监测概况</div>' +
+    '<div class="toc-item sub" data-target="section1-1">1.1 监测对象健康状况</div>' +
+    '<div class="toc-item sub" data-target="section1-2">1.2 报警统计</div>' +
+    '<div class="toc-item sub" data-target="section1-3">1.3 预警情况说明</div>' +
+    '<div class="toc-item" data-target="chapter2">第二章 风险评估</div>' +
+    '<div class="toc-item sub" data-target="section2-1">2.1 风险等级分布</div>' +
+    '<div class="toc-item sub" data-target="section2-2">2.2 重点区域分析</div>' +
+    '<div class="toc-item" data-target="chapter3">第三章 运维建议</div>' +
+    '<div class="toc-item sub" data-target="section3-1">3.1 短期措施</div>' +
+    '<div class="toc-item sub" data-target="section3-2">3.2 长期规划</div>';
 }
 
 function bindTocClicks() {
-  document.querySelectorAll('.toc-item').forEach(item => {
+  document.querySelectorAll('.toc-item').forEach(function(item) {
     item.addEventListener('click', function() {
-      document.querySelectorAll('.toc-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.toc-item').forEach(function(i) { i.classList.remove('active'); });
       this.classList.add('active');
-      const target = this.dataset.target;
-      const el = document.getElementById(target);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      var el = document.getElementById(this.dataset.target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 }
 
-// ========== TOC Toggle ==========
-function collapseToc() {
-  document.getElementById('reportToc').classList.add('collapsed');
-  document.getElementById('tocExpandBtn').classList.add('visible');
-}
-function expandToc() {
-  document.getElementById('reportToc').classList.remove('collapsed');
-  document.getElementById('tocExpandBtn').classList.remove('visible');
-}
+function collapseToc() { document.getElementById('reportToc').classList.add('collapsed'); document.getElementById('tocExpandBtn').classList.add('visible'); }
+function expandToc() { document.getElementById('reportToc').classList.remove('collapsed'); document.getElementById('tocExpandBtn').classList.remove('visible'); }
 
-// ========== Download ==========
-function toggleDownloadDropdown(e) {
-  e.stopPropagation();
-  const dd = document.getElementById('downloadDropdown');
-  dd.classList.toggle('show');
-}
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.report-header-actions')) {
-    const dd = document.getElementById('downloadDropdown');
-    if (dd) dd.classList.remove('show');
-  }
-});
+function toggleDownloadDropdown(e) { e.stopPropagation(); document.getElementById('downloadDropdown').classList.toggle('show'); }
+document.addEventListener('click', function(e) { if (!e.target.closest('.report-header-actions')) { var dd = document.getElementById('downloadDropdown'); if (dd) dd.classList.remove('show'); } });
 
 function downloadReport(format) {
   document.getElementById('downloadDropdown').classList.remove('show');
-  const title = document.getElementById('reportTitle').textContent || '报告';
-  const body = document.getElementById('reportBody');
-  const content = body.innerHTML;
-
-  // Build HTML document for Word/WPS
-  const htmlDoc = `
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:w="urn:schemas-microsoft-com:office:word"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta charset="utf-8">
-  <title>${title}</title>
-  <!--[if gte mso 9]>
-  <xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml>
-  <![endif]-->
-  <style>
-    body { font-family: "Microsoft YaHei", "SimSun", sans-serif; font-size: 14px; color: #333; line-height: 1.8; padding: 40px; }
-    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-    th, td { border: 1px solid #d1d5db; padding: 8px 12px; text-align: center; font-size: 13px; }
-    th { background: #f3f4f6; font-weight: 600; }
-    tr:nth-child(even) td { background: #f9fafb; }
-    h1 { font-size: 22px; text-align: center; margin-bottom: 24px; }
-    h2 { font-size: 17px; color: #1f2937; margin: 20px 0 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
-    h3 { font-size: 15px; color: #374151; margin: 14px 0 8px; }
-    strong { color: #1f2937; }
-  </style>
-</head>
-<body>${content}</body>
-</html>`;
-
-  const ext = format === 'wps' ? 'wps' : 'docx';
-  const mimeType = 'application/msword';
-  const blob = new Blob(['\ufeff' + htmlDoc], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = title + '.' + ext;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  // Show success toast
+  var title = document.getElementById('reportTitle').textContent || '报告';
+  var content = document.getElementById('reportBody').innerHTML;
+  var htmlDoc = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + title + '</title><style>body{font-family:"Microsoft YaHei",sans-serif;font-size:14px;color:#333;line-height:1.8;padding:40px}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d1d5db;padding:8px 12px;text-align:center;font-size:13px}th{background:#f3f4f6;font-weight:600}h1{font-size:22px;text-align:center;margin-bottom:24px}h2{font-size:17px;margin:20px 0 10px}h3{font-size:15px;margin:14px 0 8px}</style></head><body>' + content + '</body></html>';
+  var ext = format === 'wps' ? 'wps' : 'docx';
+  var blob = new Blob(['\ufeff' + htmlDoc], { type: 'application/msword' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = title + '.' + ext;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   showDownloadToast(title, ext);
 }
 
 function showDownloadToast(title, ext) {
-  let toast = document.getElementById('downloadToast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'downloadToast';
-    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10B981;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;display:flex;align-items:center;gap:8px;';
-    document.body.appendChild(toast);
-  }
+  var toast = document.getElementById('downloadToast');
+  if (!toast) { toast = document.createElement('div'); toast.id = 'downloadToast'; toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10B981;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;display:flex;align-items:center;gap:8px;'; document.body.appendChild(toast); }
   toast.innerHTML = '✅ 「' + title + '.' + ext + '」已开始下载';
-  toast.style.opacity = '1';
-  toast.style.display = 'flex';
-  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 2500);
+  toast.style.opacity = '1'; toast.style.display = 'flex';
+  setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.style.display = 'none'; }, 300); }, 2500);
 }
 
 function closeReport() {
   document.getElementById('reportPanel').classList.remove('open');
   document.querySelector('.app-layout').classList.remove('report-open');
-  // Reset TOC state
   document.getElementById('reportToc').classList.remove('collapsed');
   document.getElementById('tocExpandBtn').classList.remove('visible');
 }
 
 function aiRewrite(type) {
-  const body = document.getElementById('reportBody');
-  const firstText = body.querySelector('.report-text');
-  if (firstText) {
-    const orig = firstText.innerHTML;
-    firstText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">AI' + type + '中...</span></div>';
-    setTimeout(() => {
-      firstText.innerHTML = orig;
-    }, 1500);
+  var body = document.getElementById('reportBody');
+  var firstText = body.querySelector('.report-text');
+  if (firstText) { var orig = firstText.innerHTML; firstText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">AI' + type + '中...</span></div>'; setTimeout(function() { firstText.innerHTML = orig; }, 1500); }
+}
+
+function ftCmd(cmd, val) { document.execCommand(cmd, false, val || null); document.getElementById('reportBody').focus(); }
+function ftFontSize(val) { if (val) { document.execCommand('fontSize', false, val); document.getElementById('reportBody').focus(); } }
+function getSelectedText() { return window.getSelection().toString() || ''; }
+function toggleAiDropdown(e) { e.stopPropagation(); document.getElementById('aiDropdown').classList.toggle('show'); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var reportBody = document.getElementById('reportBody');
+  var toolbar = document.getElementById('floatingToolbar');
+  var container = reportBody.closest('[style*="position:relative"]') || reportBody.parentElement;
+  reportBody.addEventListener('mouseup', function(e) { setTimeout(function() { showFT(e); }, 10); });
+  reportBody.addEventListener('click', function(e) { setTimeout(function() { showFT(e); }, 10); });
+  function showFT(e) {
+    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
+    var range = sel.getRangeAt(0); var rect = range.getBoundingClientRect(); var cr = container.getBoundingClientRect();
+    var top, left;
+    if (sel.toString().length > 0) { top = rect.top - cr.top - 40; left = rect.left - cr.left + (rect.width/2) - 140; }
+    else { top = e.clientY - cr.top - 40; left = e.clientX - cr.left - 140; }
+    top = Math.max(4, top); left = Math.max(4, Math.min(left, cr.width - 320));
+    toolbar.style.top = top + 'px'; toolbar.style.left = left + 'px'; toolbar.classList.add('visible');
   }
-}
-
-// ========== Floating Toolbar ==========
-function ftCmd(cmd, val) {
-  document.execCommand(cmd, false, val || null);
-  document.getElementById('reportBody').focus();
-}
-function ftFontSize(val) {
-  if (val) {
-    document.execCommand('fontSize', false, val);
-    document.getElementById('reportBody').focus();
-  }
-}
-function getSelectedText() {
-  return window.getSelection().toString() || '';
-}
-
-function toggleAiDropdown(e) {
-  e.stopPropagation();
-  const dd = document.getElementById('aiDropdown');
-  dd.classList.toggle('show');
-}
-
-// Show floating toolbar on click/selection inside report body
-document.addEventListener('DOMContentLoaded', () => {
-  const reportBody = document.getElementById('reportBody');
-  const toolbar = document.getElementById('floatingToolbar');
-  const container = reportBody.closest('[style*="position:relative"]') || reportBody.parentElement;
-
-  reportBody.addEventListener('mouseup', (e) => {
-    setTimeout(() => showFloatingToolbar(e), 10);
-  });
-
-  reportBody.addEventListener('click', (e) => {
-    setTimeout(() => showFloatingToolbar(e), 10);
-  });
-
-  function showFloatingToolbar(e) {
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    // Position above the click/selection
-    let top, left;
-    if (sel.toString().length > 0) {
-      // Has selection - show above selection
-      top = rect.top - containerRect.top - 40;
-      left = rect.left - containerRect.left + (rect.width / 2) - 140;
-    } else {
-      // Just clicked - show above click point
-      top = e.clientY - containerRect.top - 40;
-      left = e.clientX - containerRect.left - 140;
-    }
-    top = Math.max(4, top);
-    left = Math.max(4, Math.min(left, containerRect.width - 320));
-
-    toolbar.style.top = top + 'px';
-    toolbar.style.left = left + 'px';
-    toolbar.classList.add('visible');
-  }
-
-  // Hide toolbar when clicking outside report area
-  document.addEventListener('mousedown', (e) => {
-    if (!toolbar.contains(e.target) && !reportBody.contains(e.target)) {
-      toolbar.classList.remove('visible');
-      document.getElementById('aiDropdown').classList.remove('show');
-    }
-  });
-
-  // Hide AI dropdown on outside click
-  document.addEventListener('click', (e) => {
-    if (!document.getElementById('ftAiBtn').contains(e.target)) {
-      document.getElementById('aiDropdown').classList.remove('show');
-    }
-  });
+  document.addEventListener('mousedown', function(e) { if (!toolbar.contains(e.target) && !reportBody.contains(e.target)) { toolbar.classList.remove('visible'); document.getElementById('aiDropdown').classList.remove('show'); } });
+  document.addEventListener('click', function(e) { if (!document.getElementById('ftAiBtn').contains(e.target)) { document.getElementById('aiDropdown').classList.remove('show'); } });
 });
 
 function generateReportContent(title) {
-  return `
-    <div class="report-doc-title">${title || '燃气监测运营月度报告'}</div>
-
-    <div class="report-chapter" id="chapter1">第一章 监测概况</div>
-
-    <div class="report-section-title" id="section1-1">1.1 监测对象的健康状况</div>
-    <div class="report-text">
-      <p>2025年2月期间，监测对象的整体评分为<strong>91.6</strong>分，燃气管道整体健康状态为良好。本月风险评估结果显示合肥市监测范围内的燃气管道及其附属设施的整体风险维持在较低水平。</p>
-    </div>
-
-    <div class="report-section-title" id="section1-2">1.2 报警统计</div>
-    <div class="report-text">
-      <p>本月共监测到可燃气体浓度超标报警<strong>56</strong>起，较上月（43起）增加13起，环比上升30.23%，整体防控压力有所增大。</p>
-    </div>
-
-    <div class="report-table-wrap">
-      <div class="report-table-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1"/><line x1="2" y1="5" x2="12" y2="5"/><line x1="5" y1="5" x2="5" y2="12"/><line x1="8.5" y1="5" x2="8.5" y2="12"/></svg>
-        报警等级统计表
-      </div>
-      <table class="report-table">
-        <thead>
-          <tr><th>报警级别/管井类型</th><th>燃气井</th><th>排水井</th><th>其他</th><th>合计</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>一级报警</td><td>2</td><td>1</td><td>1</td><td>4</td></tr>
-          <tr><td>二级报警</td><td>3</td><td>1</td><td>4</td><td>8</td></tr>
-          <tr><td>三级报警</td><td>12</td><td>3</td><td>2</td><td>17</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="report-text">
-      <p>从报警级别进行分析：一级报警<strong>4</strong>起，占比6.90%；二级报警<strong>8</strong>起，占比13.79%；三级报警<strong>17</strong>起，占比29.31%。三类风险结论以低风险事件为主。</p>
-    </div>
-
-    <div class="report-section-title" id="section1-3">1.3 预警情况说明</div>
-    <div class="report-text">
-      <p>2025年2月内共发布<strong>12</strong>起沼气聚集三级风险提醒，经技术人员现场勘查后进行技术分析，初步判断为季节性温差导致管井内有机物分解加速，确认均为管井内含量较高时短暂瞬间化反应产生沼气聚集所致，未发现风险数据源指标异常情况。</p>
-    </div>
-
-    <div class="report-table-wrap">
-      <div class="report-table-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1"/><line x1="2" y1="5" x2="12" y2="5"/><line x1="5" y1="5" x2="5" y2="12"/><line x1="8.5" y1="5" x2="8.5" y2="12"/></svg>
-        预警信息总表
-      </div>
-      <table class="report-table">
-        <thead>
-          <tr><th>序号</th><th>管井编号</th><th>井类型</th><th>发布时间</th><th>风控等级</th><th>处置状态</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>GJ-2024-001</td><td>燃气井</td><td>02-05 14:20</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>2</td><td>GJ-2024-002</td><td>排水井</td><td>02-08 09:15</td><td style="color:#EF4444;font-weight:500">一级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>3</td><td>GJ-2024-003</td><td>燃气井</td><td>02-12 16:40</td><td style="color:#F59E0B;font-weight:500">二级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>4</td><td>GJ-2024-004</td><td>燃气井</td><td>02-15 08:30</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
-          <tr><td>5</td><td>GJ-2024-005</td><td>排水井</td><td>02-19 11:45</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="report-chapter" id="chapter2">第二章 风险评估</div>
-
-    <div class="report-section-title" id="section2-1">2.1 风险等级分布</div>
-    <div class="report-text">
-      <p>本月综合风险评估结果显示，监测区域内低风险点位占比<strong>82.5%</strong>，中风险点位占比<strong>14.3%</strong>，高风险点位占比<strong style="color:#EF4444">3.2%</strong>。高风险点位主要集中在城北老旧管网区域和城东工业园区周边。</p>
-      <p>与上月相比，低风险区域占比提升1.2个百分点，中风险区域占比下降0.8个百分点，高风险区域占比下降0.4个百分点，整体风险态势持续向好。</p>
-    </div>
-
-    <div class="report-section-title" id="section2-2">2.2 重点区域分析</div>
-    <div class="report-text">
-      <p><strong>城北片区：</strong>管网使用年限超过15年，本月检测到微量渗漏点3处，建议纳入年度改造计划。</p>
-      <p><strong>城东工业园区：</strong>受周边施工影响，管道外部荷载变化较大，需加强监测频次，当前已提升至每日4次巡检。</p>
-      <p><strong>城南新区：</strong>新铺设管网运行平稳，各项指标均在正常范围内，继续保持常规监测即可。</p>
-    </div>
-
-    <div class="report-chapter" id="chapter3">第三章 运维建议</div>
-
-    <div class="report-section-title" id="section3-1">3.1 短期措施</div>
-    <div class="report-text">
-      <p>1. 针对城北片区3处微量渗漏点，建议在未来两周内安排专业检修团队进行精准定位和修复；</p>
-      <p>2. 城东工业园区周边施工期间，建议将该区域监测预警阈值下调10%，提升预警灵敏度；</p>
-      <p>3. 对本月离线超过4小时的5台监测设备进行全面检修和通信链路排查。</p>
-    </div>
-
-    <div class="report-section-title" id="section3-2">3.2 长期规划</div>
-    <div class="report-text">
-      <p>1. 建议将城北片区老旧管网纳入2025年度城市基础设施改造专项计划，预计涉及管线总长12.6km；</p>
-      <p>2. 推进监测设备智能化升级，计划年内完成200个点位的新一代传感器替换；</p>
-      <p>3. 完善多源数据融合分析平台建设，实现气象、地质、交通等外部数据与管网监测数据的联动分析。</p>
-    </div>
-
-    <div style="background:#EFF6FF;border-radius:8px;padding:16px;margin-top:24px;">
-      <div style="font-size:14px;font-weight:600;color:#2563EB;margin-bottom:8px;">📋 结论与总结</div>
-      <div class="report-text" style="margin-bottom:0;">
-        <p>本月城市燃气管网整体运行状况良好，风险态势持续向好。建议重点关注城北老旧管网区域的渗漏修复和城东工业园区的施工期安全监测，同步推进设备升级和数据平台建设，持续提升城市生命线安全保障能力。</p>
-      </div>
-    </div>
-  `;
+  return '<div class="report-doc-title">' + (title || '燃气监测运营月度报告') + '</div>' +
+    '<div class="report-chapter" id="chapter1">第一章 监测概况</div>' +
+    '<div class="report-section-title" id="section1-1">1.1 监测对象的健康状况</div>' +
+    '<div class="report-text"><p>2025年2月期间，监测对象的整体评分为<strong>91.6</strong>分，燃气管道整体健康状态为良好。</p></div>' +
+    '<div class="report-section-title" id="section1-2">1.2 报警统计</div>' +
+    '<div class="report-text"><p>本月共监测到可燃气体浓度超标报警<strong>56</strong>起，较上月（43起）增加13起，环比上升30.23%。</p></div>' +
+    '<div class="report-table-wrap"><div class="report-table-label"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1"/><line x1="2" y1="5" x2="12" y2="5"/><line x1="5" y1="5" x2="5" y2="12"/><line x1="8.5" y1="5" x2="8.5" y2="12"/></svg>报警等级统计表</div><table class="report-table"><thead><tr><th>报警级别/管井类型</th><th>燃气井</th><th>排水井</th><th>其他</th><th>合计</th></tr></thead><tbody><tr><td>一级报警</td><td>2</td><td>1</td><td>1</td><td>4</td></tr><tr><td>二级报警</td><td>3</td><td>1</td><td>4</td><td>8</td></tr><tr><td>三级报警</td><td>12</td><td>3</td><td>2</td><td>17</td></tr></tbody></table></div>' +
+    '<div class="report-text"><p>从报警级别分析：一级报警<strong>4</strong>起，二级报警<strong>8</strong>起，三级报警<strong>17</strong>起。</p></div>' +
+    '<div class="report-section-title" id="section1-3">1.3 预警情况说明</div>' +
+    '<div class="report-text"><p>2025年2月内共发布<strong>12</strong>起沼气聚集三级风险提醒。</p></div>' +
+    '<div class="report-table-wrap"><div class="report-table-label"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1"/><line x1="2" y1="5" x2="12" y2="5"/><line x1="5" y1="5" x2="5" y2="12"/><line x1="8.5" y1="5" x2="8.5" y2="12"/></svg>预警信息总表</div><table class="report-table"><thead><tr><th>序号</th><th>管井编号</th><th>井类型</th><th>发布时间</th><th>风控等级</th><th>处置状态</th></tr></thead><tbody><tr><td>1</td><td>GJ-2024-001</td><td>燃气井</td><td>02-05 14:20</td><td style="color:#F59E0B;font-weight:500">三级</td><td style="color:#10B981">已处置</td></tr><tr><td>2</td><td>GJ-2024-002</td><td>排水井</td><td>02-08 09:15</td><td style="color:#EF4444;font-weight:500">一级</td><td style="color:#10B981">已处置</td></tr><tr><td>3</td><td>GJ-2024-003</td><td>燃气井</td><td>02-12 16:40</td><td style="color:#F59E0B;font-weight:500">二级</td><td style="color:#10B981">已处置</td></tr></tbody></table></div>' +
+    '<div class="report-chapter" id="chapter2">第二章 风险评估</div>' +
+    '<div class="report-section-title" id="section2-1">2.1 风险等级分布</div>' +
+    '<div class="report-text"><p>低风险占比<strong>82.5%</strong>，中风险<strong>14.3%</strong>，高风险<strong style="color:#EF4444">3.2%</strong>。</p></div>' +
+    '<div class="report-section-title" id="section2-2">2.2 重点区域分析</div>' +
+    '<div class="report-text"><p><strong>城北片区：</strong>检测到微量渗漏点3处。</p><p><strong>城东工业园区：</strong>受施工影响需加强监测。</p></div>' +
+    '<div class="report-chapter" id="chapter3">第三章 运维建议</div>' +
+    '<div class="report-section-title" id="section3-1">3.1 短期措施</div>' +
+    '<div class="report-text"><p>1. 安排城北片区检修；2. 下调城东预警阈值10%；3. 检修离线设备。</p></div>' +
+    '<div class="report-section-title" id="section3-2">3.2 长期规划</div>' +
+    '<div class="report-text"><p>1. 老旧管网改造12.6km；2. 传感器升级200点位；3. 多源数据融合平台。</p></div>' +
+    '<div style="background:#EFF6FF;border-radius:8px;padding:16px;margin-top:24px;"><div style="font-size:14px;font-weight:600;color:#2563EB;margin-bottom:8px;">📋 结论与总结</div><div class="report-text" style="margin-bottom:0;"><p>本月整体运行良好，风险态势持续向好。</p></div></div>';
 }
 
 // ========== Context Menu ==========
-function showContextMenu(e, chatId) {
-  e.preventDefault();
-  const menu = document.getElementById('contextMenu');
-  menu.style.display = 'block';
-  menu.style.left = e.clientX + 'px';
-  menu.style.top = e.clientY + 'px';
-  deleteTargetId = chatId;
-}
-document.addEventListener('click', () => {
-  document.getElementById('contextMenu').style.display = 'none';
-});
+function showContextMenu(e, chatId) { e.preventDefault(); var menu = document.getElementById('contextMenu'); menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px'; deleteTargetId = chatId; }
+document.addEventListener('click', function() { document.getElementById('contextMenu').style.display = 'none'; });
+function confirmDeleteChat() { document.getElementById('contextMenu').style.display = 'none'; document.getElementById('deleteDialog').classList.add('show'); }
+function closeDialog() { document.getElementById('deleteDialog').classList.remove('show'); }
+function deleteChat() { if (deleteTargetId) { var item = document.querySelector('.history-item[data-id="' + deleteTargetId + '"]'); if (item) item.remove(); deleteTargetId = null; } closeDialog(); }
+function renameChat() { var item = document.querySelector('.history-item[data-id="' + deleteTargetId + '"]'); if (item) { var t = item.querySelector('.history-item-title'); var n = prompt('重命名会话：', t.textContent); if (n && n.trim()) t.textContent = n.trim(); } document.getElementById('contextMenu').style.display = 'none'; }
 
-function confirmDeleteChat() {
-  document.getElementById('contextMenu').style.display = 'none';
-  document.getElementById('deleteDialog').classList.add('show');
-}
-function closeDialog() {
-  document.getElementById('deleteDialog').classList.remove('show');
-}
-function deleteChat() {
-  if (deleteTargetId) {
-    const item = document.querySelector(`.history-item[data-id="${deleteTargetId}"]`);
-    if (item) item.remove();
-    deleteTargetId = null;
-  }
-  closeDialog();
-}
-function renameChat() {
-  const item = document.querySelector(`.history-item[data-id="${deleteTargetId}"]`);
-  if (item) {
-    const titleEl = item.querySelector('.history-item-title');
-    const newName = prompt('重命名会话：', titleEl.textContent);
-    if (newName && newName.trim()) titleEl.textContent = newName.trim();
-  }
-  document.getElementById('contextMenu').style.display = 'none';
-}
-
-// ========== Switch Chat ==========
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.history-item').forEach(item => {
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.history-item').forEach(function(item) {
     item.addEventListener('click', function() {
-      document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.history-item').forEach(function(i) { i.classList.remove('active'); });
       this.classList.add('active');
       currentChatId = this.dataset.id;
       document.getElementById('welcomeCard').style.display = 'none';
-      const chatArea = document.getElementById('chatArea');
-      chatArea.querySelectorAll('.chat-msg').forEach(m => m.remove());
-      const title = this.querySelector('.history-item-title').textContent;
+      var chatArea = document.getElementById('chatArea');
+      chatArea.querySelectorAll('.chat-msg').forEach(function(m) { m.remove(); });
+      var title = this.querySelector('.history-item-title').textContent;
       addUserBubble(title);
       addAITextResponse('已为您加载该会话的历史记录。当前会话主题：<strong>' + title + '</strong>。请继续提问或选择功能。', [
-        { label: '查看详细记录', action: () => {} },
-        { label: '基于此主题继续分析', action: () => {} }
+        { label: '查看详细记录', action: function(){} },
+        { label: '基于此主题继续分析', action: function(){} }
       ]);
     });
   });
