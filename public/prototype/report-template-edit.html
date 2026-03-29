@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模板编辑 - 城市生命线监测</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Inter", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+  font-size: 14px; color: #4B5563; line-height: 1.5;
+  background: #F3F4F6; min-width: 1280px; height: 100vh; overflow: hidden;
+}
+.layout { display: flex; height: 100vh; }
+
+/* Sidebar - same as other pages */
+.sidebar {
+  width: 220px; min-width: 220px; background: #fff;
+  border-right: 1px solid #E5E7EB; display: flex; flex-direction: column;
+}
+.sidebar-header { padding: 16px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;
+}
+.sidebar-title { font-size: 15px; font-weight: 600; color: #1F2937; }
+.sidebar-nav { padding: 8px; flex: 1; }
+.nav-group-label { font-size: 11px; color: #9CA3AF; padding: 12px 12px 6px; letter-spacing: 0.5px; }
+.nav-item {
+  padding: 9px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #4B5563; transition: all 0.15s; border-radius: 6px; margin-bottom: 1px; text-decoration: none;
+}
+.nav-item:hover { background: #F3F4F6; color: #2563EB; }
+.nav-item.active { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600;
+}
+.sidebar-collapse { padding: 8px; border-top: 1px solid #E5E7EB; text-align: center; }
+.collapse-btn {
+  width: 28px; height: 28px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff;
+  cursor: pointer; color: #9CA3AF; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;
+}
+.collapse-btn:hover { background: #F3F4F6; color: #2563EB; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Top bar */
+.top-bar {
+  height: 48px; background: #fff; border-bottom: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+}
+.top-bar-left { display: flex; align-items: center; gap: 12px; }
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #6B7280; }
+.breadcrumb a { color: #6B7280; text-decoration: none; }
+.breadcrumb a:hover { color: #2563EB; }
+.breadcrumb span { color: #1F2937; font-weight: 500; }
+.top-bar-actions { display: flex; align-items: center; gap: 8px; }
+.btn {
+  padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB;
+  background: #fff; color: #374151; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: #2563EB; color: #2563EB; }
+.btn-primary { background: #2563EB; color: #fff; border-color: #2563EB; }
+.btn-primary:hover { background: #1D4ED8; color: #fff; }
+.btn-success { background: #059669; color: #fff; border-color: #059669; }
+.btn-success:hover { background: #047857; color: #fff; }
+
+/* Parse banner */
+.parse-banner {
+  background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between; margin: 16px 16px 0;
+}
+.parse-banner-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1D4ED8; }
+.parse-banner-dot { width: 8px; height: 8px; background: #2563EB; border-radius: 50%; }
+.parse-confirm-btn {
+  padding: 5px 14px; background: #2563EB; color: #fff; border: none; border-radius: 5px;
+  font-size: 12px; cursor: pointer;
+}
+.parse-confirm-btn:hover { background: #1D4ED8; }
+
+/* Legend bar */
+.legend-bar {
+  display: flex; align-items: center; gap: 16px; padding: 8px 16px; font-size: 12px; color: #6B7280;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-param { display: inline-block; padding: 1px 6px; background: #DBEAFE; color: #2563EB; border-radius: 3px; font-size: 11px; }
+.legend-var { display: inline-block; padding: 1px 6px; background: #FED7AA; color: #C2410C; border-radius: 3px; font-size: 11px; }
+.legend-table { display: inline-flex; align-items: center; gap: 2px; color: #6B7280; }
+
+/* Editor area - three columns */
+.editor-area { flex: 1; display: flex; overflow: hidden; }
+
+/* Left: TOC tree */
+.toc-panel {
+  width: 200px; min-width: 200px; background: #fff; border-right: 1px solid #E5E7EB;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.toc-header {
+  padding: 12px 14px; border-bottom: 1px solid #E5E7EB; font-size: 13px; font-weight: 600; color: #1F2937;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.toc-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+.toc-chapter {
+  padding: 0 8px; margin-bottom: 2px;
+}
+.toc-chapter-title {
+  display: flex; align-items: center; gap: 4px; padding: 6px 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: #1F2937; border-radius: 5px; transition: all 0.15s;
+}
+.toc-chapter-title:hover { background: #F3F4F6; }
+.toc-chapter-title.active { background: #EFF6FF; color: #2563EB; }
+.toc-arrow { font-size: 10px; color: #9CA3AF; transition: transform 0.2s; width: 14px; text-align: center; }
+.toc-arrow.expanded { transform: rotate(90deg); }
+.toc-sections { padding-left: 18px; }
+.toc-section {
+  display: flex; align-items: center; gap: 4px; padding: 5px 8px; cursor: pointer;
+  font-size: 12px; color: #4B5563; border-radius: 5px; transition: all 0.15s;
+}
+.toc-section:hover { background: #F3F4F6; color: #2563EB; }
+.toc-section.active { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+.toc-pin { font-size: 11px; color: #F59E0B; }
+
+/* Center: Preview area */
+.preview-panel {
+  flex: 1; overflow-y: auto; background: #F9FAFB; padding: 24px;
+}
+.preview-paper {
+  max-width: 800px; margin: 0 auto; background: #fff; border: 1px solid #E5E7EB;
+  border-radius: 8px; padding: 40px 48px; min-height: 1000px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.report-title {
+  font-size: 22px; font-weight: 700; color: #111827; text-align: center; margin-bottom: 32px;
+  padding-bottom: 16px; border-bottom: 2px solid #E5E7EB;
+}
+.chapter-title {
+  font-size: 17px; font-weight: 700; color: #111827; margin: 28px 0 14px; padding-bottom: 6px;
+  border-bottom: 1px solid #F3F4F6; cursor: pointer; border-radius: 4px; padding: 6px 8px;
+  transition: background 0.15s;
+}
+.chapter-title:hover { background: #F0F9FF; }
+.chapter-title.selected { background: #EFF6FF; outline: 2px solid #93C5FD; }
+.section-title {
+  font-size: 15px; font-weight: 600; color: #1F2937; margin: 18px 0 10px; cursor: pointer;
+  padding: 4px 8px; border-radius: 4px; transition: background 0.15s;
+}
+.section-title:hover { background: #F0F9FF; }
+.section-title.selected { background: #EFF6FF; outline: 2px solid #93C5FD; }
+.report-para {
+  font-size: 14px; color: #374151; line-height: 1.8; margin-bottom: 14px; padding: 4px 8px;
+  border-radius: 4px;
+}
+.param-tag {
+  display: inline-flex; align-items: center; gap: 2px; padding: 1px 8px; background: #DBEAFE;
+  color: #2563EB; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.param-tag:hover { border-color: #93C5FD; background: #BFDBFE; }
+.param-tag.selected { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+.param-value { font-weight: 600; color: #1D4ED8; }
+.param-name { font-size: 11px; color: #60A5FA; margin-left: 2px; }
+.var-tag {
+  display: inline-flex; align-items: center; gap: 2px; padding: 1px 8px; background: #FED7AA;
+  color: #C2410C; border-radius: 4px; font-size: 13px;
+}
+
+/* Data table in preview */
+.data-table-wrapper {
+  margin: 14px 0; border: 2px solid transparent; border-radius: 6px; padding: 2px;
+  cursor: pointer; transition: all 0.2s;
+}
+.data-table-wrapper:hover { border-color: #93C5FD; background: #F0F9FF; }
+.data-table-wrapper.selected { border-color: #2563EB; background: #EFF6FF; }
+.data-table-label {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6B7280; margin-bottom: 6px; padding: 0 4px;
+}
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.data-table th {
+  background: #F3F4F6; padding: 8px 12px; text-align: left; font-weight: 600; color: #374151;
+  border: 1px solid #E5E7EB; font-size: 12px;
+}
+.data-table td {
+  padding: 7px 12px; border: 1px solid #E5E7EB; color: #4B5563; font-size: 12px;
+}
+
+/* Right: Settings panel */
+.settings-panel {
+  width: 320px; min-width: 320px; background: #fff; border-left: 1px solid #E5E7EB;
+  display: flex; flex-direction: column; overflow: hidden; transition: width 0.3s;
+}
+.settings-panel.collapsed { width: 0; min-width: 0; overflow: hidden; }
+.settings-header {
+  padding: 12px 16px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 8px;
+}
+.settings-icon {
+  width: 32px; height: 32px; background: #EFF6FF; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.settings-header-text { flex: 1; }
+.settings-header-title { font-size: 13px; font-weight: 600; color: #1F2937; }
+.settings-header-sub { font-size: 11px; color: #9CA3AF; }
+.settings-body { flex: 1; overflow-y: auto; padding: 16px; }
+.settings-footer {
+  padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* Settings sections */
+.setting-section { margin-bottom: 20px; }
+.setting-section-title {
+  font-size: 13px; font-weight: 600; color: #1F2937; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.setting-section-title .icon { font-size: 14px; }
+.setting-row { margin-bottom: 10px; }
+.setting-label { font-size: 12px; color: #6B7280; margin-bottom: 4px; display: block; }
+.setting-input {
+  width: 100%; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 5px;
+  font-size: 12px; outline: none; background: #fff;
+}
+.setting-input:focus { border-color: #2563EB; }
+.setting-select {
+  width: 100%; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 5px;
+  font-size: 12px; outline: none; background: #fff;
+}
+
+/* Score display */
+.score-display {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center;
+  margin-bottom: 12px;
+}
+.score-value { font-size: 36px; font-weight: 700; color: #111827; }
+.score-badge {
+  display: inline-block; padding: 2px 8px; background: #DBEAFE; color: #2563EB;
+  border-radius: 4px; font-size: 11px; margin-left: 6px; vertical-align: middle;
+}
+
+/* Rule items */
+.rule-box {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; padding: 10px; margin-bottom: 8px;
+  font-size: 12px; color: #374151; line-height: 1.7;
+}
+.rule-number { font-weight: 600; color: #2563EB; }
+
+/* Analysis rule panel */
+.template-content-box {
+  background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px;
+  font-size: 12px; color: #92400E; line-height: 1.7; margin-bottom: 12px;
+}
+.analysis-rule-textarea {
+  width: 100%; min-height: 100px; padding: 10px; border: 1px solid #E5E7EB; border-radius: 6px;
+  font-size: 12px; outline: none; resize: vertical; font-family: inherit; line-height: 1.7;
+}
+.analysis-rule-textarea:focus { border-color: #2563EB; }
+
+/* Data binding */
+.binding-option {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; color: #374151;
+}
+.binding-option input[type="radio"],
+.binding-option input[type="checkbox"] { accent-color: #2563EB; }
+
+/* NL input */
+.nl-input-area {
+  display: flex; gap: 6px; margin-top: 8px;
+}
+.nl-input {
+  flex: 1; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 5px;
+  font-size: 12px; outline: none;
+}
+.nl-input:focus { border-color: #2563EB; }
+.nl-send {
+  padding: 7px 12px; background: #2563EB; color: #fff; border: none; border-radius: 5px;
+  font-size: 12px; cursor: pointer;
+}
+.nl-send:hover { background: #1D4ED8; }
+
+/* Default panel placeholder */
+.settings-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: #9CA3AF; font-size: 13px; gap: 8px;
+}
+.settings-empty-icon { font-size: 32px; opacity: 0.5; }
+
+/* Result preview mini table */
+.preview-mini-table {
+  width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px;
+}
+.preview-mini-table th {
+  background: #F3F4F6; padding: 5px 8px; text-align: left; font-weight: 500;
+  border: 1px solid #E5E7EB; color: #6B7280;
+}
+.preview-mini-table td {
+  padding: 4px 8px; border: 1px solid #E5E7EB; color: #4B5563;
+}
+.preview-hint { font-size: 11px; color: #9CA3AF; margin-top: 6px; text-align: right; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">线</div>
+      <div class="sidebar-title">运营管理后台</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">概览</div>
+      <a class="nav-item" href="console.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="6" y1="6" x2="6" y2="14"/></svg>
+        控制台首页
+      </a>
+      <div class="nav-group-label">智能体配置</div>
+      <a class="nav-item" href="knowledge-base.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M6 6h4M6 9h2"/></svg>
+        知识库管理
+      </a>
+      <a class="nav-item" href="system-qa-config.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        系统问答配置
+      </a>
+      <a class="nav-item active" href="report-template.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h6l4 4v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M10 2v4h4"/></svg>
+        报告模板管理
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-avatar">张</div>
+      <div>
+        <div style="font-size:13px;color:#1F2937;font-weight:500">张工</div>
+        <div style="font-size:11px;color:#9CA3AF">运维管理员</div>
+      </div>
+    </div>
+    <div class="sidebar-collapse"><button class="collapse-btn">‹</button></div>
+  </aside>
+
+  <main class="main">
+    <!-- Top bar with actions -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <div class="breadcrumb">
+          <a href="report-template.html">模板管理</a> / <span>燃气专项安全运行月报</span>
+        </div>
+      </div>
+      <div class="top-bar-actions">
+        <button class="btn" onclick="location.href='report-template.html'">← 返回列表</button>
+        <button class="btn btn-success" onclick="alert('解析结果已确认')">✓ 确认解析结果</button>
+        <button class="btn btn-primary" onclick="alert('模板已保存')">💾 保存模板</button>
+      </div>
+    </div>
+
+    <!-- Parse banner -->
+    <div class="parse-banner">
+      <div class="parse-banner-left">
+        <svg width="16" height="16" fill="none" stroke="#2563EB" stroke-width="1.5"><path d="M8 1v6l4 2"/><circle cx="8" cy="8" r="7"/></svg>
+        <span>✅ 参数已配置 &nbsp; 时间: 2026年3月 · 专项: 燃气 · 城市: 合肥</span>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-bar">
+      <div class="legend-item"><span class="legend-param">#参数</span> 动态参数（可点击）</div>
+      <div class="legend-item"><span class="legend-var">变量</span> 模板变量</div>
+      <div class="legend-item"><span class="legend-table">📊</span> 表格/图表（可点击配置）</div>
+    </div>
+
+    <!-- Three-column editor -->
+    <div class="editor-area">
+      <!-- Left: TOC Tree -->
+      <div class="toc-panel">
+        <div class="toc-header">
+          <span>模板结构</span>
+        </div>
+        <div class="toc-body" id="tocTree"></div>
+      </div>
+
+      <!-- Center: Preview -->
+      <div class="preview-panel" id="previewPanel">
+        <div class="preview-paper" id="previewPaper"></div>
+      </div>
+
+      <!-- Right: Settings Panel -->
+      <div class="settings-panel" id="settingsPanel">
+        <div id="settingsContent"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Template structure data
+const templateStructure = [
+  {
+    id: 'ch1', title: '第一章 监测概况', hasRule: false,
+    sections: [
+      { id: 's1_1', title: '1.1 监测对象的健康状况', hasRule: true },
+      { id: 's1_2', title: '1.2 报警统计', hasRule: false },
+      { id: 's1_3', title: '1.2 预警情况说明', hasRule: true, hasTable: true },
+    ]
+  },
+  {
+    id: 'ch2', title: '第二章 预警统计分析', hasRule: false,
+    sections: [
+      { id: 's2_6', title: '2.6 预警分析结论', hasRule: true },
+    ]
+  },
+  {
+    id: 'ch3', title: '第三章 设备运行分析', hasRule: false,
+    sections: [
+      { id: 's3_3', title: '3.3 运行分析结论', hasRule: true },
+    ]
+  },
+  {
+    id: 'ch4', title: '第四章 风险评估', hasRule: false,
+    sections: [
+      { id: 's4_2', title: '4.2 风险评估结论', hasRule: false },
+    ]
+  },
+  {
+    id: 'ch5', title: '第五章 总结与建议', hasRule: false,
+    sections: [
+      { id: 's5_1', title: '5.1 本月工作总结', hasRule: false },
+      { id: 's5_2', title: '5.2 下月工作建议', hasRule: false },
+    ]
+  }
+];
+
+let selectedItem = null;
+let expandedChapters = { ch1: true, ch2: true, ch3: true, ch4: true, ch5: true };
+
+// Render TOC tree
+function renderToc() {
+  const container = document.getElementById('tocTree');
+  container.innerHTML = templateStructure.map(ch => `
+    <div class="toc-chapter">
+      <div class="toc-chapter-title ${selectedItem === ch.id ? 'active' : ''}"
+           onclick="toggleChapter('${ch.id}'); selectItem('${ch.id}', 'chapter', '${ch.title}')">
+        <span class="toc-arrow ${expandedChapters[ch.id] ? 'expanded' : ''}">▶</span>
+        ${ch.title}
+      </div>
+      <div class="toc-sections" style="display:${expandedChapters[ch.id] ? 'block' : 'none'}">
+        ${ch.sections.map(s => `
+          <div class="toc-section ${selectedItem === s.id ? 'active' : ''}"
+               onclick="event.stopPropagation(); selectItem('${s.id}', '${s.hasTable ? 'table' : 'section'}', '${s.title}')">
+            ${s.title}
+            ${s.hasRule ? '<span class="toc-pin">📌</span>' : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleChapter(chId) {
+  expandedChapters[chId] = !expandedChapters[chId];
+  renderToc();
+}
+
+function selectItem(id, type, title) {
+  selectedItem = id;
+  renderToc();
+
+  // Highlight in preview
+  document.querySelectorAll('.chapter-title, .section-title, .data-table-wrapper, .param-tag').forEach(el => {
+    el.classList.remove('selected');
+  });
+  const el = document.getElementById('preview-' + id);
+  if (el) {
+    el.classList.add('selected');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Show settings panel
+  if (type === 'table') {
+    showDataComponentPanel(id, title);
+  } else if (type === 'chapter') {
+    showAnalysisRulePanel(id, title, 'chapter');
+  } else {
+    showAnalysisRulePanel(id, title, 'section');
+  }
+}
+
+// Data component config panel
+function showDataComponentPanel(id, title) {
+  const panel = document.getElementById('settingsContent');
+  panel.innerHTML = `
+    <div class="settings-header">
+      <div class="settings-icon">📊</div>
+      <div class="settings-header-text">
+        <div class="settings-header-title">当前选中：${title}</div>
+        <div class="settings-header-sub">数据组件 · 表格</div>
+      </div>
+    </div>
+    <div class="settings-body">
+      <!-- Score display -->
+      <div class="score-display">
+        <div style="font-size:12px;color:#6B7280;margin-bottom:4px">燃气监测月度评分（起）</div>
+        <span class="score-value">92.5</span>
+        <span class="score-badge">1 2.3</span>
+      </div>
+
+      <!-- 统计口径 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">📐</span> 统计口径</div>
+        <div class="setting-row">
+          <label class="setting-label">统计时间</label>
+          <input type="text" class="setting-input" value="2026年3月">
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">专项类型</label>
+          <select class="setting-select">
+            <option selected>燃气</option><option>供水</option><option>排水</option><option>桥梁</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">分组维度</label>
+          <select class="setting-select">
+            <option>按报警级别</option><option>按管井类型</option><option>按区域</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label">统计指标</label>
+          <select class="setting-select">
+            <option>报警数量</option><option>报警占比</option><option>环比变化</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 动态参数获取规则 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">📋</span> 动态参数获取规则 <span style="margin-left:auto;font-size:11px;color:#2563EB;cursor:pointer">✏ 编辑</span></div>
+        <div class="rule-box">
+          <div><span class="rule-number">1.</span> 按照当前报表时间范围统计燃气监测月度评分的分；</div>
+          <div><span class="rule-number">2.</span> 去掉统计时间: 2026年3月，专项类型: 燃气为空的异常数据；</div>
+        </div>
+      </div>
+
+      <!-- 结果预览 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">👁</span> 结果预览</div>
+        <table class="preview-mini-table">
+          <thead><tr><th>报警级别/管井类型</th><th>燃气井</th><th>排水井</th><th>其他</th><th>合计</th></tr></thead>
+          <tbody>
+            <tr><td>一级</td><td>3</td><td>0</td><td>1</td><td>4</td></tr>
+            <tr><td>二级</td><td>5</td><td>2</td><td>0</td><td>7</td></tr>
+            <tr><td>合计</td><td>8</td><td>2</td><td>1</td><td>11</td></tr>
+          </tbody>
+        </table>
+        <div class="preview-hint">仅展示前5条 · <a href="#" style="color:#2563EB;text-decoration:none" onclick="alert('查看完整明细数据')">查看明细</a></div>
+      </div>
+
+      <!-- 自然语言指令 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">💬</span> 自然语言指令</div>
+        <div class="nl-input-area">
+          <input type="text" class="nl-input" placeholder="如：统计时间改为2月份，按街道分组">
+          <button class="nl-send" onclick="alert('指令已解析并应用')">发送</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Analysis rule config panel
+function showAnalysisRulePanel(id, title, type) {
+  const templateText = type === 'chapter'
+    ? '本章节涵盖监测对象的整体健康状况评估、报警统计及预警情况说明等内容。'
+    : '本月共监测到燃气安全报警XX起，较上月（XX起）增加/减少XX起，环比上升/下降XX.XX%，整体防控压力相应增大/相对减小/保持稳定。';
+
+  const panel = document.getElementById('settingsContent');
+  panel.innerHTML = `
+    <div class="settings-header">
+      <div class="settings-icon">📄</div>
+      <div class="settings-header-text">
+        <div class="settings-header-title">当前选中：${title}</div>
+        <div class="settings-header-sub">${type === 'chapter' ? '章节' : '段落'}</div>
+      </div>
+    </div>
+    <div class="settings-body">
+      <!-- 原文模板内容 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">📄</span> 原文模板内容</div>
+        <div class="template-content-box">${templateText}</div>
+      </div>
+
+      <!-- 分析规则 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">✍️</span> 分析规则</div>
+        <textarea class="analysis-rule-textarea" placeholder="输入分析规则提示词...">1. 当环比≥30%：防控压力增大
+-30% < 环比 < 30%：防控压力保持稳定
+环比≤-30%：防控压力相对减少
+
+2. 若一、二级报警合计占比≥60%，则需特别说明高等级报警的集中区域和原因分析</textarea>
+      </div>
+
+      <!-- 数据绑定 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">🔗</span> 数据绑定</div>
+        <div class="binding-option">
+          <input type="checkbox" checked id="autoBinding">
+          <label for="autoBinding">自动关联此章节中的图表/表格数据</label>
+        </div>
+        <div class="binding-option">
+          <input type="checkbox" id="manualBinding">
+          <label for="manualBinding">手动选择数据源：</label>
+        </div>
+        <select class="setting-select" style="margin-top:4px" disabled id="manualSelect">
+          <option>选择组件...</option>
+          <option>报警等级统计表</option>
+          <option>预警趋势图</option>
+          <option>设备在线率统计表</option>
+        </select>
+      </div>
+
+      <!-- 规则生效方式 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">⚙️</span> 规则生效方式</div>
+        <div class="binding-option">
+          <input type="radio" name="ruleMode" checked id="dynamic">
+          <label for="dynamic">动态生成（每次报告时调用LLM）</label>
+        </div>
+        <div class="binding-option">
+          <input type="radio" name="ruleMode" id="static">
+          <label for="static">固定内容（提示词作为静态文本）</label>
+        </div>
+      </div>
+
+      <!-- 自然语言指令 -->
+      <div class="setting-section">
+        <div class="setting-section-title"><span class="icon">💬</span> 自然语言指令（可选）</div>
+        <div class="nl-input-area">
+          <input type="text" class="nl-input" placeholder="输入指令，如&quot;增加环比变化分析要求&quot;">
+          <button class="nl-send" onclick="alert('指令已解析')">发送</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-footer">
+      <button class="btn" onclick="alert('规则已清空')">清空规则</button>
+      <button class="btn btn-primary" onclick="alert('规则已保存')">保存规则</button>
+    </div>
+  `;
+
+  // Manual binding toggle
+  setTimeout(() => {
+    const mc = document.getElementById('manualBinding');
+    const ms = document.getElementById('manualSelect');
+    if (mc && ms) {
+      mc.onchange = () => { ms.disabled = !mc.checked; };
+    }
+  }, 0);
+}
+
+// Show empty settings
+function showEmptySettings() {
+  document.getElementById('settingsContent').innerHTML = `
+    <div class="settings-empty">
+      <div class="settings-empty-icon">🖱️</div>
+      <div>点击左侧目录或中间预览区</div>
+      <div>选择章节/组件进行配置</div>
+    </div>
+  `;
+}
+
+// Render preview content
+function renderPreview() {
+  const paper = document.getElementById('previewPaper');
+  paper.innerHTML = `
+    <div class="report-title">燃气监测运营月度报告</div>
+
+    <div class="chapter-title" id="preview-ch1" onclick="selectItem('ch1','chapter','第一章 监测概况')">第一章 监测概况</div>
+
+    <div class="section-title" id="preview-s1_1" onclick="selectItem('s1_1','section','1.1 监测对象的健康状况')">1.1 监测对象的健康状况</div>
+    <div class="report-para">
+      <span class="param-tag" onclick="event.stopPropagation(); selectItem('s1_1','table','1.1 监测对象的健康状况')"><span class="param-value">2026年3月</span> <span class="param-name">时间</span></span>
+      期间，监测对象的整体评分为
+      <span class="param-tag" onclick="event.stopPropagation(); selectItem('s1_1','table','1.1 监测对象的健康状况')"><span class="param-value">92.5</span> <span class="param-name">#(燃气监测月度评分)</span></span>
+      分，燃气管道整体健康状态为优。本月风险评估结果显示
+      <span class="param-tag"><span class="param-value">合肥</span> <span class="param-name">城市名称</span></span>
+      市监测范围内的燃气管道及其附属设施的整体风险维持在较低。
+    </div>
+
+    <div class="section-title" id="preview-s1_2" onclick="selectItem('s1_2','section','1.2 报警统计')">1.2 报警统计</div>
+    <div class="report-para">
+      本月共监测到可燃气体浓度超标报警
+      <span class="param-tag"><span class="param-value">11</span> <span class="param-name">#(燃气预警总数)</span></span>
+      起，较上月（
+      <span class="param-tag"><span class="param-value">43</span> <span class="param-name">#(上月燃气预警数)</span></span>
+      起）增加13起，环比上升30.23%，整体防控压力有所增大。
+    </div>
+
+    <!-- Data table -->
+    <div class="data-table-wrapper" id="preview-s1_3" onclick="selectItem('s1_3','table','1.2 预警情况说明')">
+      <div class="data-table-label">📊 报警等级统计表</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>报警级别/管井类型</th><th>燃气井</th><th>排水井</th><th>其他</th><th>合计</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>一级报警</td><td>3</td><td>0</td><td>1</td><td>4</td></tr>
+          <tr><td>二级报警</td><td>5</td><td>2</td><td>0</td><td>7</td></tr>
+          <tr><td>三级报警</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>合计</td><td>8</td><td>2</td><td>1</td><td>11</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chapter-title" id="preview-ch2" onclick="selectItem('ch2','chapter','第二章 预警统计分析')">第二章 预警统计分析</div>
+    <div class="report-para">
+      本章对2026年3月全市燃气预警数据进行详细统计分析，涵盖预警类型分布、等级分布、时段分布和区域分布等多维度分析。
+    </div>
+    <div class="section-title" id="preview-s2_6" onclick="selectItem('s2_6','section','2.6 预警分析结论')">2.6 预警分析结论 <span class="toc-pin">📌</span></div>
+    <div class="report-para">
+      综合以上分析，本月燃气预警呈现以下特征：一是预警总量较上月有所上升，主要集中在城区老旧管网区域；二是一级、二级高等级预警占比达到63.6%，需重点关注；三是夜间时段（22:00-06:00）预警占比偏高，建议加强夜间巡检力度。
+    </div>
+
+    <div class="chapter-title" id="preview-ch3" onclick="selectItem('ch3','chapter','第三章 设备运行分析')">第三章 设备运行分析</div>
+    <div class="report-para">
+      本月全市共部署燃气监测设备1,247台，整体在线率为96.8%，较上月提升0.5个百分点。设备故障率为1.2%，主要故障类型包括通信中断和传感器异常。
+    </div>
+    <div class="section-title" id="preview-s3_3" onclick="selectItem('s3_3','section','3.3 运行分析结论')">3.3 运行分析结论 <span class="toc-pin">📌</span></div>
+    <div class="report-para">
+      本月设备整体运行状况良好，在线率持续保持在95%以上。建议对通信中断频繁的设备进行硬件排查，并对传感器异常设备安排校准维护。
+    </div>
+
+    <div class="chapter-title" id="preview-ch4" onclick="selectItem('ch4','chapter','第四章 风险评估')">第四章 风险评估</div>
+    <div class="section-title" id="preview-s4_2" onclick="selectItem('s4_2','section','4.2 风险评估结论')">4.2 风险评估结论</div>
+    <div class="report-para">
+      综合预警数据、设备运行状况和历史趋势，本月合肥市燃气管网整体风险等级维持在"低风险"水平。重点关注区域包括：老城区（包河区、庐阳区）的老旧管网段，建议制定专项巡检计划。
+    </div>
+
+    <div class="chapter-title" id="preview-ch5" onclick="selectItem('ch5','chapter','第五章 总结与建议')">第五章 总结与建议</div>
+    <div class="section-title" id="preview-s5_1" onclick="selectItem('s5_1','section','5.1 本月工作总结')">5.1 本月工作总结</div>
+    <div class="report-para">
+      本月燃气安全监测工作整体运行平稳，完成了既定的监测目标。预警处置效率达到98.2%，平均处置时间缩短至2.3小时。完成设备维护保养56台次，新增监测点位12个。
+    </div>
+    <div class="section-title" id="preview-s5_2" onclick="selectItem('s5_2','section','5.2 下月工作建议')">5.2 下月工作建议</div>
+    <div class="report-para">
+      1. 加强老城区老旧管网段的巡检频次，重点关注包河区、庐阳区管段；<br>
+      2. 对通信中断频繁的设备进行硬件更换或升级；<br>
+      3. 优化夜间巡检机制，针对高发时段增加巡检力量；<br>
+      4. 推进新增监测点位建设，计划下月新增8个监测点。
+    </div>
+  `;
+}
+
+// Initialize
+renderToc();
+renderPreview();
+showEmptySettings();
+</script>
+</body>
+</html>

@@ -323,7 +323,7 @@ function filterCards() {
         <span class="card-date">${t.date}</span>
         <div class="card-actions">
           <button class="card-action" title="预览"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/></svg></button>
-          <button class="card-action" title="编辑"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3L5 14H2v-3L11 2z"/></svg></button>
+          <button class="card-action" title="编辑" onclick="event.stopPropagation(); location.href='report-template-edit.html'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3L5 14H2v-3L11 2z"/></svg></button>
           <button class="card-action danger" title="删除"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10M5 5V3h6v2M6 8v4M10 8v4"/></svg></button>
         </div>
       </div>
