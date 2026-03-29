@@ -475,127 +475,123 @@ function selectItem(id, type, title) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  // Show settings panel
-  if (type === 'table') {
-    showDataComponentPanel(id, title);
-  } else if (type === 'chapter') {
-    showAnalysisRulePanel(id, title, 'chapter');
+  // Show settings panel based on type
+  if (type === 'param') {
+    showParamPanel(id, title);
+  } else if (type === 'table') {
+    showParamPanel(id, title);
   } else {
-    showAnalysisRulePanel(id, title, 'section');
+    // For TOC chapter/section clicks, check if hasRule
+    const section = templateStructure.flatMap(c => c.sections).find(s => s.id === id);
+    const chapter = templateStructure.find(c => c.id === id);
+    if (section && section.hasRule) {
+      showAnalysisRulePanel(id, title, 'section');
+    } else if (chapter) {
+      showAnalysisRulePanel(id, title, 'chapter');
+    } else {
+      showAnalysisRulePanel(id, title, 'section');
+    }
   }
 }
 
-// Data component config panel
-function showDataComponentPanel(id, title) {
+// Parameter / Data component config panel (image 13)
+function showParamPanel(id, title) {
   const panel = document.getElementById('settingsContent');
   panel.innerHTML = `
     <div class="settings-header">
-      <div class="settings-icon">📊</div>
+      <div class="settings-icon" style="background:#2563EB;color:#fff;font-size:14px;">■</div>
       <div class="settings-header-text">
-        <div class="settings-header-title">当前选中：${title}</div>
-        <div class="settings-header-sub">数据组件 · 表格</div>
+        <div style="font-size:11px;color:#10B981;">● 当前选中：</div>
+        <div class="settings-header-title">参数：燃气监测月度评分</div>
       </div>
     </div>
     <div class="settings-body">
-      <!-- Score display -->
-      <div class="score-display">
-        <div style="font-size:12px;color:#6B7280;margin-bottom:4px">燃气监测月度评分（起）</div>
-        <span class="score-value">92.5</span>
-        <span class="score-badge">1 2.3</span>
-      </div>
-
       <!-- 统计口径 -->
       <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">📐</span> 统计口径</div>
-        <div class="setting-row">
-          <label class="setting-label">统计时间</label>
-          <input type="text" class="setting-input" value="2026年3月">
+        <div class="setting-section-title" style="border-bottom:1px solid #E5E7EB;padding-bottom:8px;">统计口径</div>
+        <div style="font-size:12px;color:#6B7280;margin:8px 0;">
+          <span style="color:#2563EB;">统计时间</span> = 2026年3月
         </div>
-        <div class="setting-row">
-          <label class="setting-label">专项类型</label>
-          <select class="setting-select">
-            <option selected>燃气</option><option>供水</option><option>排水</option><option>桥梁</option>
-          </select>
+        <div style="font-size:12px;color:#6B7280;margin-bottom:12px;">
+          <span style="color:#2563EB;">专项类型</span> = 燃气
         </div>
-        <div class="setting-row">
-          <label class="setting-label">分组维度</label>
-          <select class="setting-select">
-            <option>按报警级别</option><option>按管井类型</option><option>按区域</option>
-          </select>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label">统计指标</label>
-          <select class="setting-select">
-            <option>报警数量</option><option>报警占比</option><option>环比变化</option>
-          </select>
+      </div>
+
+      <!-- Score display -->
+      <div class="score-display" style="text-align:left;padding:16px;">
+        <div style="font-size:12px;color:#6B7280;margin-bottom:8px;border:1px solid #E5E7EB;display:inline-block;padding:2px 10px;border-radius:4px;">燃气监测月度评分（起）</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-top:8px;">
+          <span class="score-value" style="font-size:42px;">92.5</span>
+          <span style="color:#10B981;font-size:13px;font-weight:500;">↑ 2.3</span>
         </div>
       </div>
 
       <!-- 动态参数获取规则 -->
       <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">📋</span> 动态参数获取规则 <span style="margin-left:auto;font-size:11px;color:#2563EB;cursor:pointer">✏ 编辑</span></div>
+        <div class="setting-section-title">
+          <span class="icon">📋</span> 动态参数获取规则
+          <span style="margin-left:auto;font-size:12px;color:#2563EB;cursor:pointer;">✏ 编辑</span>
+        </div>
         <div class="rule-box">
           <div><span class="rule-number">1.</span> 按照当前报表时间范围统计燃气监测月度评分的分；</div>
           <div><span class="rule-number">2.</span> 去掉统计时间: 2026年3月，专项类型: 燃气为空的异常数据；</div>
         </div>
       </div>
 
-      <!-- 结果预览 -->
-      <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">👁</span> 结果预览</div>
-        <table class="preview-mini-table">
-          <thead><tr><th>报警级别/管井类型</th><th>燃气井</th><th>排水井</th><th>其他</th><th>合计</th></tr></thead>
-          <tbody>
-            <tr><td>一级</td><td>3</td><td>0</td><td>1</td><td>4</td></tr>
-            <tr><td>二级</td><td>5</td><td>2</td><td>0</td><td>7</td></tr>
-            <tr><td>合计</td><td>8</td><td>2</td><td>1</td><td>11</td></tr>
-          </tbody>
-        </table>
-        <div class="preview-hint">仅展示前5条 · <a href="#" style="color:#2563EB;text-decoration:none" onclick="alert('查看完整明细数据')">查看明细</a></div>
-      </div>
-
       <!-- 自然语言指令 -->
       <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">💬</span> 自然语言指令</div>
+        <div class="setting-section-title" style="font-weight:700;">自然语言指令</div>
         <div class="nl-input-area">
-          <input type="text" class="nl-input" placeholder="如：统计时间改为2月份，按街道分组">
-          <button class="nl-send" onclick="alert('指令已解析并应用')">发送</button>
+          <input type="text" class="nl-input" placeholder="如：统计时间改为2月份，按街道分组" style="border-radius:6px;">
+          <button class="nl-send" onclick="alert('指令已解析并应用')" style="border-radius:6px;padding:7px 10px;">▶</button>
         </div>
       </div>
     </div>
   `;
 }
 
-// Analysis rule config panel
+// Analysis rule config panel (image 12 - for TOC sections with hasRule)
 function showAnalysisRulePanel(id, title, type) {
-  const templateText = type === 'chapter'
-    ? '本章节涵盖监测对象的整体健康状况评估、报警统计及预警情况说明等内容。'
-    : '本月共监测到燃气安全报警XX起，较上月（XX起）增加/减少XX起，环比上升/下降XX.XX%，整体防控压力相应增大/相对减小/保持稳定。';
+  const isSection = type === 'section';
+  const sectionData = templateStructure.flatMap(c => c.sections).find(s => s.id === id);
+  const hasRule = sectionData ? sectionData.hasRule : false;
+
+  const templateText = isSection
+    ? '{{时间}}内共发布【#{{燃气预警总数}}】起沼气聚集三级风险提醒，经技术人员现场勘查后进行技术分析，【#{{燃气预警原因}}】，确认均为管井内含量较高时短暂腐化反应产生沼气聚集所数，未发现风险数据源指标异常情况。'
+    : '本章节涵盖监测对象的整体健康状况评估、报警统计及预警情况说明等内容。';
 
   const panel = document.getElementById('settingsContent');
   panel.innerHTML = `
     <div class="settings-header">
       <div class="settings-icon">📄</div>
       <div class="settings-header-text">
-        <div class="settings-header-title">当前选中：${title}</div>
-        <div class="settings-header-sub">${type === 'chapter' ? '章节' : '段落'}</div>
+        <div style="font-size:11px;color:#10B981;">● 当前选中：</div>
+        <div class="settings-header-title">【${isSection ? '段落' : '章节'}】${title}</div>
       </div>
     </div>
     <div class="settings-body">
       <!-- 原文模板内容 -->
       <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">📄</span> 原文模板内容</div>
-        <div class="template-content-box">${templateText}</div>
+        <div class="setting-section-title" style="border-bottom:1px solid #E5E7EB;padding-bottom:8px;">原文模板内容</div>
+        <div style="font-size:13px;color:#374151;line-height:1.8;margin-top:8px;padding:10px;background:#F9FAFB;border-radius:6px;">
+          ${templateText.replace(/【#\{\{(.*?)\}\}】/g, '<span style="color:#2563EB;font-weight:500;">【#{{$1}}】</span>').replace(/\{\{(.*?)\}\}/g, '<span style="color:#2563EB;">{{$1}}</span>')}
+        </div>
       </div>
 
-      <!-- 分析规则 -->
+      <!-- 分析规则提示词 -->
       <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">✍️</span> 分析规则</div>
-        <textarea class="analysis-rule-textarea" placeholder="输入分析规则提示词...">1. 当环比≥30%：防控压力增大
--30% < 环比 < 30%：防控压力保持稳定
-环比≤-30%：防控压力相对减少
-
-2. 若一、二级报警合计占比≥60%，则需特别说明高等级报警的集中区域和原因分析</textarea>
+        <div class="setting-section-title" style="border-bottom:1px solid #E5E7EB;padding-bottom:8px;">分析规则提示词</div>
+        <div style="display:flex;gap:6px;margin:10px 0;">
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:#EFF6FF;color:#2563EB;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid #BFDBFE;">⟳ 趋势分析</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:#EFF6FF;color:#2563EB;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid #BFDBFE;">⟳ 异常检测</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:#EFF6FF;color:#2563EB;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid #BFDBFE;">⟳ 对比分析</span>
+        </div>
+        <textarea class="analysis-rule-textarea" placeholder="请输入分析规则提示词，例如：
+1. 当环比≥30%：防控压力增大
+2. 若一、二级报警合计占比较高，则用下面这段描述总结...">请输入分析规则提示词，例如：
+1. 当环比≥30%：防控压力增大
+2. 若一、二级报警合计占比较高，则用下面这段描述总结...</textarea>
+        <div style="text-align:right;font-size:11px;color:#9CA3AF;margin-top:4px;">0/2000</div>
       </div>
 
       <!-- 数据绑定 -->
@@ -607,14 +603,8 @@ function showAnalysisRulePanel(id, title, type) {
         </div>
         <div class="binding-option">
           <input type="checkbox" id="manualBinding">
-          <label for="manualBinding">手动选择数据源：</label>
+          <label for="manualBinding">手动选择数据源</label>
         </div>
-        <select class="setting-select" style="margin-top:4px" disabled id="manualSelect">
-          <option>选择组件...</option>
-          <option>报警等级统计表</option>
-          <option>预警趋势图</option>
-          <option>设备在线率统计表</option>
-        </select>
       </div>
 
       <!-- 规则生效方式 -->
@@ -622,37 +612,15 @@ function showAnalysisRulePanel(id, title, type) {
         <div class="setting-section-title"><span class="icon">⚙️</span> 规则生效方式</div>
         <div class="binding-option">
           <input type="radio" name="ruleMode" checked id="dynamic">
-          <label for="dynamic">动态生成（每次报告时调用LLM）</label>
+          <label for="dynamic">动态生成（每次调用LLM）</label>
         </div>
         <div class="binding-option">
           <input type="radio" name="ruleMode" id="static">
-          <label for="static">固定内容（提示词作为静态文本）</label>
+          <label for="static">固定内容（静态文本）</label>
         </div>
       </div>
-
-      <!-- 自然语言指令 -->
-      <div class="setting-section">
-        <div class="setting-section-title"><span class="icon">💬</span> 自然语言指令（可选）</div>
-        <div class="nl-input-area">
-          <input type="text" class="nl-input" placeholder="输入指令，如&quot;增加环比变化分析要求&quot;">
-          <button class="nl-send" onclick="alert('指令已解析')">发送</button>
-        </div>
-      </div>
-    </div>
-    <div class="settings-footer">
-      <button class="btn" onclick="alert('规则已清空')">清空规则</button>
-      <button class="btn btn-primary" onclick="alert('规则已保存')">保存规则</button>
     </div>
   `;
-
-  // Manual binding toggle
-  setTimeout(() => {
-    const mc = document.getElementById('manualBinding');
-    const ms = document.getElementById('manualSelect');
-    if (mc && ms) {
-      mc.onchange = () => { ms.disabled = !mc.checked; };
-    }
-  }, 0);
 }
 
 // Show empty settings
