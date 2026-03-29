@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识库管理 - 城市生命线监测</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Inter", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+  font-size: 14px; color: #4B5563; line-height: 1.5;
+  background: #F3F4F6; min-width: 1280px; height: 100vh; overflow: hidden;
+}
+.layout { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 220px; min-width: 220px; background: #fff;
+  border-right: 1px solid #E5E7EB; display: flex; flex-direction: column;
+}
+.sidebar-header { padding: 16px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;
+}
+.sidebar-title { font-size: 15px; font-weight: 600; color: #1F2937; }
+.sidebar-nav { padding: 8px; flex: 1; overflow-y: auto; }
+.nav-group-label { font-size: 11px; color: #9CA3AF; padding: 12px 12px 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-item {
+  padding: 9px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #4B5563; transition: all 0.15s; border-radius: 6px; margin-bottom: 1px; text-decoration: none;
+}
+.nav-item:hover { background: #F3F4F6; color: #2563EB; }
+.nav-item.active { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+.sidebar-footer {
+  padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px;
+}
+.user-avatar {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600;
+}
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-bar {
+  height: 48px; background: #fff; border-bottom: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #6B7280; }
+.breadcrumb span { color: #1F2937; font-weight: 500; }
+.top-bar-actions { display: flex; gap: 8px; }
+
+.content-area { flex: 1; display: flex; overflow: hidden; }
+
+/* Left Tree */
+.tree-panel {
+  width: 260px; min-width: 260px; background: #fff; border-right: 1px solid #E5E7EB;
+  display: flex; flex-direction: column;
+}
+.tree-header { padding: 16px; border-bottom: 1px solid #E5E7EB; }
+.tree-header h3 { font-size: 14px; font-weight: 600; color: #1F2937; margin-bottom: 10px; }
+.tree-search {
+  width: 100%; padding: 7px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none;
+}
+.tree-search:focus { border-color: #2563EB; }
+.tree-body { flex: 1; overflow-y: auto; padding: 8px; }
+
+.tree-node { user-select: none; }
+.tree-node-row {
+  display: flex; align-items: center; gap: 4px; padding: 7px 8px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; color: #374151; transition: all 0.15s;
+}
+.tree-node-row:hover { background: #F3F4F6; }
+.tree-node-row.active { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+.tree-node-row .arrow { width: 16px; text-align: center; font-size: 10px; color: #9CA3AF; transition: transform 0.2s; }
+.tree-node-row .arrow.expanded { transform: rotate(90deg); }
+.tree-node-row .folder-icon { font-size: 14px; }
+.tree-node-row .node-name { flex: 1; }
+.tree-node-row .node-actions { display: none; gap: 2px; }
+.tree-node-row:hover .node-actions { display: flex; }
+.node-action-btn {
+  width: 22px; height: 22px; border: none; background: transparent; cursor: pointer;
+  border-radius: 4px; color: #9CA3AF; font-size: 12px; display: flex; align-items: center; justify-content: center;
+}
+.node-action-btn:hover { background: #E5E7EB; color: #2563EB; }
+.tree-children { padding-left: 20px; }
+.tree-add-btn {
+  margin: 8px; padding: 6px; border: 1px dashed #D1D5DB; border-radius: 6px;
+  background: transparent; color: #6B7280; font-size: 13px; cursor: pointer; width: calc(100% - 16px); text-align: center;
+}
+.tree-add-btn:hover { border-color: #2563EB; color: #2563EB; }
+
+/* Right List */
+.list-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.list-toolbar {
+  padding: 16px 20px; background: #fff; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #E5E7EB; gap: 12px; flex-wrap: wrap;
+}
+.toolbar-left { display: flex; align-items: center; gap: 8px; }
+.toolbar-search {
+  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; width: 220px; outline: none;
+}
+.toolbar-search:focus { border-color: #2563EB; }
+.btn {
+  padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB;
+  background: #fff; color: #374151; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
+}
+.btn:hover { border-color: #2563EB; color: #2563EB; }
+.btn-primary { background: #2563EB; color: #fff; border-color: #2563EB; }
+.btn-primary:hover { background: #1D4ED8; }
+.btn-danger { color: #EF4444; border-color: #FCA5A5; }
+.btn-danger:hover { background: #FEF2F2; }
+
+.list-content { flex: 1; overflow-y: auto; padding: 0; background: #fff; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { position: sticky; top: 0; z-index: 2; }
+th {
+  background: #F9FAFB; color: #374151; font-weight: 500; padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid #E5E7EB; white-space: nowrap;
+}
+td { padding: 10px 14px; border-bottom: 1px solid #F3F4F6; color: #4B5563; }
+tr:hover td { background: #F9FAFB; }
+.checkbox-cell { width: 36px; text-align: center; }
+input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #2563EB; }
+
+.status-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500;
+}
+.status-tag.enabled { background: #ECFDF5; color: #059669; }
+.status-tag.disabled { background: #F3F4F6; color: #9CA3AF; }
+.status-tag.parsing { background: #FEF3C7; color: #D97706; }
+.status-tag.parsed { background: #ECFDF5; color: #059669; }
+.status-tag.failed { background: #FEF2F2; color: #EF4444; }
+.keyword-tag {
+  display: inline-block; padding: 1px 6px; background: #EFF6FF; color: #2563EB; border-radius: 4px;
+  font-size: 11px; margin-right: 4px;
+}
+
+.action-link {
+  color: #2563EB; cursor: pointer; font-size: 13px; background: none; border: none; margin-right: 8px;
+}
+.action-link:hover { text-decoration: underline; }
+.action-link.danger { color: #EF4444; }
+
+.pagination {
+  padding: 12px 20px; background: #fff; border-top: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #6B7280;
+}
+.page-btns { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px; height: 32px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff;
+  cursor: pointer; font-size: 13px; color: #374151; display: flex; align-items: center; justify-content: center;
+}
+.page-btn.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+.page-btn:hover:not(.active) { border-color: #2563EB; color: #2563EB; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px; width: 600px; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-header {
+  padding: 16px 20px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; }
+.modal-close {
+  width: 28px; height: 28px; border: none; background: #F3F4F6; border-radius: 6px; cursor: pointer;
+  font-size: 16px; color: #6B7280; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: #E5E7EB; }
+.modal-body { padding: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+.form-label .required { color: #EF4444; }
+.form-input {
+  width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none;
+}
+.form-input:focus { border-color: #2563EB; }
+.form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+.form-select {
+  width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px;
+  outline: none; background: #fff; cursor: pointer;
+}
+.upload-area {
+  border: 2px dashed #D1D5DB; border-radius: 8px; padding: 30px; text-align: center;
+  cursor: pointer; transition: all 0.2s; color: #6B7280;
+}
+.upload-area:hover { border-color: #2563EB; background: #EFF6FF; }
+.upload-area .upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-area p { font-size: 13px; }
+.upload-area .formats { font-size: 11px; color: #9CA3AF; margin-top: 6px; }
+.modal-footer {
+  padding: 12px 20px; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* Confirm Dialog */
+.confirm-dialog {
+  background: #fff; border-radius: 12px; width: 400px; padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center;
+}
+.confirm-dialog .icon { font-size: 36px; margin-bottom: 12px; }
+.confirm-dialog h3 { font-size: 16px; color: #1F2937; margin-bottom: 8px; }
+.confirm-dialog p { font-size: 13px; color: #6B7280; margin-bottom: 20px; }
+.confirm-dialog .btns { display: flex; gap: 8px; justify-content: center; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">线</div>
+      <div class="sidebar-title">运营管理后台</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">概览</div>
+      <a class="nav-item" href="console.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="6" y1="6" x2="6" y2="14"/></svg>
+        控制台首页
+      </a>
+      <div class="nav-group-label">智能体配置</div>
+      <a class="nav-item active" href="knowledge-base.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M6 6h4M6 9h2"/></svg>
+        知识库管理
+      </a>
+      <a class="nav-item" href="system-qa-config.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        系统问答配置
+      </a>
+      <a class="nav-item" href="report-template.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h6l4 4v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M10 2v4h4"/></svg>
+        报告模板管理
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-avatar">张</div>
+      <div>
+        <div style="font-size:13px;color:#1F2937;font-weight:500">张工</div>
+        <div style="font-size:11px;color:#9CA3AF">运维管理员</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <div class="breadcrumb">智能体配置 / <span>知识库管理</span></div>
+      <button class="btn" onclick="location.href='index.html'">← 返回AI助手</button>
+    </div>
+
+    <div class="content-area">
+      <!-- Left Tree -->
+      <div class="tree-panel">
+        <div class="tree-header">
+          <h3>知识分类</h3>
+          <input type="text" class="tree-search" placeholder="搜索分类..." oninput="filterTree(this.value)">
+        </div>
+        <div class="tree-body" id="treeBody"></div>
+        <button class="tree-add-btn" onclick="showAddCategoryModal()">+ 新增一级分类</button>
+      </div>
+
+      <!-- Right List -->
+      <div class="list-panel">
+        <div class="list-toolbar">
+          <div class="toolbar-left">
+            <input type="text" class="toolbar-search" id="docSearch" placeholder="搜索文档名称...">
+            <button class="btn" onclick="searchDocs()">查询</button>
+            <button class="btn" onclick="resetSearch()">重置</button>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-danger" onclick="batchDelete()">删除选中</button>
+            <button class="btn btn-primary" onclick="showDocModal()">+ 新增文档</button>
+          </div>
+        </div>
+        <div class="list-content">
+          <table>
+            <thead>
+              <tr>
+                <th class="checkbox-cell"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()"></th>
+                <th>序号</th>
+                <th>资料名称</th>
+                <th>上传日期</th>
+                <th>是否启用</th>
+                <th>支持下载</th>
+                <th>解析状态</th>
+                <th>关键词</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="docTableBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="pageInfo">共 0 条</span>
+          <div class="page-btns">
+            <button class="page-btn" onclick="changePage(-1)">‹</button>
+            <button class="page-btn active" id="pageNum">1</button>
+            <button class="page-btn" onclick="changePage(1)">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Document Modal -->
+<div class="modal-overlay" id="docModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="docModalTitle">新增文档</h3>
+      <button class="modal-close" onclick="closeDocModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" id="uploadGroup">
+        <label class="form-label"><span class="required">*</span> 上传文件</label>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📁</div>
+          <p id="uploadText">点击或拖拽文件至此区域上传</p>
+          <p class="formats">支持 docx, xlsx, pdf, txt, md, png, jpg, csv, html, pptx 等格式</p>
+        </div>
+        <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 文件名称</label>
+        <input type="text" class="form-input" id="docName" placeholder="请输入文件名称">
+      </div>
+      <div class="form-group">
+        <label class="form-label">文件内容概览</label>
+        <textarea class="form-input form-textarea" id="docDesc" placeholder="请输入文档核心内容的简要描述"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">关键词</label>
+        <input type="text" class="form-input" id="docKeywords" placeholder="多个关键词用逗号分隔，如：燃气安全，布点原则">
+      </div>
+      <div class="form-group">
+        <label class="form-label">关联问题</label>
+        <input type="text" class="form-input" id="docQuestion" placeholder="该文档可解答的典型问题">
+      </div>
+      <div style="display:flex;gap:16px;">
+        <div class="form-group" style="flex:1;">
+          <label class="form-label"><span class="required">*</span> 是否支持下载</label>
+          <select class="form-select" id="docDownload"><option value="是">是</option><option value="否">否</option></select>
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label"><span class="required">*</span> 是否启用</label>
+          <select class="form-select" id="docEnabled"><option value="是">是</option><option value="否">否</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeDocModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveDoc()">确认保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="confirm-dialog">
+    <div class="icon">⚠️</div>
+    <h3 id="confirmTitle">确认删除</h3>
+    <p id="confirmMsg">此操作不可恢复，是否确认？</p>
+    <div class="btns">
+      <button class="btn" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="closeConfirm()">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tree Data
+const treeData = [
+  { name: '燃气', children: ['布点指导文件', '标准方案', '标准规范', '安全案例'] },
+  { name: '供水', children: ['管网监测规范', '水质分析标准', '压力监测方案'] },
+  { name: '排水', children: ['排水安全规范', '液位监测标准'] },
+  { name: '桥梁', children: ['结构监测规范', '荷载分析标准', '风险评估方案'] },
+  { name: '供热', children: ['供热安全标准', '温度监测规范'] },
+  { name: '管廊', children: ['综合管廊规范', '环境监测标准'] },
+];
+
+let selectedCategory = null;
+let expandedNodes = new Set(['燃气', '供水', '桥梁']);
+
+function renderTree(filter = '') {
+  const body = document.getElementById('treeBody');
+  const lf = filter.toLowerCase();
+  body.innerHTML = treeData.map((node, i) => {
+    const matchChildren = node.children.filter(c => !lf || c.toLowerCase().includes(lf) || node.name.toLowerCase().includes(lf));
+    if (lf && matchChildren.length === 0 && !node.name.toLowerCase().includes(lf)) return '';
+    const expanded = expandedNodes.has(node.name) || !!lf;
+    const children = (lf ? matchChildren : node.children);
+    return `<div class="tree-node">
+      <div class="tree-node-row${selectedCategory === node.name ? ' active' : ''}" onclick="selectCategory('${node.name}')">
+        <span class="arrow${expanded ? ' expanded' : ''}" onclick="event.stopPropagation();toggleNode('${node.name}')">▶</span>
+        <span class="folder-icon">📁</span>
+        <span class="node-name">${node.name}</span>
+        <div class="node-actions">
+          <button class="node-action-btn" title="新增子分类" onclick="event.stopPropagation()">+</button>
+          <button class="node-action-btn" title="编辑" onclick="event.stopPropagation()">✏</button>
+          <button class="node-action-btn" title="删除" onclick="event.stopPropagation();showDeleteCategory('${node.name}')">🗑</button>
+        </div>
+      </div>
+      ${expanded ? `<div class="tree-children">${children.map(c =>
+        `<div class="tree-node-row${selectedCategory === node.name + '/' + c ? ' active' : ''}" onclick="selectCategory('${node.name}/${c}')">
+          <span class="arrow" style="visibility:hidden">▶</span>
+          <span class="folder-icon">📄</span>
+          <span class="node-name">${c}</span>
+          <div class="node-actions">
+            <button class="node-action-btn" title="编辑" onclick="event.stopPropagation()">✏</button>
+            <button class="node-action-btn" title="删除" onclick="event.stopPropagation()">🗑</button>
+          </div>
+        </div>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleNode(name) {
+  if (expandedNodes.has(name)) expandedNodes.delete(name);
+  else expandedNodes.add(name);
+  renderTree();
+}
+
+function selectCategory(path) {
+  selectedCategory = path;
+  renderTree();
+  renderDocs();
+}
+
+function filterTree(val) { renderTree(val); }
+
+// Documents Data
+const allDocs = [
+  { name: '可燃气体智能监测仪安装工艺规范.pdf', date: '2026-03-28', enabled: '是', download: '是', status: '解析完成', keywords: ['燃气安全','安装工艺'], category: '燃气/标准规范' },
+  { name: '燃气管网监测布点规范V2.0.docx', date: '2026-03-27', enabled: '是', download: '是', status: '解析完成', keywords: ['布点规范','管网监测'], category: '燃气/布点指导文件' },
+  { name: '液化气安全监管平台技术方案.pdf', date: '2026-03-26', enabled: '是', download: '否', status: '解析完成', keywords: ['液化气','监管平台'], category: '燃气/标准方案' },
+  { name: '城市燃气预警成效案例汇编.docx', date: '2026-03-25', enabled: '是', download: '是', status: '解析完成', keywords: ['预警成效','案例'], category: '燃气/安全案例' },
+  { name: '供水管网压力监测技术规范.pdf', date: '2026-03-24', enabled: '是', download: '是', status: '解析完成', keywords: ['供水','压力监测'], category: '供水/压力监测方案' },
+  { name: '排水安全业务核心优势分析报告.docx', date: '2026-03-23', enabled: '是', download: '是', status: '解析中', keywords: ['排水安全','业务优势'], category: '排水/排水安全规范' },
+  { name: '桥梁结构健康监测标准.pdf', date: '2026-03-22', enabled: '否', download: '是', status: '解析完成', keywords: ['桥梁','结构监测'], category: '桥梁/结构监测规范' },
+  { name: '综合管廊环境监测实施方案.pdf', date: '2026-03-21', enabled: '是', download: '是', status: '解析失败', keywords: ['管廊','环境监测'], category: '管廊/环境监测标准' },
+  { name: '供热管网安全运行指南.docx', date: '2026-03-20', enabled: '是', download: '否', status: '解析完成', keywords: ['供热','安全运行'], category: '供热/供热安全标准' },
+  { name: '城市供水水质分析标准操作手册.xlsx', date: '2026-03-19', enabled: '是', download: '是', status: '解析完成', keywords: ['供水','水质分析'], category: '供水/水质分析标准' },
+];
+
+let currentPage = 1;
+const pageSize = 10;
+let checkedDocs = new Set();
+
+function renderDocs() {
+  const search = document.getElementById('docSearch').value.toLowerCase();
+  let docs = allDocs.filter(d => {
+    if (selectedCategory && !d.category.startsWith(selectedCategory)) return false;
+    if (search && !d.name.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const tbody = document.getElementById('docTableBody');
+  document.getElementById('pageInfo').textContent = `共 ${docs.length} 条`;
+  const start = (currentPage - 1) * pageSize;
+  const pageDocs = docs.slice(start, start + pageSize);
+  tbody.innerHTML = pageDocs.map((d, i) => {
+    const idx = start + i + 1;
+    const statusClass = d.status === '解析完成' ? 'parsed' : d.status === '解析中' ? 'parsing' : 'failed';
+    const enabledClass = d.enabled === '是' ? 'enabled' : 'disabled';
+    const isParsing = d.status === '解析中';
+    return `<tr>
+      <td class="checkbox-cell"><input type="checkbox" data-idx="${idx}" ${checkedDocs.has(idx)?'checked':''} onchange="toggleCheck(${idx})"></td>
+      <td>${idx}</td>
+      <td style="color:#2563EB;cursor:pointer">${d.name}</td>
+      <td>${d.date}</td>
+      <td><span class="status-tag ${enabledClass}">${d.enabled === '是' ? '已启用' : '未启用'}</span></td>
+      <td>${d.download}</td>
+      <td><span class="status-tag ${statusClass}">${d.status}</span></td>
+      <td>${d.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}</td>
+      <td>
+        <button class="action-link" ${isParsing?'disabled style="opacity:0.4"':''} onclick="editDoc(${start+i})">编辑</button>
+        <button class="action-link danger" ${isParsing?'disabled style="opacity:0.4"':''} onclick="deleteDoc(${start+i})">删除</button>
+        ${d.download === '是' ? '<button class="action-link">下载</button>' : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleCheck(idx) { checkedDocs.has(idx) ? checkedDocs.delete(idx) : checkedDocs.add(idx); }
+function toggleCheckAll() {
+  const all = document.getElementById('checkAll').checked;
+  document.querySelectorAll('#docTableBody input[type=checkbox]').forEach(cb => {
+    const idx = parseInt(cb.dataset.idx);
+    if (all) checkedDocs.add(idx); else checkedDocs.delete(idx);
+    cb.checked = all;
+  });
+}
+function changePage(d) { currentPage = Math.max(1, currentPage + d); document.getElementById('pageNum').textContent = currentPage; renderDocs(); }
+function searchDocs() { currentPage = 1; renderDocs(); }
+function resetSearch() { document.getElementById('docSearch').value = ''; selectedCategory = null; currentPage = 1; renderTree(); renderDocs(); }
+
+// Modal
+let editingIdx = -1;
+function showDocModal(idx) {
+  editingIdx = idx !== undefined ? idx : -1;
+  document.getElementById('docModalTitle').textContent = editingIdx >= 0 ? '编辑文档' : '新增文档';
+  if (editingIdx >= 0) {
+    const d = allDocs[editingIdx];
+    document.getElementById('docName').value = d.name;
+    document.getElementById('docDesc').value = '';
+    document.getElementById('docKeywords').value = d.keywords.join(',');
+    document.getElementById('uploadGroup').style.display = 'none';
+  } else {
+    document.getElementById('docName').value = '';
+    document.getElementById('docDesc').value = '';
+    document.getElementById('docKeywords').value = '';
+    document.getElementById('docQuestion').value = '';
+    document.getElementById('uploadGroup').style.display = '';
+    document.getElementById('uploadText').textContent = '点击或拖拽文件至此区域上传';
+  }
+  document.getElementById('docModal').classList.add('show');
+}
+function closeDocModal() { document.getElementById('docModal').classList.remove('show'); }
+function editDoc(idx) { showDocModal(idx); }
+function saveDoc() {
+  const name = document.getElementById('docName').value.trim();
+  if (!name) { alert('请填写文件名称'); return; }
+  closeDocModal();
+  renderDocs();
+}
+function handleFileSelect(input) {
+  if (input.files.length) {
+    document.getElementById('uploadText').textContent = '已选择: ' + input.files[0].name;
+    if (!document.getElementById('docName').value) document.getElementById('docName').value = input.files[0].name;
+  }
+}
+
+function deleteDoc(idx) {
+  document.getElementById('confirmTitle').textContent = '确认删除';
+  document.getElementById('confirmMsg').textContent = `将删除文档"${allDocs[idx].name}"，此操作不可恢复，是否确认？`;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function batchDelete() {
+  if (checkedDocs.size === 0) { alert('请先选择要删除的文档'); return; }
+  document.getElementById('confirmTitle').textContent = '批量删除';
+  document.getElementById('confirmMsg').textContent = `将删除选中的 ${checkedDocs.size} 条文档，此操作不可恢复，是否确认？`;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function showDeleteCategory(name) {
+  document.getElementById('confirmTitle').textContent = '删除分类';
+  document.getElementById('confirmMsg').textContent = `删除目录"${name}"将同时移除该目录下所有文档关联关系，是否确认？`;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function showAddCategoryModal() {
+  const name = prompt('请输入一级分类名称：');
+  if (name && name.trim()) {
+    treeData.push({ name: name.trim(), children: [] });
+    expandedNodes.add(name.trim());
+    renderTree();
+  }
+}
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); }
+
+// Init
+renderTree();
+renderDocs();
+</script>
+</body>
+</html>
