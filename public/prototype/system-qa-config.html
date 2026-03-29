@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统问答配置 - 城市生命线监测</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Inter", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+  font-size: 14px; color: #4B5563; line-height: 1.5;
+  background: #F3F4F6; min-width: 1280px; height: 100vh; overflow: hidden;
+}
+.layout { display: flex; height: 100vh; }
+.sidebar {
+  width: 220px; min-width: 220px; background: #fff;
+  border-right: 1px solid #E5E7EB; display: flex; flex-direction: column;
+}
+.sidebar-header { padding: 16px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;
+}
+.sidebar-title { font-size: 15px; font-weight: 600; color: #1F2937; }
+.sidebar-nav { padding: 8px; flex: 1; }
+.nav-group-label { font-size: 11px; color: #9CA3AF; padding: 12px 12px 6px; letter-spacing: 0.5px; }
+.nav-item {
+  padding: 9px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #4B5563; transition: all 0.15s; border-radius: 6px; margin-bottom: 1px; text-decoration: none;
+}
+.nav-item:hover { background: #F3F4F6; color: #2563EB; }
+.nav-item.active { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+.sidebar-footer {
+  padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; align-items: center; gap: 10px;
+}
+.user-avatar {
+  width: 32px; height: 32px; background: #2563EB; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600;
+}
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-bar {
+  height: 48px; background: #fff; border-bottom: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #6B7280; }
+.breadcrumb span { color: #1F2937; font-weight: 500; }
+
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #E5E7EB; margin-bottom: 20px; }
+.tab {
+  padding: 10px 24px; cursor: pointer; font-size: 14px; color: #6B7280; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.2s; font-weight: 500;
+}
+.tab:hover { color: #2563EB; }
+.tab.active { color: #2563EB; border-bottom-color: #2563EB; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Common Panel */
+.panel { background: #fff; border-radius: 10px; border: 1px solid #E5E7EB; overflow: hidden; }
+.panel-toolbar {
+  padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; gap: 8px;
+}
+.toolbar-left { display: flex; align-items: center; gap: 8px; }
+.toolbar-search {
+  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; width: 220px; outline: none;
+}
+.toolbar-search:focus { border-color: #2563EB; }
+.btn {
+  padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB;
+  background: #fff; color: #374151; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
+}
+.btn:hover { border-color: #2563EB; color: #2563EB; }
+.btn-primary { background: #2563EB; color: #fff; border-color: #2563EB; }
+.btn-primary:hover { background: #1D4ED8; }
+.filter-select {
+  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  background: #F9FAFB; color: #374151; font-weight: 500; padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid #E5E7EB; white-space: nowrap;
+}
+td { padding: 10px 14px; border-bottom: 1px solid #F3F4F6; color: #4B5563; }
+tr:hover td { background: #F9FAFB; }
+
+.status-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.status-tag.enabled { background: #ECFDF5; color: #059669; }
+.status-tag.disabled { background: #F3F4F6; color: #9CA3AF; }
+.action-link { color: #2563EB; cursor: pointer; font-size: 13px; background: none; border: none; margin-right: 8px; }
+.action-link:hover { text-decoration: underline; }
+.action-link.danger { color: #EF4444; }
+
+.pagination {
+  padding: 12px 20px; border-top: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #6B7280;
+}
+.page-btns { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px; height: 32px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff;
+  cursor: pointer; font-size: 13px; color: #374151; display: flex; align-items: center; justify-content: center;
+}
+.page-btn.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px; width: 680px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-header {
+  padding: 16px 20px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; }
+.modal-close {
+  width: 28px; height: 28px; border: none; background: #F3F4F6; border-radius: 6px; cursor: pointer;
+  font-size: 16px; color: #6B7280; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: #E5E7EB; }
+.modal-body { padding: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+.form-label .required { color: #EF4444; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; }
+.form-input:focus { border-color: #2563EB; }
+.form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+.form-select { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 8px; }
+
+.code-block {
+  background: #1F2937; color: #A5F3FC; padding: 12px; border-radius: 6px; font-family: 'Courier New', monospace;
+  font-size: 12px; overflow-x: auto; white-space: pre; margin-top: 4px;
+}
+.detail-row { display: flex; gap: 16px; margin-bottom: 12px; }
+.detail-label { font-size: 12px; color: #9CA3AF; min-width: 80px; }
+.detail-value { font-size: 13px; color: #1F2937; flex: 1; }
+.version-item {
+  padding: 10px 14px; border: 1px solid #E5E7EB; border-radius: 6px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+}
+.version-item .ver-tag { background: #EFF6FF; color: #2563EB; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">线</div>
+      <div class="sidebar-title">运营管理后台</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">概览</div>
+      <a class="nav-item" href="console.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="6" y1="6" x2="6" y2="14"/></svg>
+        控制台首页
+      </a>
+      <div class="nav-group-label">智能体配置</div>
+      <a class="nav-item" href="knowledge-base.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M6 6h4M6 9h2"/></svg>
+        知识库管理
+      </a>
+      <a class="nav-item active" href="system-qa-config.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        系统问答配置
+      </a>
+      <a class="nav-item" href="report-template.html" style="text-decoration:none">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h6l4 4v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M10 2v4h4"/></svg>
+        报告模板管理
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-avatar">张</div>
+      <div>
+        <div style="font-size:13px;color:#1F2937;font-weight:500">张工</div>
+        <div style="font-size:11px;color:#9CA3AF">运维管理员</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <div class="breadcrumb">智能体配置 / <span>系统问答配置</span></div>
+      <button class="btn" onclick="location.href='index.html'">← 返回AI助手</button>
+    </div>
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('metrics')">指标库管理</div>
+        <div class="tab" onclick="switchTab('dimensions')">维度库管理</div>
+        <div class="tab" onclick="switchTab('scenes')">场景库管理</div>
+        <div class="tab" onclick="switchTab('knowledge')">知识库管理</div>
+      </div>
+
+      <!-- 指标库 -->
+      <div class="tab-panel active" id="tab-metrics">
+        <div class="panel">
+          <div class="panel-toolbar">
+            <div class="toolbar-left">
+              <input type="text" class="toolbar-search" placeholder="搜索指标名称/ID...">
+              <select class="filter-select"><option>全部状态</option><option>已启用</option><option>已禁用</option></select>
+              <button class="btn">查询</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn">导入</button>
+              <button class="btn">导出</button>
+              <button class="btn btn-primary" onclick="showMetricModal()">+ 新增指标</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>指标ID</th><th>指标名称</th><th>别名</th><th>业务口径</th><th>来源表</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+            <tbody id="metricsBody"></tbody>
+          </table>
+          <div class="pagination"><span>共 8 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+        </div>
+      </div>
+
+      <!-- 维度库 -->
+      <div class="tab-panel" id="tab-dimensions">
+        <div class="panel">
+          <div class="panel-toolbar">
+            <div class="toolbar-left">
+              <input type="text" class="toolbar-search" placeholder="搜索维度名称/ID...">
+              <select class="filter-select"><option>全部状态</option><option>已启用</option><option>已禁用</option></select>
+              <button class="btn">查询</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn">批量导入</button>
+              <button class="btn">导出</button>
+              <button class="btn btn-primary" onclick="showDimModal()">+ 新增维度</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
+            <tbody id="dimensionsBody"></tbody>
+          </table>
+          <div class="pagination"><span>共 6 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+        </div>
+      </div>
+
+      <!-- 场景库 -->
+      <div class="tab-panel" id="tab-scenes">
+        <div class="panel">
+          <div class="panel-toolbar">
+            <div class="toolbar-left">
+              <input type="text" class="toolbar-search" placeholder="搜索场景名称...">
+              <select class="filter-select"><option>全部类别</option><option>安全</option><option>运营</option><option>服务</option></select>
+              <button class="btn">查询</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" onclick="showSceneModal()">+ 新增场景</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>场景名称</th><th>类别</th><th>描述</th><th>关联指标数</th><th>业务规则</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="scenesBody"></tbody>
+          </table>
+          <div class="pagination"><span>共 5 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+        </div>
+      </div>
+
+      <!-- 知识库 -->
+      <div class="tab-panel" id="tab-knowledge">
+        <div class="panel">
+          <div class="panel-toolbar">
+            <div class="toolbar-left">
+              <input type="text" class="toolbar-search" placeholder="搜索规则/模板名称...">
+              <select class="filter-select"><option>全部类型</option><option>阈值规则</option><option>归因逻辑</option><option>洞察模板</option></select>
+              <button class="btn">查询</button>
+            </div>
+            <button class="btn btn-primary" onclick="showKnowledgeModal()">+ 新增规则</button>
+          </div>
+          <table>
+            <thead><tr><th>名称</th><th>类型</th><th>描述</th><th>状态</th><th>版本</th><th>更新时间</th><th>操作</th></tr></thead>
+            <tbody id="knowledgeBody"></tbody>
+          </table>
+          <div class="pagination"><span>共 6 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Metric Modal -->
+<div class="modal-overlay" id="metricModal">
+  <div class="modal">
+    <div class="modal-header"><h3>新增指标</h3><button class="modal-close" onclick="closeModal('metricModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 指标ID</label><input class="form-input" placeholder="如 M001"></div>
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 指标名称</label><input class="form-input" placeholder="如 预警总数"></div>
+      <div class="form-group"><label class="form-label">别名</label><input class="form-input" placeholder="如 告警数量、报警数"></div>
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 业务口径</label><textarea class="form-input form-textarea" placeholder="描述指标的业务含义与应用场景"></textarea></div>
+      <div class="form-group"><label class="form-label">计算逻辑（SQL/公式）</label><textarea class="form-input form-textarea" placeholder="COUNT(*) FROM warn_info WHERE status='active'" style="font-family:monospace"></textarea></div>
+      <div class="form-group"><label class="form-label">来源物理表</label><input class="form-input" placeholder="如 dws_gsps_common_warn_info_view"></div>
+      <div class="form-group"><label class="form-label">映射字段</label><input class="form-input" placeholder="如 warn_count, warn_id"></div>
+      <div style="display:flex;gap:16px;">
+        <div class="form-group" style="flex:1"><label class="form-label">状态</label><select class="form-select"><option>启用</option><option>禁用</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('metricModal')">取消</button><button class="btn btn-primary" onclick="closeModal('metricModal')">确认保存</button></div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="width:720px">
+    <div class="modal-header"><h3 id="detailTitle">指标详情</h3><button class="modal-close" onclick="closeModal('detailModal')">×</button></div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- Dimension Modal -->
+<div class="modal-overlay" id="dimModal">
+  <div class="modal">
+    <div class="modal-header"><h3>新增维度</h3><button class="modal-close" onclick="closeModal('dimModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 维度ID</label><input class="form-input" placeholder="如 D001"></div>
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 维度名称</label><input class="form-input" placeholder="如 行政区划"></div>
+      <div class="form-group"><label class="form-label">别名</label><input class="form-input" placeholder="如 区域、地区"></div>
+      <div class="form-group"><label class="form-label">层级关系</label><input class="form-input" placeholder="如 省→市→区县"></div>
+      <div class="form-group"><label class="form-label">来源维表</label><input class="form-input" placeholder="如 dim_region"></div>
+      <div class="form-group"><label class="form-label">状态</label><select class="form-select"><option>启用</option><option>禁用</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('dimModal')">取消</button><button class="btn btn-primary" onclick="closeModal('dimModal')">确认保存</button></div>
+  </div>
+</div>
+
+<!-- Scene Modal -->
+<div class="modal-overlay" id="sceneModal">
+  <div class="modal" style="width:720px">
+    <div class="modal-header"><h3>新增场景</h3><button class="modal-close" onclick="closeModal('sceneModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 场景名称</label><input class="form-input" placeholder="如 城市安全态势"></div>
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 类别</label><select class="form-select"><option>安全</option><option>运营</option><option>服务</option></select></div>
+      <div class="form-group"><label class="form-label">详细描述</label><textarea class="form-input form-textarea" placeholder="描述场景的分析目标与应用范围"></textarea></div>
+      <div class="form-group"><label class="form-label">关联指标</label>
+        <div style="border:1px solid #E5E7EB;border-radius:6px;padding:10px;min-height:60px;">
+          <span style="display:inline-block;padding:3px 10px;background:#EFF6FF;color:#2563EB;border-radius:4px;font-size:12px;margin:2px;">预警总数 ×</span>
+          <span style="display:inline-block;padding:3px 10px;background:#EFF6FF;color:#2563EB;border-radius:4px;font-size:12px;margin:2px;">处置率 ×</span>
+          <button class="btn" style="font-size:12px;padding:3px 10px;margin-top:4px">+ 选择指标</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">业务规则/评分公式</label><textarea class="form-input form-textarea" placeholder="如 安全态势评分 = 告警数×0.3 + 处置率×0.7" style="font-family:monospace"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('sceneModal')">取消</button><button class="btn btn-primary" onclick="closeModal('sceneModal')">确认保存</button></div>
+  </div>
+</div>
+
+<!-- Knowledge Modal -->
+<div class="modal-overlay" id="knowledgeModal">
+  <div class="modal">
+    <div class="modal-header"><h3>新增规则</h3><button class="modal-close" onclick="closeModal('knowledgeModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 名称</label><input class="form-input" placeholder="如 处置率预警规则"></div>
+      <div class="form-group"><label class="form-label"><span class="required">*</span> 类型</label><select class="form-select"><option>阈值规则</option><option>归因逻辑</option><option>洞察模板</option></select></div>
+      <div class="form-group"><label class="form-label">描述/内容</label><textarea class="form-input form-textarea" placeholder="输入规则描述或洞察模板，支持变量 {时间} {区域} {数值}"></textarea></div>
+      <div class="form-group"><label class="form-label">状态</label><select class="form-select"><option>启用</option><option>禁用</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal('knowledgeModal')">取消</button><button class="btn btn-primary" onclick="closeModal('knowledgeModal')">确认保存</button></div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showMetricModal() { document.getElementById('metricModal').classList.add('show'); }
+function showDimModal() { document.getElementById('dimModal').classList.add('show'); }
+function showSceneModal() { document.getElementById('sceneModal').classList.add('show'); }
+function showKnowledgeModal() { document.getElementById('knowledgeModal').classList.add('show'); }
+
+function showDetail(title, html) {
+  document.getElementById('detailTitle').textContent = title;
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+// Metrics Data
+const metrics = [
+  { id:'M001', name:'预警总数', alias:'告警数量', desc:'统计周期内产生的预警事件总数', table:'dws_gsps_common_warn_info_view', sql:'COUNT(*) FROM warn_info', status:'启用', time:'2026-03-28' },
+  { id:'M002', name:'设备在线率', alias:'在线率', desc:'在线设备数占设备总数百分比', table:'dws_device_status_view', sql:'online_count/total_count*100', status:'启用', time:'2026-03-27' },
+  { id:'M003', name:'处置效率', alias:'处置率', desc:'已处置预警数占总预警数百分比', table:'dws_gsps_common_warn_info_view', sql:'disposed_count/total_count*100', status:'启用', time:'2026-03-26' },
+  { id:'M004', name:'预警数量占比', alias:'占比', desc:'各行业预警数量占总预警的百分比', table:'dws_gsps_common_warn_info_view', sql:'industry_count/total*100', status:'启用', time:'2026-03-25' },
+  { id:'M005', name:'区域预警分布', alias:'区域分布', desc:'各区域预警数量统计', table:'dws_gsps_common_warn_info_view', sql:'GROUP BY region', status:'启用', time:'2026-03-24' },
+  { id:'M006', name:'未解除预警数', alias:'活跃预警', desc:'当前状态为未解除的预警总数', table:'dws_gsps_common_warn_info_view', sql:"WHERE status='active'", status:'启用', time:'2026-03-23' },
+  { id:'M007', name:'日均预警数', alias:'日均告警', desc:'统计周期内日均产生预警数量', table:'dws_gsps_common_warn_info_view', sql:'total/days', status:'禁用', time:'2026-03-22' },
+  { id:'M008', name:'设备故障率', alias:'故障率', desc:'故障设备数占设备总数百分比', table:'dws_device_status_view', sql:'fault_count/total*100', status:'启用', time:'2026-03-21' },
+];
+
+document.getElementById('metricsBody').innerHTML = metrics.map(m => `<tr>
+  <td style="font-family:monospace;color:#6B7280">${m.id}</td>
+  <td style="color:#1F2937;font-weight:500">${m.name}</td>
+  <td>${m.alias}</td>
+  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.desc}</td>
+  <td style="font-family:monospace;font-size:12px">${m.table}</td>
+  <td><span class="status-tag ${m.status==='启用'?'enabled':'disabled'}">${m.status==='启用'?'已启用':'已禁用'}</span></td>
+  <td>${m.time}</td>
+  <td>
+    <button class="action-link" onclick="showDetail('${m.name} - 指标详情', getMetricDetail('${m.id}'))">详情</button>
+    <button class="action-link">编辑</button>
+    <button class="action-link danger">删除</button>
+  </td>
+</tr>`).join('');
+
+function getMetricDetail(id) {
+  const m = metrics.find(x => x.id === id);
+  return `<div class="detail-row"><div class="detail-label">指标ID</div><div class="detail-value" style="font-family:monospace">${m.id}</div></div>
+  <div class="detail-row"><div class="detail-label">指标名称</div><div class="detail-value" style="font-weight:500">${m.name}</div></div>
+  <div class="detail-row"><div class="detail-label">别名</div><div class="detail-value">${m.alias}</div></div>
+  <div class="detail-row"><div class="detail-label">业务口径</div><div class="detail-value">${m.desc}</div></div>
+  <div class="detail-row"><div class="detail-label">来源物理表</div><div class="detail-value" style="font-family:monospace">${m.table}</div></div>
+  <div class="detail-row"><div class="detail-label">计算逻辑</div><div class="detail-value"><div class="code-block">${m.sql}</div></div></div>
+  <div style="margin-top:20px;"><h4 style="font-size:14px;color:#1F2937;margin-bottom:10px">版本历史</h4>
+    <div class="version-item"><div><span class="ver-tag">v2.0</span> <span style="margin-left:8px">${m.time}</span> · 张工 · 更新计算逻辑</div><button class="action-link">对比</button></div>
+    <div class="version-item"><div><span class="ver-tag">v1.0</span> <span style="margin-left:8px">2026-03-01</span> · 李工 · 初始创建</div><button class="action-link">对比</button></div>
+  </div>`;
+}
+
+// Dimensions
+const dims = [
+  { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'启用', mapCount:156 },
+  { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'启用', mapCount:365 },
+  { id:'D003', name:'行业类型', alias:'业务领域', levels:'大类→小类', table:'dim_industry', status:'启用', mapCount:12 },
+  { id:'D004', name:'设备类型', alias:'传感器类型', levels:'一级→二级', table:'dim_device_type', status:'启用', mapCount:28 },
+  { id:'D005', name:'预警级别', alias:'告警等级', levels:'—', table:'dim_warn_level', status:'启用', mapCount:4 },
+  { id:'D006', name:'处置状态', alias:'处理状态', levels:'—', table:'dim_dispose_status', status:'禁用', mapCount:5 },
+];
+document.getElementById('dimensionsBody').innerHTML = dims.map(d => `<tr>
+  <td style="font-family:monospace;color:#6B7280">${d.id}</td>
+  <td style="color:#1F2937;font-weight:500">${d.name}</td>
+  <td>${d.alias}</td>
+  <td>${d.levels}</td>
+  <td style="font-family:monospace;font-size:12px">${d.table}</td>
+  <td><span class="status-tag ${d.status==='启用'?'enabled':'disabled'}">${d.status==='启用'?'已启用':'已禁用'}</span></td>
+  <td>${d.mapCount}</td>
+  <td><button class="action-link">编辑</button><button class="action-link">值映射</button><button class="action-link danger">删除</button></td>
+</tr>`).join('');
+
+// Scenes
+const scenes = [
+  { name:'城市安全态势', cat:'安全', desc:'综合评估城市生命线安全运行态势', metrics:5, rule:'安全评分=告警数×0.3+处置率×0.7', status:'启用' },
+  { name:'预警趋势分析', cat:'安全', desc:'分析各行业预警数量变化趋势', metrics:3, rule:'趋势=环比增长率>20%触发预警', status:'启用' },
+  { name:'设备运行监控', cat:'运营', desc:'监控全市设备在线率和故障率', metrics:4, rule:'在线率<90%触发告警', status:'启用' },
+  { name:'处置效能评估', cat:'运营', desc:'评估各单位预警处置效率', metrics:3, rule:'处置率<80%标记低效', status:'启用' },
+  { name:'区域风险评估', cat:'安全', desc:'评估各区域安全风险等级', metrics:6, rule:'综合风险=预警密度×0.4+设备故障×0.3+历史事故×0.3', status:'禁用' },
+];
+document.getElementById('scenesBody').innerHTML = scenes.map(s => `<tr>
+  <td style="color:#1F2937;font-weight:500">${s.name}</td>
+  <td><span style="padding:2px 8px;background:#F0F9FF;color:#0369A1;border-radius:4px;font-size:12px">${s.cat}</span></td>
+  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.desc}</td>
+  <td>${s.metrics}</td>
+  <td style="font-size:12px;font-family:monospace;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.rule}</td>
+  <td><span class="status-tag ${s.status==='启用'?'enabled':'disabled'}">${s.status==='启用'?'已启用':'已禁用'}</span></td>
+  <td><button class="action-link">编辑</button><button class="action-link">复制</button><button class="action-link danger">删除</button></td>
+</tr>`).join('');
+
+// Knowledge
+const kbs = [
+  { name:'处置率预警规则', type:'阈值规则', desc:'处置率 < 80% 触发告警', status:'启用', ver:'v1.2', time:'2026-03-28' },
+  { name:'告警日环比预警', type:'阈值规则', desc:'告警数日环比上升 50% 预警', status:'启用', ver:'v1.0', time:'2026-03-27' },
+  { name:'区域告警归因模型', type:'归因逻辑', desc:'区域告警数上升关联因素：天气、人员配置', status:'启用', ver:'v2.0', time:'2026-03-26' },
+  { name:'处置率洞察模板', type:'洞察模板', desc:'{时间}{区域}处置率为{数值}，较上期{环比}', status:'启用', ver:'v1.1', time:'2026-03-25' },
+  { name:'设备故障归因', type:'归因逻辑', desc:'设备故障关联：使用年限、维保记录、环境温度', status:'启用', ver:'v1.0', time:'2026-03-24' },
+  { name:'安全态势综合模板', type:'洞察模板', desc:'{时间}全市安全态势评分{数值}，{趋势描述}', status:'禁用', ver:'v1.0', time:'2026-03-23' },
+];
+document.getElementById('knowledgeBody').innerHTML = kbs.map(k => `<tr>
+  <td style="color:#1F2937;font-weight:500">${k.name}</td>
+  <td><span style="padding:2px 8px;background:${k.type==='阈值规则'?'#FEF3C7':k.type==='归因逻辑'?'#E0E7FF':'#ECFDF5'};color:${k.type==='阈值规则'?'#D97706':k.type==='归因逻辑'?'#4338CA':'#059669'};border-radius:4px;font-size:12px">${k.type}</span></td>
+  <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.desc}</td>
+  <td><span class="status-tag ${k.status==='启用'?'enabled':'disabled'}">${k.status==='启用'?'已启用':'已禁用'}</span></td>
+  <td style="font-family:monospace;font-size:12px">${k.ver}</td>
+  <td>${k.time}</td>
+  <td><button class="action-link">编辑</button><button class="action-link">测试</button><button class="action-link danger">删除</button></td>
+</tr>`).join('');
+</script>
+</body>
+</html>
