@@ -2284,7 +2284,6 @@ function addTypingIndicator() {
   return el;
 }
 
-function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
 function scrollChatBottom() { const c = document.getElementById('chatArea'); c.scrollTop = c.scrollHeight; }
 function copyBubble(btn) { const b = btn.closest('.ai-bubble'); if (b) { const c = b.querySelector('.ai-content'); navigator.clipboard.writeText((c||b).innerText); } }
 function regenerate(btn) { const b = btn.closest('.ai-bubble'); if (!b) return; const c = b.querySelector('.ai-content'); if (c) { const o = c.innerHTML; c.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span style="margin-left:6px;color:#9CA3AF;">重新生成中...</span></div>'; setTimeout(function() { c.innerHTML = '已为您重新分析。当前各项指标运行正常，暂无异常情况需要关注。'; }, 1200); } }
