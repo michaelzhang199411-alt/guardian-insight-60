@@ -1774,6 +1774,114 @@ function matchSystemQA(text) {
   return null;
 }
 
+// ========== Streaming Helper ==========
+function streamText(el, fullHtml, speed, callback) {
+  // Strip HTML tags to get plain text length, but insert HTML progressively
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = fullHtml;
+  const plainText = tempDiv.textContent;
+  const totalLen = plainText.length;
+  let charIndex = 0;
+  
+  // We'll reveal the HTML by mapping plain text position to HTML position
+  const htmlChars = [];
+  let inTag = false;
+  let plainIdx = 0;
+  for (let i = 0; i < fullHtml.length; i++) {
+    if (fullHtml[i] === '<') inTag = true;
+    if (!inTag) {
+      htmlChars.push({ htmlIdx: i, plainIdx: plainIdx });
+      plainIdx++;
+    }
+    if (fullHtml[i] === '>') inTag = false;
+  }
+  
+  el.classList.add('typing-cursor');
+  const chunkSize = Math.max(1, Math.floor(totalLen / 60)); // ~60 steps
+  
+  function step() {
+    charIndex += chunkSize;
+    if (charIndex >= totalLen) {
+      el.innerHTML = fullHtml;
+      el.classList.remove('typing-cursor');
+      if (callback) callback();
+      return;
+    }
+    // Find HTML position for current plain text position
+    const mapping = htmlChars[Math.min(charIndex, htmlChars.length - 1)];
+    if (mapping) {
+      let partial = fullHtml.substring(0, mapping.htmlIdx + 1);
+      // Close any open tags
+      const openTags = [];
+      const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
+      let match;
+      while ((match = tagRegex.exec(partial)) !== null) {
+        if (match[0][1] === '/') { openTags.pop(); }
+        else if (!match[0].endsWith('/>')) { openTags.push(match[1]); }
+      }
+      for (let t = openTags.length - 1; t >= 0; t--) {
+        partial += '</' + openTags[t] + '>';
+      }
+      el.innerHTML = partial;
+    }
+    scrollChatBottom();
+    setTimeout(step, speed);
+  }
+  step();
+}
+
+function streamSection(sections, index, callback) {
+  if (index >= sections.length) { if (callback) callback(); return; }
+  const sec = sections[index];
+  sec.el.style.display = '';
+  sec.el.classList.add('stream-fade-in');
+  
+  if (sec.streamText && sec.contentEl) {
+    const fullHtml = sec.fullHtml;
+    sec.contentEl.innerHTML = '';
+    setTimeout(() => {
+      streamText(sec.contentEl, fullHtml, sec.speed || 25, () => {
+        streamSection(sections, index + 1, callback);
+      });
+    }, 150);
+  } else {
+    setTimeout(() => {
+      streamSection(sections, index + 1, callback);
+    }, sec.delay || 300);
+  }
+}
+
+function streamThinkingSteps(thinkingBody, callback) {
+  const steps = thinkingBody.querySelectorAll('.thinking-step');
+  let i = 0;
+  steps.forEach(s => { s.classList.add('stream-thinking-step'); });
+  
+  // Auto-expand thinking during streaming
+  const header = thinkingBody.closest('.thinking-section').querySelector('.thinking-header');
+  if (header && header.classList.contains('collapsed')) {
+    header.classList.remove('collapsed');
+    thinkingBody.classList.remove('hidden');
+  }
+  
+  function showNext() {
+    if (i >= steps.length) {
+      // Collapse thinking after streaming
+      setTimeout(() => {
+        if (header) {
+          header.classList.add('collapsed');
+          thinkingBody.classList.add('hidden');
+        }
+        if (callback) callback();
+      }, 500);
+      return;
+    }
+    steps[i].classList.add('visible');
+    i++;
+    setTimeout(showNext, 350);
+  }
+  showNext();
+}
+
 // ========== Send Message ==========
 function sendMessage(openReport) {
   const input = document.getElementById('inputBox');
@@ -1792,12 +1900,19 @@ function sendMessage(openReport) {
 
   setTimeout(() => {
     typingEl.remove();
-    isGenerating = false;
 
     const sqaData = (agentAtSend === '系统问答') ? matchSystemQA(text) : null;
+    const kqaData = (!agentAtSend || agentAtSend === '知识问答') ? matchKnowledgeQA(text) : null;
 
     if (sqaData) {
       addSystemQAResponse(sqaData, agentAtSend);
+    } else if (kqaData) {
+      const agent = agentAtSend || '知识问答';
+      addStreamingTextResponse(kqaData.content, kqaData.suggestions ? kqaData.suggestions.map(s => ({label: s, action: () => sendQuickQ(s)})) : null, agent);
+    } else if (agentAtSend === '系统巡检' && otherAgentResponses['系统巡检']) {
+      addStreamingTextResponse(otherAgentResponses['系统巡检'].content, null, agentAtSend);
+    } else if (agentAtSend === '分析决策' && otherAgentResponses['分析决策']) {
+      addStreamingTextResponse(otherAgentResponses['分析决策'].content, null, agentAtSend);
     } else if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
       const reportTitle = text.includes('报表') ? '监测数据统计报表' : '燃气监测运营月度报告';
       addAIResponseWithReport(text, reportTitle, agentAtSend);
@@ -1805,12 +1920,12 @@ function sendMessage(openReport) {
     } else if (text.includes('运行状态') || text.includes('管网')) {
       addAIDataResponse(agentAtSend);
     } else if (text.includes('报警')) {
-      addAITextResponse('根据近一个月的报警数据统计：\n\n• 总报警数：<strong>127 起</strong>\n• 一级报警：<strong style="color:#EF4444">8 起</strong>（占比 6.3%）\n• 二级报警：<strong style="color:#F59E0B">23 起</strong>（占比 18.1%）\n• 三级报警：<strong>96 起</strong>（占比 75.6%）\n\n三级报警占比最高，主要集中在<strong>城北片区</strong>和<strong>工业园区周边</strong>。', [
+      addStreamingTextResponse('根据近一个月的报警数据统计：\n\n• 总报警数：<strong>127 起</strong>\n• 一级报警：<strong style="color:#EF4444">8 起</strong>（占比 6.3%）\n• 二级报警：<strong style="color:#F59E0B">23 起</strong>（占比 18.1%）\n• 三级报警：<strong>96 起</strong>（占比 75.6%）\n\n三级报警占比最高，主要集中在<strong>城北片区</strong>和<strong>工业园区周边</strong>。', [
         { label: '查看报警热力地图', action: () => sendQuickQ('展示报警热力分布图') },
         { label: '导出报警明细表', action: () => sendQuickQ('导出近一个月报警明细报表') },
       ], agentAtSend);
     } else {
-      addAITextResponse('好的，我来为您分析。根据系统数据：\n\n当前城市生命线各监测专项运行平稳，暂未发现异常情况。如需深入了解某个专项的详细数据，请告诉我具体的分析方向。', [
+      addStreamingTextResponse('好的，我来为您分析。根据系统数据：\n\n当前城市生命线各监测专项运行平稳，暂未发现异常情况。如需深入了解某个专项的详细数据，请告诉我具体的分析方向。', [
         { label: '查看各专项运行概况', action: () => sendQuickQ('各专项运行状态概况') },
         { label: '近期预警趋势分析', action: () => sendQuickQ('近一个月的预警趋势如何？') },
       ], agentAtSend);
@@ -1819,7 +1934,155 @@ function sendMessage(openReport) {
   }, 1800);
 }
 
-// ========== System Q&A Response ==========
+// ========== Streaming Text Response ==========
+function addStreamingTextResponse(html, suggestions, agent) {
+  const chatArea = document.getElementById('chatArea');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ai';
+
+  let suggestHtml = '';
+  if (suggestions && suggestions.length) {
+    suggestHtml = '<div class="ai-suggestions" style="display:none">' +
+      suggestions.map(function(s, i) { return '<button class="ai-suggest-btn" data-idx="' + i + '">' + s.label + ' <span class="arrow">→</span></button>'; }).join('') +
+      '</div>';
+  }
+
+  const fullContentHtml = html.replace(/\n/g, '<br>');
+
+  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
+    '<div class="agent-badge-row" style="display:none">' + (agent ? '<span class="agent-badge">' + (agent === '系统问答' ? '智能问数' : agent) + '</span><span class="agent-badge-text">为您作答</span>' : '') + '</div>' +
+    '<div class="thinking-section" style="display:none">' + getThinkingInnerHtml(agent) + '</div>' +
+    '<div class="ai-content" style="display:none"></div>' +
+    suggestHtml +
+    '<div class="ai-actions-row" style="display:none">' + getActionsRowInner() + '</div>' +
+    '</div>';
+
+  chatArea.appendChild(msg);
+  scrollChatBottom();
+
+  const bubble = msg.querySelector('.ai-bubble');
+  const badgeRow = bubble.querySelector('.agent-badge-row');
+  const thinkSection = bubble.querySelector('.thinking-section');
+  const contentEl = bubble.querySelector('.ai-content');
+  const suggestEl = bubble.querySelector('.ai-suggestions');
+  const actionsEl = bubble.querySelector('.ai-actions-row');
+
+  // Step 1: Show badge
+  setTimeout(() => {
+    if (agent) { badgeRow.style.display = ''; badgeRow.classList.add('stream-fade-in'); }
+    
+    // Step 2: Show thinking (streaming steps)
+    setTimeout(() => {
+      thinkSection.style.display = '';
+      thinkSection.classList.add('stream-fade-in');
+      const thinkBody = thinkSection.querySelector('.thinking-body');
+      
+      if (thinkBody && thinkBody.querySelectorAll('.thinking-step').length > 0) {
+        streamThinkingSteps(thinkBody, () => {
+          // Step 3: Stream content
+          contentEl.style.display = '';
+          streamText(contentEl, fullContentHtml, 20, () => {
+            // Step 4: Show suggestions and actions
+            if (suggestEl) { suggestEl.style.display = ''; suggestEl.classList.add('stream-fade-in'); }
+            actionsEl.style.display = ''; actionsEl.classList.add('stream-fade-in');
+            isGenerating = false;
+            scrollChatBottom();
+            // Bind suggestion clicks
+            if (suggestions) {
+              msg.querySelectorAll('.ai-suggest-btn').forEach(function(btn, i) {
+                if (suggestions[i]) btn.addEventListener('click', suggestions[i].action);
+              });
+            }
+          });
+        });
+      } else {
+        // Simple thinking, just show it then stream content
+        setTimeout(() => {
+          const header = thinkSection.querySelector('.thinking-header');
+          if (header) { header.classList.add('collapsed'); }
+          if (thinkBody) thinkBody.classList.add('hidden');
+          
+          contentEl.style.display = '';
+          streamText(contentEl, fullContentHtml, 20, () => {
+            if (suggestEl) { suggestEl.style.display = ''; suggestEl.classList.add('stream-fade-in'); }
+            actionsEl.style.display = ''; actionsEl.classList.add('stream-fade-in');
+            isGenerating = false;
+            scrollChatBottom();
+            if (suggestions) {
+              msg.querySelectorAll('.ai-suggest-btn').forEach(function(btn, i) {
+                if (suggestions[i]) btn.addEventListener('click', suggestions[i].action);
+              });
+            }
+          });
+        }, 600);
+      }
+    }, 300);
+  }, 100);
+}
+
+function getThinkingInnerHtml(agent) {
+  if (!agent) agent = '系统';
+  const thinkTexts = {
+    '知识问答': [
+      { title: '检索知识库', icon: '1', content: '正在检索知识库，匹配相关文档...' },
+      { title: '文档匹配', icon: '2', content: '匹配到相关文档 3 篇，相关度评分：0.92, 0.87, 0.81' },
+      { title: '综合分析', icon: '3', content: '综合多篇文档信息，提取关键内容并生成回答...' },
+      { title: '生成完毕', icon: '✓', content: '已完成回答生成。' },
+    ],
+    '系统问答': [
+      { title: '语义解析', icon: '1', content: '正在解析问题语义...' },
+      { title: '数据查询', icon: '2', content: '查询系统数据库...' },
+      { title: '可视化生成', icon: '3', content: '数据分析与可视化...' },
+      { title: '完成', icon: '✓', content: '已完成分析。' },
+    ],
+    '智能报告': [
+      { title: '数据收集', icon: '1', content: '正在收集相关监测数据...' },
+      { title: '趋势分析', icon: '2', content: '分析数据变化趋势...' },
+      { title: '报告生成', icon: '3', content: '组织报告结构并生成内容...' },
+      { title: '完成', icon: '✓', content: '报告已生成。' },
+    ],
+    '系统巡检': [
+      { title: '系统自检', icon: '1', content: '正在执行全系统健康检查...' },
+      { title: '设备扫描', icon: '2', content: '检查所有监测设备连接状态...' },
+      { title: '异常分析', icon: '3', content: '分析异常指标，生成巡检报告...' },
+      { title: '完成', icon: '✓', content: '巡检完成。' },
+    ],
+    '分析决策': [
+      { title: '数据采集', icon: '1', content: '正在收集多维度数据...' },
+      { title: '模型分析', icon: '2', content: '建立分析模型，进行关联推理...' },
+      { title: '研判决策', icon: '3', content: '综合研判，生成决策建议...' },
+      { title: '完成', icon: '✓', content: '分析研判完成。' },
+    ],
+  };
+  const steps = thinkTexts[agent] || [
+    { title: '分析问题', icon: '1', content: '正在分析问题...' },
+    { title: '检索信息', icon: '2', content: '检索相关信息...' },
+    { title: '生成回复', icon: '✓', content: '生成回复...' },
+  ];
+  
+  const stepsHtml = steps.map(s =>
+    '<div class="thinking-step"><div class="thinking-step-title"><span class="step-icon">' + s.icon + '</span>' + s.title + '</div><div class="thinking-step-content">' + s.content + '</div></div>'
+  ).join('');
+  
+  const duration = (Math.random() * 2 + 1.5).toFixed(1);
+  return '<div class="thinking-header" onclick="toggleThinking(this)">' +
+    '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg>' +
+    '<span class="thinking-label">思考过程</span>' +
+    '<span class="thinking-duration">' + duration + 's</span></div>' +
+    '<div class="thinking-body"><div class="thinking-steps">' + stepsHtml + '</div></div>';
+}
+
+function getActionsRowInner() {
+  return '<button class="ai-action-btn" title="点赞"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v5h1.5l1-1h2l1.5 1H12V7l-2.5-4h-1L7 5v2H4z"/></svg></button>' +
+    '<button class="ai-action-btn" title="点踩"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V2h1.5l1 1h2L10 2h2v5l-2.5 4h-1L7 9V7H4z"/></svg></button>' +
+    '<button class="ai-action-btn" title="重新生成" onclick="regenerate(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7a5 5 0 019.5-1.5M12 7a5 5 0 01-9.5 1.5"/><path d="M12 2v4h-4M2 12V8h4"/></svg></button>' +
+    '<button class="ai-action-btn" title="复制" onclick="copyBubble(this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="7" height="7" rx="1"/><path d="M5 9H4a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v1"/></svg></button>' +
+    '<button class="ai-action-btn" title="朗读"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h2l3-3v10l-3-3H3V5z"/><path d="M10 4.5a3 3 0 010 5"/></svg></button>' +
+    '<button class="ai-action-btn" title="分享"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h6M7 5l3 3-3 3"/></svg></button>' +
+    '<button class="ai-action-btn" title="更多"><svg width="14" height="14" fill="currentColor"><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="11" cy="7" r="1.2"/></svg></button>';
+}
+
+// ========== System Q&A Streaming Response ==========
 function addSystemQAResponse(data, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
@@ -1829,30 +2092,7 @@ function addSystemQAResponse(data, agent) {
     '<span class="sqa-filter-tag"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="8" height="8" rx="1.5"/></svg>' + f.label + '：' + f.value + '</span>'
   ).join('');
 
-  const thinkingHtml = getSystemThinkingHtml(data.thinking);
-
-  const recommendHtml = data.recommendations.map(r =>
-    '<button class="sqa-recommend-btn" onclick="sendQuickQ(\'' + r.replace(/'/g, "\\'") + '\')">' + r + ' <span class="arrow" style="color:#9CA3AF;font-size:12px;margin-left:4px">→</span></button>'
-  ).join('');
-
-  msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
-    '<div class="agent-badge-row"><span class="agent-badge">智能问数</span><span class="agent-badge-text">为您作答</span></div>' +
-    thinkingHtml +
-    '<div class="sqa-result-card">' +
-    '<div class="sqa-filter-bar">' + filtersHtml + '</div>' +
-    data.dataHtml +
-    '<div class="sqa-summary"><div class="sqa-summary-title"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="1.5"><path d="M2 7h4l2 3 3-8h3"/></svg>分析总结</div>' + data.summary + '</div>' +
-    '</div>' +
-    '<div class="sqa-recommend">' + recommendHtml + '</div>' +
-    getActionsRow() +
-    '</div>';
-
-  chatArea.appendChild(msg);
-  scrollChatBottom();
-}
-
-function getSystemThinkingHtml(steps) {
-  const stepsHtml = steps.map(function(s) {
+  const thinkingStepsHtml = data.thinking.map(function(s) {
     let contentHtml = '';
     if (s.content) contentHtml += '<div class="thinking-step-content">' + s.content + '</div>';
     if (s.sql) contentHtml += '<div class="thinking-step-content"><code>' + s.sql + '</code></div>';
@@ -1860,83 +2100,57 @@ function getSystemThinkingHtml(steps) {
     return '<div class="thinking-step"><div class="thinking-step-title"><span class="step-icon">' + s.icon + '</span>' + s.title + '</div>' + contentHtml + '</div>';
   }).join('');
 
-  return '<div class="thinking-section">' +
-    '<div class="thinking-header collapsed" onclick="toggleThinking(this)">' +
-    '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg>' +
-    '<span class="thinking-label">分析过程</span>' +
-    '<span class="thinking-duration">已完成 · 共' + steps.length + '个步骤</span>' +
-    '</div>' +
-    '<div class="thinking-body hidden"><div class="thinking-steps">' + stepsHtml + '</div></div>' +
-    '</div>';
-}
-
-// ========== Common Response Functions ==========
-function addUserBubble(text) {
-  const chatArea = document.getElementById('chatArea');
-  const msg = document.createElement('div');
-  msg.className = 'chat-msg user';
-  msg.innerHTML = '<div class="msg-bubble user-bubble">' + escapeHtml(text) + '</div>';
-  chatArea.appendChild(msg);
-}
-
-function getAgentBadgeHtml(agent) {
-  if (!agent) return '';
-  const displayName = agent === '系统问答' ? '智能问数' : agent;
-  return '<div class="agent-badge-row"><span class="agent-badge">' + displayName + '</span><span class="agent-badge-text">为您作答</span></div>';
-}
-
-function getThinkingHtml(agent) {
-  if (!agent) agent = '系统';
-  const thinkTexts = {
-    '知识问答': '正在检索知识库...\n匹配到相关文档 3 篇\n综合分析并生成回答...',
-    '系统问答': '正在解析问题语义...\n查询系统数据库...\n数据分析与可视化...',
-    '智能报告': '正在收集相关数据...\n分析数据趋势...\n组织报告结构...\n生成报告内容...',
-    '智能报表': '正在查询数据表...\n汇总统计数据...\n生成报表格式...',
-    '系统巡检': '正在执行系统自检...\n检查设备连接状态...\n分析异常指标...',
-    '分析决策': '正在收集多维度数据...\n建立分析模型...\n推理与研判...',
-  };
-  const text = thinkTexts[agent] || '正在分析问题...\n检索相关信息...\n生成回复...';
-  const duration = (Math.random() * 2 + 1.5).toFixed(1);
-  return '<div class="thinking-section"><div class="thinking-header collapsed" onclick="toggleThinking(this)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg><span class="thinking-label">思考过程</span><span class="thinking-duration">' + duration + 's</span></div><div class="thinking-body hidden">' + text.replace(/\n/g, '<br>') + '</div></div>';
-}
-
-function toggleThinking(header) {
-  header.classList.toggle('collapsed');
-  header.nextElementSibling.classList.toggle('hidden');
-}
-
-function addAITextResponse(html, suggestions, agent) {
-  const chatArea = document.getElementById('chatArea');
-  const msg = document.createElement('div');
-  msg.className = 'chat-msg ai';
-
-  let suggestHtml = '';
-  if (suggestions && suggestions.length) {
-    suggestHtml = '<div class="ai-suggestions">' +
-      suggestions.map(function(s, i) { return '<button class="ai-suggest-btn" data-idx="' + i + '">' + s.label + ' <span class="arrow">→</span></button>'; }).join('') +
-      '</div>';
-  }
+  const recommendHtml = data.recommendations.map(r =>
+    '<button class="sqa-recommend-btn" onclick="sendQuickQ(\'' + r.replace(/'/g, "\\'") + '\')">' + r + ' <span class="arrow" style="color:#9CA3AF;font-size:12px;margin-left:4px">→</span></button>'
+  ).join('');
 
   msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
-    getAgentBadgeHtml(agent) +
-    getThinkingHtml(agent) +
-    '<div class="ai-content">' + html.replace(/\n/g, '<br>') + '</div>' +
-    suggestHtml +
-    getActionsRow() +
+    '<div class="agent-badge-row" style="display:none"><span class="agent-badge">智能问数</span><span class="agent-badge-text">为您作答</span></div>' +
+    '<div class="thinking-section" style="display:none"><div class="thinking-header" onclick="toggleThinking(this)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5l5 4.5-5 4.5"/></svg><span class="thinking-label">分析过程</span><span class="thinking-duration">已完成 · 共' + data.thinking.length + '个步骤</span></div><div class="thinking-body"><div class="thinking-steps">' + thinkingStepsHtml + '</div></div></div>' +
+    '<div class="sqa-result-card" style="display:none"><div class="sqa-filter-bar">' + filtersHtml + '</div>' + data.dataHtml + '<div class="sqa-summary"><div class="sqa-summary-title"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="1.5"><path d="M2 7h4l2 3 3-8h3"/></svg>分析总结</div><span class="sqa-summary-text"></span></div></div>' +
+    '<div class="sqa-recommend" style="display:none">' + recommendHtml + '</div>' +
+    '<div class="ai-actions-row" style="display:none">' + getActionsRowInner() + '</div>' +
     '</div>';
-
-  if (suggestions) {
-    setTimeout(function() {
-      msg.querySelectorAll('.ai-suggest-btn').forEach(function(btn, i) {
-        btn.addEventListener('click', suggestions[i].action);
-      });
-    }, 0);
-  }
 
   chatArea.appendChild(msg);
   scrollChatBottom();
+
+  const bubble = msg.querySelector('.ai-bubble');
+  const badgeRow = bubble.querySelector('.agent-badge-row');
+  const thinkSection = bubble.querySelector('.thinking-section');
+  const resultCard = bubble.querySelector('.sqa-result-card');
+  const summaryText = bubble.querySelector('.sqa-summary-text');
+  const recommendEl = bubble.querySelector('.sqa-recommend');
+  const actionsEl = bubble.querySelector('.ai-actions-row');
+
+  // Stream sequence
+  setTimeout(() => {
+    badgeRow.style.display = ''; badgeRow.classList.add('stream-fade-in');
+    
+    setTimeout(() => {
+      thinkSection.style.display = ''; thinkSection.classList.add('stream-fade-in');
+      const thinkBody = thinkSection.querySelector('.thinking-body');
+      
+      streamThinkingSteps(thinkBody, () => {
+        // Show result card
+        resultCard.style.display = ''; resultCard.classList.add('stream-fade-in');
+        scrollChatBottom();
+        
+        // Stream summary text
+        setTimeout(() => {
+          streamText(summaryText, data.summary, 20, () => {
+            recommendEl.style.display = ''; recommendEl.classList.add('stream-fade-in');
+            actionsEl.style.display = ''; actionsEl.classList.add('stream-fade-in');
+            isGenerating = false;
+            scrollChatBottom();
+          });
+        }, 400);
+      });
+    }, 300);
+  }, 100);
 }
 
+// Keep legacy functions for report and data responses (with streaming)
 function addAIResponseWithReport(text, reportTitle, agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
@@ -1944,37 +2158,97 @@ function addAIResponseWithReport(text, reportTitle, agent) {
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 
+  const contentHtml = '好的，我将为您生成「' + reportTitle + '」，已整理相关数据并生成完整报告内容。';
+
   msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
-    getAgentBadgeHtml(agent) +
-    getThinkingHtml(agent) +
-    '<div class="ai-content">好的，我将为您生成「' + reportTitle + '」，已整理相关数据并生成完整报告内容。</div>' +
-    '<div class="report-card-inline" onclick="openReportPanel(\'' + reportTitle + '\')">' +
-    '<div class="report-card-icon">📄</div><div class="report-card-info"><div class="report-card-title">' + reportTitle + '（...</div><div class="report-card-meta">创建时间: ' + timeStr + '</div></div>' +
+    '<div class="agent-badge-row" style="display:none">' + (agent ? '<span class="agent-badge">' + agent + '</span><span class="agent-badge-text">为您作答</span>' : '') + '</div>' +
+    '<div class="thinking-section" style="display:none">' + getThinkingInnerHtml(agent) + '</div>' +
+    '<div class="ai-content" style="display:none"></div>' +
+    '<div class="report-card-inline" style="display:none" onclick="openReportPanel(\'' + reportTitle + '\')">' +
+    '<div class="report-card-icon">📄</div><div class="report-card-info"><div class="report-card-title">' + reportTitle + '</div><div class="report-card-meta">创建时间: ' + timeStr + '</div></div>' +
     '<div class="report-card-thumb"><div class="report-card-thumb-inner"><div style="font-size:8px;font-weight:600;color:#374151;margin-bottom:2px">' + reportTitle + '</div><div style="font-size:6px;color:#9CA3AF">第一章 监测概况...</div></div></div></div>' +
-    '<div class="switch-reply-link" onclick="toggleDirectReply(this)">改用对话直接回答 ›</div>' +
-    '<div class="ai-content" style="margin-top:4px;">这份报告全面覆盖了监测区域的运行状况。需要我帮你<strong>调整报告章节</strong>吗？</div>' +
-    '<div class="ai-suggestions"><button class="ai-suggest-btn" onclick="sendQuickQ(\'增加城北片区的详细压力分析\')">增加城北片区的详细压力分析 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'添加近半年的趋势对比图表\')">添加近半年的趋势对比图表 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'导出PDF版本报告\')">导出PDF版本报告 <span class="arrow">→</span></button></div>' +
-    getActionsRow(6) +
+    '<div class="ai-suggestions" style="display:none"><button class="ai-suggest-btn" onclick="sendQuickQ(\'增加城北片区的详细压力分析\')">增加城北片区的详细压力分析 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'添加近半年的趋势对比图表\')">添加近半年的趋势对比图表 <span class="arrow">→</span></button></div>' +
+    '<div class="ai-actions-row" style="display:none">' + getActionsRowInner() + '</div>' +
     '</div>';
 
   chatArea.appendChild(msg);
   scrollChatBottom();
+
+  const bubble = msg.querySelector('.ai-bubble');
+  const badgeRow = bubble.querySelector('.agent-badge-row');
+  const thinkSection = bubble.querySelector('.thinking-section');
+  const contentEl = bubble.querySelector('.ai-content');
+  const reportCard = bubble.querySelector('.report-card-inline');
+  const suggestEl = bubble.querySelector('.ai-suggestions');
+  const actionsEl = bubble.querySelector('.ai-actions-row');
+
+  setTimeout(() => {
+    if (agent) { badgeRow.style.display = ''; badgeRow.classList.add('stream-fade-in'); }
+    setTimeout(() => {
+      thinkSection.style.display = ''; thinkSection.classList.add('stream-fade-in');
+      const thinkBody = thinkSection.querySelector('.thinking-body');
+      streamThinkingSteps(thinkBody, () => {
+        contentEl.style.display = '';
+        streamText(contentEl, contentHtml, 25, () => {
+          reportCard.style.display = ''; reportCard.classList.add('stream-fade-in');
+          setTimeout(() => {
+            suggestEl.style.display = ''; suggestEl.classList.add('stream-fade-in');
+            actionsEl.style.display = ''; actionsEl.classList.add('stream-fade-in');
+            isGenerating = false;
+            scrollChatBottom();
+          }, 400);
+        });
+      });
+    }, 300);
+  }, 100);
 }
 
 function addAIDataResponse(agent) {
   const chatArea = document.getElementById('chatArea');
   const msg = document.createElement('div');
   msg.className = 'chat-msg ai';
+  
+  const dataCardHtml = '<div class="data-card"><div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div><div class="data-card-row"><span class="data-label">管线总长度</span><span><span class="data-value">3,842km</span></span></div><div class="data-card-row"><span class="data-label">在线设备数</span><span><span class="data-value">1,204</span><span class="data-trend down">↓ 3</span></span></div><div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#EF4444">3</span></span></div><div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#10B981;font-size:12px;margin-left:6px">正常</span></span></div></div>';
+
   msg.innerHTML = '<div class="msg-bubble ai-bubble">' +
-    getAgentBadgeHtml(agent) +
-    getThinkingHtml(agent) +
-    '<div class="ai-content">当前全市供水管网运行状态概览：</div>' +
-    '<div class="data-card"><div class="data-card-row"><span class="data-label">监测点位总数</span><span><span class="data-value">1,286</span><span class="data-trend up">↑ 12</span></span></div><div class="data-card-row"><span class="data-label">管线总长度</span><span><span class="data-value">3,842km</span></span></div><div class="data-card-row"><span class="data-label">在线设备数</span><span><span class="data-value">1,204</span><span class="data-trend down">↓ 3</span></span></div><div class="data-card-row"><span class="data-label">今日报警数</span><span><span class="data-value" style="color:#EF4444">3</span></span></div><div class="data-card-row"><span class="data-label">管网压力</span><span><span class="data-value">0.32MPa</span><span style="color:#10B981;font-size:12px;margin-left:6px">正常</span></span></div></div>' +
-    '<div class="ai-suggestions"><button class="ai-suggest-btn" onclick="openReportPanel(\'供水管网运行报告\')">生成详细运行报告 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'查看各区域压力分布详情\')">查看各区域压力分布详情 <span class="arrow">→</span></button><button class="ai-suggest-btn">导出数据 <span class="arrow">→</span></button></div>' +
-    getActionsRow() +
+    '<div class="agent-badge-row" style="display:none">' + (agent ? '<span class="agent-badge">' + agent + '</span><span class="agent-badge-text">为您作答</span>' : '') + '</div>' +
+    '<div class="thinking-section" style="display:none">' + getThinkingInnerHtml(agent) + '</div>' +
+    '<div class="ai-content" style="display:none"></div>' +
+    '<div class="data-card-wrapper" style="display:none">' + dataCardHtml + '</div>' +
+    '<div class="ai-suggestions" style="display:none"><button class="ai-suggest-btn" onclick="openReportPanel(\'供水管网运行报告\')">生成详细运行报告 <span class="arrow">→</span></button><button class="ai-suggest-btn" onclick="sendQuickQ(\'查看各区域压力分布详情\')">查看各区域压力分布详情 <span class="arrow">→</span></button></div>' +
+    '<div class="ai-actions-row" style="display:none">' + getActionsRowInner() + '</div>' +
     '</div>';
+
   chatArea.appendChild(msg);
   scrollChatBottom();
+
+  const bubble = msg.querySelector('.ai-bubble');
+  const badgeRow = bubble.querySelector('.agent-badge-row');
+  const thinkSection = bubble.querySelector('.thinking-section');
+  const contentEl = bubble.querySelector('.ai-content');
+  const dataCard = bubble.querySelector('.data-card-wrapper');
+  const suggestEl = bubble.querySelector('.ai-suggestions');
+  const actionsEl = bubble.querySelector('.ai-actions-row');
+
+  setTimeout(() => {
+    if (agent) { badgeRow.style.display = ''; badgeRow.classList.add('stream-fade-in'); }
+    setTimeout(() => {
+      thinkSection.style.display = ''; thinkSection.classList.add('stream-fade-in');
+      const thinkBody = thinkSection.querySelector('.thinking-body');
+      streamThinkingSteps(thinkBody, () => {
+        contentEl.style.display = '';
+        streamText(contentEl, '当前全市供水管网运行状态概览：', 25, () => {
+          dataCard.style.display = ''; dataCard.classList.add('stream-fade-in');
+          setTimeout(() => {
+            suggestEl.style.display = ''; suggestEl.classList.add('stream-fade-in');
+            actionsEl.style.display = ''; actionsEl.classList.add('stream-fade-in');
+            isGenerating = false;
+            scrollChatBottom();
+          }, 400);
+        });
+      });
+    }, 300);
+  }, 100);
 }
 
 function getActionsRow(refCount) {
