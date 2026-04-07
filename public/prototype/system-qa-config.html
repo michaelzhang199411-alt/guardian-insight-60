@@ -405,24 +405,37 @@ tr:hover td { background: #F9FAFB; }
 
       <!-- 维度库 -->
       <div class="tab-panel" id="tab-dimensions">
-        <div class="panel">
-          <div class="panel-toolbar">
-            <div class="toolbar-left">
-              <input type="text" class="toolbar-search" placeholder="搜索维度名称/ID...">
-              <select class="filter-select"><option>全部状态</option><option>已启用</option><option>已禁用</option></select>
-              <button class="btn">查询</button>
+        <div style="display:flex;gap:0;height:calc(100vh - 180px);">
+          <!-- Left: data table tree -->
+          <div style="width:300px;min-width:300px;background:#fff;border:1px solid #E5E7EB;border-radius:10px 0 0 10px;display:flex;flex-direction:column;">
+            <div style="padding:14px 16px;border-bottom:1px solid #E5E7EB;font-size:14px;font-weight:600;color:#1F2937;display:flex;align-items:center;gap:8px;">
+              <svg width="16" height="16" fill="none" stroke="#2563EB" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+              数据表清单
             </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn">批量导入</button>
-              <button class="btn">导出</button>
-              <button class="btn btn-primary" onclick="showDimModal()">+ 新增维度</button>
-            </div>
+            <div style="flex:1;overflow-y:auto;padding:8px;" id="dimTableTree"></div>
           </div>
-          <table>
-            <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
-            <tbody id="dimensionsBody"></tbody>
-          </table>
-          <div class="pagination"><span>共 6 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div></div>
+          <!-- Right: dimension list for selected table -->
+          <div style="flex:1;background:#fff;border:1px solid #E5E7EB;border-left:none;border-radius:0 10px 10px 0;display:flex;flex-direction:column;">
+            <div class="panel-toolbar">
+              <div class="toolbar-left">
+                <input type="text" class="toolbar-search" placeholder="搜索维度名称/ID..." id="dimSearchInput">
+                <select class="filter-select" id="dimStatusFilter"><option value="">全部状态</option><option>已启用</option><option>已禁用</option></select>
+                <button class="btn" onclick="renderDimTable()">查询</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn">批量导入</button>
+                <button class="btn">导出</button>
+                <button class="btn btn-primary" onclick="showDimModal()">+ 新增维度</button>
+              </div>
+            </div>
+            <div style="flex:1;overflow-y:auto;">
+              <table>
+                <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
+                <tbody id="dimensionsBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination" id="dimPagination"></div>
+          </div>
         </div>
       </div>
 
