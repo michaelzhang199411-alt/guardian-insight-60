@@ -59,6 +59,18 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* Stat Cards */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card {
+  background: #fff; border-radius: 8px; padding: 16px 20px; border: 1px solid #E5E7EB;
+}
+.stat-card-label { font-size: 14px; color: #6B7280; margin-bottom: 6px; }
+.stat-card-value { font-size: 28px; font-weight: 700; }
+.stat-card-value.blue { color: #2563EB; }
+.stat-card-value.cyan { color: #06B6D4; }
+.stat-card-value.orange { color: #F59E0B; }
+.stat-card-value.red { color: #EF4444; }
+
 /* Common Panel */
 .panel { background: #fff; border-radius: 10px; border: 1px solid #E5E7EB; overflow: hidden; }
 .panel-toolbar {
@@ -67,18 +79,26 @@ body {
 }
 .toolbar-left { display: flex; align-items: center; gap: 8px; }
 .toolbar-search {
-  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; width: 220px; outline: none;
+  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; width: 200px; outline: none;
 }
 .toolbar-search:focus { border-color: #2563EB; }
+.toolbar-hint {
+  font-size: 12px; color: #9CA3AF; text-align: right; margin-bottom: 4px; padding-right: 4px;
+}
 .btn {
   padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB;
   background: #fff; color: #374151; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
 }
 .btn:hover { border-color: #2563EB; color: #2563EB; }
 .btn-primary { background: #2563EB; color: #fff; border-color: #2563EB; }
-.btn-primary:hover { background: #1D4ED8; }
+.btn-primary:hover { background: #1D4ED8; color: #fff; }
+.btn-help {
+  width: 28px; height: 28px; border-radius: 50%; background: #EFF6FF; color: #2563EB;
+  border: 1px solid #BFDBFE; font-size: 14px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 0;
+}
 .filter-select {
-  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff;
+  padding: 7px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff; min-width: 120px;
 }
 
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -91,29 +111,87 @@ tr:hover td { background: #F9FAFB; }
 
 .status-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
 .status-tag.enabled { background: #ECFDF5; color: #059669; }
-.status-tag.disabled { background: #F3F4F6; color: #9CA3AF; }
+.status-tag.disabled { background: #FEF2F2; color: #EF4444; }
 .action-link { color: #2563EB; cursor: pointer; font-size: 13px; background: none; border: none; margin-right: 8px; }
 .action-link:hover { text-decoration: underline; }
 .action-link.danger { color: #EF4444; }
 
 .pagination {
   padding: 12px 20px; border-top: 1px solid #E5E7EB;
-  display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #6B7280;
+  display: flex; align-items: center; justify-content: flex-end; font-size: 13px; color: #6B7280; gap: 4px;
 }
-.page-btns { display: flex; gap: 4px; }
 .page-btn {
   width: 32px; height: 32px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff;
   cursor: pointer; font-size: 13px; color: #374151; display: flex; align-items: center; justify-content: center;
 }
 .page-btn.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+.page-btn:hover:not(.active) { border-color: #2563EB; color: #2563EB; }
 
-/* Modal */
+/* Full-screen Modal / Drawer */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
-  display: none; align-items: center; justify-content: center; z-index: 100;
+  display: none; align-items: stretch; justify-content: center; z-index: 100;
 }
 .modal-overlay.show { display: flex; }
-.modal {
+
+.modal-fullscreen {
+  background: #fff; width: 100%; height: 100%; display: flex; flex-direction: column;
+}
+.modal-fs-header {
+  padding: 14px 24px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;
+  background: #fff; flex-shrink: 0;
+}
+.modal-fs-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; }
+.modal-close {
+  width: 28px; height: 28px; border: none; background: #F3F4F6; border-radius: 6px; cursor: pointer;
+  font-size: 18px; color: #6B7280; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: #E5E7EB; }
+.modal-fs-body { flex: 1; overflow-y: auto; padding: 24px 32px; background: #F9FAFB; }
+.modal-fs-footer {
+  padding: 12px 24px; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 8px;
+  background: #fff; flex-shrink: 0;
+}
+
+/* Form styles for detail/edit */
+.form-section-title {
+  font-size: 16px; font-weight: 600; color: #1F2937; margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.form-row { display: flex; gap: 24px; margin-bottom: 16px; }
+.form-col { flex: 1; }
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;
+}
+.form-label .required { color: #EF4444; margin-right: 2px; }
+.form-label .hint { font-weight: 400; color: #9CA3AF; font-size: 12px; margin-left: 6px; }
+.form-input {
+  width: 100%; padding: 9px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none;
+  background: #fff; color: #1F2937;
+}
+.form-input:focus { border-color: #2563EB; }
+.form-input.readonly {
+  background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;
+}
+.form-textarea { resize: vertical; min-height: 100px; font-family: inherit; }
+.form-select {
+  width: 100%; padding: 9px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff;
+}
+.radio-group { display: flex; gap: 20px; align-items: center; margin-top: 8px; }
+.radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #374151; }
+
+/* Dimension tags */
+.dim-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.dim-tag {
+  padding: 8px 24px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB;
+  background: #fff; color: #374151; transition: all 0.15s; user-select: none;
+}
+.dim-tag.selected { background: #2563EB; color: #fff; border-color: #2563EB; }
+.dim-tag:hover:not(.selected) { border-color: #2563EB; color: #2563EB; }
+
+/* Small modal for simple forms */
+.modal-sm {
   background: #fff; border-radius: 12px; width: 680px; max-height: 85vh; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
@@ -121,28 +199,84 @@ tr:hover td { background: #F9FAFB; }
   padding: 16px 20px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;
 }
 .modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; }
-.modal-close {
-  width: 28px; height: 28px; border: none; background: #F3F4F6; border-radius: 6px; cursor: pointer;
-  font-size: 16px; color: #6B7280; display: flex; align-items: center; justify-content: center;
-}
-.modal-close:hover { background: #E5E7EB; }
 .modal-body { padding: 20px; }
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-.form-label .required { color: #EF4444; }
-.form-input { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; }
-.form-input:focus { border-color: #2563EB; }
-.form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-.form-select { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none; background: #fff; }
 .modal-footer { padding: 12px 20px; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 8px; }
 
+/* Derived/Composite add modal - split layout */
+.modal-split { background: #fff; width: 100%; height: 100%; display: flex; flex-direction: column; }
+.modal-split-header {
+  padding: 14px 24px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-split-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; }
+.modal-split-body { flex: 1; display: flex; overflow: hidden; }
+.split-left {
+  width: 45%; border-right: 1px solid #E5E7EB; display: flex; flex-direction: column; background: #FAFBFC;
+}
+.split-right { width: 55%; overflow-y: auto; padding: 24px; }
+.split-title { font-size: 15px; font-weight: 600; color: #1F2937; margin-bottom: 16px; }
+
+/* Chat area in split-left */
+.chat-area { flex: 1; overflow-y: auto; padding: 20px; }
+.chat-msg { margin-bottom: 16px; max-width: 90%; }
+.chat-msg.bot { margin-right: auto; }
+.chat-msg.user { margin-left: auto; }
+.chat-bubble {
+  padding: 12px 16px; border-radius: 12px; font-size: 13px; line-height: 1.6; white-space: pre-line;
+}
+.chat-msg.bot .chat-bubble {
+  background: #fff; border: 1px solid #E5E7EB; color: #374151; border-top-left-radius: 4px;
+}
+.chat-msg.user .chat-bubble {
+  background: #2563EB; color: #fff; border-top-right-radius: 4px;
+}
+.chat-apply-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 16px; border: 1px solid #E5E7EB;
+  border-radius: 6px; background: #fff; color: #374151; cursor: pointer; font-size: 13px; margin-top: 8px; float: right;
+}
+.chat-apply-btn:hover { border-color: #2563EB; color: #2563EB; }
+.chat-input-bar {
+  padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; gap: 8px; background: #fff; flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; padding: 9px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; outline: none;
+}
+.chat-input:focus { border-color: #2563EB; }
+.chat-send-btn {
+  padding: 8px 16px; background: #2563EB; color: #fff; border: none; border-radius: 6px; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; gap: 4px;
+}
+.chat-send-btn:hover { background: #1D4ED8; }
+
+/* Related metric card */
+.related-metric-card {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid #E5E7EB;
+  border-radius: 8px; margin-bottom: 8px; background: #F9FAFB;
+}
+.related-metric-icon {
+  width: 40px; height: 40px; background: #2563EB; border-radius: 8px; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;
+}
+.related-metric-info { flex: 1; }
+.related-metric-name { font-size: 14px; font-weight: 600; color: #1F2937; }
+.related-metric-meta { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.related-metric-remove {
+  color: #EF4444; font-size: 18px; cursor: pointer; background: none; border: none; padding: 4px;
+}
+.related-metric-remove:hover { color: #DC2626; }
+
+.modal-split-footer {
+  padding: 12px 24px; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0;
+}
+
+/* detail rows for simple detail modal */
+.detail-row { display: flex; gap: 16px; margin-bottom: 12px; }
+.detail-label { font-size: 12px; color: #9CA3AF; min-width: 80px; }
+.detail-value { font-size: 13px; color: #1F2937; flex: 1; }
 .code-block {
   background: #1F2937; color: #A5F3FC; padding: 12px; border-radius: 6px; font-family: 'Courier New', monospace;
   font-size: 12px; overflow-x: auto; white-space: pre; margin-top: 4px;
 }
-.detail-row { display: flex; gap: 16px; margin-bottom: 12px; }
-.detail-label { font-size: 12px; color: #9CA3AF; min-width: 80px; }
-.detail-value { font-size: 13px; color: #1F2937; flex: 1; }
 .version-item {
   padding: 10px 14px; border: 1px solid #E5E7EB; border-radius: 6px; margin-bottom: 8px;
   display: flex; justify-content: space-between; align-items: center; font-size: 13px;
@@ -205,24 +339,67 @@ tr:hover td { background: #F9FAFB; }
 
       <!-- 指标库 -->
       <div class="tab-panel active" id="tab-metrics">
+        <!-- Stat cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-label">总指标数</div>
+            <div class="stat-card-value blue" id="statTotal">10</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">基础指标</div>
+            <div class="stat-card-value cyan" id="statBasic">6</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">衍生指标</div>
+            <div class="stat-card-value orange" id="statDerived">2</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">复合指标</div>
+            <div class="stat-card-value red" id="statComposite">2</div>
+          </div>
+        </div>
+
         <div class="panel">
-          <div class="panel-toolbar">
+          <div style="padding:4px 20px 0;text-align:right;">
+            <span class="toolbar-hint">(仅支持新增衍生/复合指标，基础指标需联系管理员新增)</span>
+          </div>
+          <div class="panel-toolbar" style="border-top:none;padding-top:8px;">
             <div class="toolbar-left">
-              <input type="text" class="toolbar-search" placeholder="搜索指标名称/ID...">
-              <select class="filter-select"><option>全部状态</option><option>已启用</option><option>已禁用</option></select>
-              <button class="btn">查询</button>
+              <input type="text" class="toolbar-search" placeholder="搜索指标名称/ID">
+              <select class="filter-select" id="filterType">
+                <option value="">指标类型</option>
+                <option>基础指标</option>
+                <option>衍生指标</option>
+                <option>复合指标</option>
+              </select>
+              <select class="filter-select" id="filterStatus">
+                <option value="">指标状态</option>
+                <option>已启用</option>
+                <option>已禁用</option>
+              </select>
+              <select class="filter-select" id="filterDim">
+                <option value="">业务维度</option>
+                <option>燃气</option>
+                <option>排水</option>
+                <option>供水</option>
+                <option>桥梁</option>
+              </select>
+              <button class="btn" onclick="filterMetrics()">查询</button>
             </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn">导入</button>
+            <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn">导出</button>
-              <button class="btn btn-primary" onclick="showMetricModal()">+ 新增指标</button>
+              <button class="btn btn-primary" onclick="showAddMetricModal()">新增指标</button>
+              <button class="btn-help" title="帮助说明">?</button>
             </div>
           </div>
           <table>
-            <thead><tr><th>指标ID</th><th>指标名称</th><th>别名</th><th>业务口径</th><th>来源表</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+            <thead><tr>
+              <th>指标ID</th><th>指标名称</th><th>单位</th><th>指标别名</th>
+              <th>业务口径描述</th><th>指标类型</th><th>状态</th><th>更新时间</th><th>操作</th>
+            </tr></thead>
             <tbody id="metricsBody"></tbody>
           </table>
-          <div class="pagination"><span>共 8 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+          <div class="pagination" id="metricsPagination"></div>
         </div>
       </div>
 
@@ -245,7 +422,7 @@ tr:hover td { background: #F9FAFB; }
             <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
             <tbody id="dimensionsBody"></tbody>
           </table>
-          <div class="pagination"><span>共 6 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+          <div class="pagination"><span>共 6 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div></div>
         </div>
       </div>
 
@@ -266,7 +443,7 @@ tr:hover td { background: #F9FAFB; }
             <thead><tr><th>场景名称</th><th>类别</th><th>描述</th><th>关联指标数</th><th>业务规则</th><th>状态</th><th>操作</th></tr></thead>
             <tbody id="scenesBody"></tbody>
           </table>
-          <div class="pagination"><span>共 5 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+          <div class="pagination"><span>共 5 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div></div>
         </div>
       </div>
 
@@ -285,44 +462,135 @@ tr:hover td { background: #F9FAFB; }
             <thead><tr><th>名称</th><th>类型</th><th>描述</th><th>状态</th><th>版本</th><th>更新时间</th><th>操作</th></tr></thead>
             <tbody id="knowledgeBody"></tbody>
           </table>
-          <div class="pagination"><span>共 6 条</span><div class="page-btns"><button class="page-btn active">1</button></div></div>
+          <div class="pagination"><span>共 6 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div></div>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Metric Modal -->
-<div class="modal-overlay" id="metricModal">
-  <div class="modal">
-    <div class="modal-header"><h3>新增指标</h3><button class="modal-close" onclick="closeModal('metricModal')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label"><span class="required">*</span> 指标ID</label><input class="form-input" placeholder="如 M001"></div>
-      <div class="form-group"><label class="form-label"><span class="required">*</span> 指标名称</label><input class="form-input" placeholder="如 预警总数"></div>
-      <div class="form-group"><label class="form-label">别名</label><input class="form-input" placeholder="如 告警数量、报警数"></div>
-      <div class="form-group"><label class="form-label"><span class="required">*</span> 业务口径</label><textarea class="form-input form-textarea" placeholder="描述指标的业务含义与应用场景"></textarea></div>
-      <div class="form-group"><label class="form-label">计算逻辑（SQL/公式）</label><textarea class="form-input form-textarea" placeholder="COUNT(*) FROM warn_info WHERE status='active'" style="font-family:monospace"></textarea></div>
-      <div class="form-group"><label class="form-label">来源物理表</label><input class="form-input" placeholder="如 dws_gsps_common_warn_info_view"></div>
-      <div class="form-group"><label class="form-label">映射字段</label><input class="form-input" placeholder="如 warn_count, warn_id"></div>
-      <div style="display:flex;gap:16px;">
-        <div class="form-group" style="flex:1"><label class="form-label">状态</label><select class="form-select"><option>启用</option><option>禁用</option></select></div>
+<!-- ==================== BASIC METRIC DETAIL MODAL ==================== -->
+<div class="modal-overlay" id="basicDetailModal">
+  <div class="modal-fullscreen">
+    <div class="modal-fs-header">
+      <h3 id="basicDetailTitle">基础指标详情页</h3>
+      <button class="modal-close" onclick="closeModal('basicDetailModal')">×</button>
+    </div>
+    <div class="modal-fs-body" id="basicDetailBody"></div>
+    <div class="modal-fs-footer" id="basicDetailFooter">
+      <button class="btn" onclick="closeModal('basicDetailModal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('basicDetailModal')">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DERIVED/COMPOSITE ADD MODAL ==================== -->
+<div class="modal-overlay" id="derivedAddModal">
+  <div class="modal-split">
+    <div class="modal-split-header">
+      <h3 id="derivedAddTitle">新增指标</h3>
+      <button class="modal-close" onclick="closeModal('derivedAddModal')">×</button>
+    </div>
+    <div class="modal-split-body">
+      <div class="split-left">
+        <div class="chat-area" id="derivedChatArea">
+          <div class="chat-msg bot">
+            <div class="chat-bubble">你好！我可以帮你配置衍生指标/复合指标的计算规则。请告诉我你想如何计算这个指标？</div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input class="chat-input" id="derivedChatInput" placeholder="描述你的计算需求，例：我想计算设备实时在线率，就是离线设备除以设备总数">
+          <button class="chat-send-btn" onclick="sendDerivedChat()">✈ 发送</button>
+        </div>
+      </div>
+      <div class="split-right" id="derivedFormArea">
+        <div class="split-title">结构化输出</div>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 指标名称<span class="hint">建议清晰易懂，不超过50字</span></label>
+              <input class="form-input" id="drvName" placeholder="例如：预警总数">
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 指标编码</label>
+              <input class="form-input readonly" id="drvCode" value="ZB_001" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label">指标别名<span class="hint">用于同一个指标的不同描述或口语化描述，多个以','隔开</span></label>
+              <input class="form-input" id="drvAlias" placeholder="例如：预警、警情">
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label">指标单位</label>
+              <input class="form-input" id="drvUnit" placeholder="例如：起、个、%">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span> 业务口径描述<span class="hint">详细描述指标的业务定义、统计范围、适用场景，不超过200字</span></label>
+          <textarea class="form-input form-textarea" id="drvDesc" placeholder="例如：统计范围内，按照预警编号去重后的预警总数"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 指标类型</label>
+              <select class="form-select" id="drvType">
+                <option>衍生指标</option>
+                <option>复合指标</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> 指标状态</label>
+              <select class="form-select" id="drvStatus">
+                <option>已启用</option>
+                <option>已禁用</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <label class="form-label" style="margin:0"><span class="required">*</span> 关联指标</label>
+            <button class="btn btn-primary" style="font-size:12px;padding:4px 12px" onclick="addRelatedMetric()">添加指标</button>
+          </div>
+          <div id="relatedMetricsList">
+            <div class="related-metric-card">
+              <div class="related-metric-icon">001</div>
+              <div class="related-metric-info">
+                <div class="related-metric-name">设备日在线率</div>
+                <div class="related-metric-meta">ZB_001 &nbsp; 单位:% &nbsp; 口径/维度:专项（燃气）</div>
+              </div>
+              <button class="related-metric-remove" onclick="this.parentElement.remove()">×</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label"><span class="required">*</span> 计算规则描述</label>
+          <input class="form-input" id="drvFormula" placeholder="例如：sum(设备日在线率)/当月天数" value="sum(设备日在线率)/当月天数">
+        </div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('metricModal')">取消</button><button class="btn btn-primary" onclick="closeModal('metricModal')">确认保存</button></div>
+    <div class="modal-split-footer">
+      <button class="btn" onclick="closeModal('derivedAddModal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('derivedAddModal')">保存并新增</button>
+    </div>
   </div>
 </div>
 
-<!-- Detail Modal -->
-<div class="modal-overlay" id="detailModal">
-  <div class="modal" style="width:720px">
-    <div class="modal-header"><h3 id="detailTitle">指标详情</h3><button class="modal-close" onclick="closeModal('detailModal')">×</button></div>
-    <div class="modal-body" id="detailBody"></div>
-  </div>
-</div>
-
-<!-- Dimension Modal -->
+<!-- ==================== Simple Modals for other tabs ==================== -->
 <div class="modal-overlay" id="dimModal">
-  <div class="modal">
+  <div class="modal-sm">
     <div class="modal-header"><h3>新增维度</h3><button class="modal-close" onclick="closeModal('dimModal')">×</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="form-label"><span class="required">*</span> 维度ID</label><input class="form-input" placeholder="如 D001"></div>
@@ -336,9 +604,8 @@ tr:hover td { background: #F9FAFB; }
   </div>
 </div>
 
-<!-- Scene Modal -->
 <div class="modal-overlay" id="sceneModal">
-  <div class="modal" style="width:720px">
+  <div class="modal-sm" style="width:720px">
     <div class="modal-header"><h3>新增场景</h3><button class="modal-close" onclick="closeModal('sceneModal')">×</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="form-label"><span class="required">*</span> 场景名称</label><input class="form-input" placeholder="如 城市安全态势"></div>
@@ -357,9 +624,8 @@ tr:hover td { background: #F9FAFB; }
   </div>
 </div>
 
-<!-- Knowledge Modal -->
 <div class="modal-overlay" id="knowledgeModal">
-  <div class="modal">
+  <div class="modal-sm">
     <div class="modal-header"><h3>新增规则</h3><button class="modal-close" onclick="closeModal('knowledgeModal')">×</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="form-label"><span class="required">*</span> 名称</label><input class="form-input" placeholder="如 处置率预警规则"></div>
@@ -380,59 +646,340 @@ function switchTab(name) {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function showMetricModal() { document.getElementById('metricModal').classList.add('show'); }
 function showDimModal() { document.getElementById('dimModal').classList.add('show'); }
 function showSceneModal() { document.getElementById('sceneModal').classList.add('show'); }
 function showKnowledgeModal() { document.getElementById('knowledgeModal').classList.add('show'); }
 
-function showDetail(title, html) {
-  document.getElementById('detailTitle').textContent = title;
-  document.getElementById('detailBody').innerHTML = html;
-  document.getElementById('detailModal').classList.add('show');
-}
-
-// Metrics Data
+// ==================== METRICS DATA ====================
 const metrics = [
-  { id:'M001', name:'预警总数', alias:'告警数量', desc:'统计周期内产生的预警事件总数', table:'dws_gsps_common_warn_info_view', sql:'COUNT(*) FROM warn_info', status:'启用', time:'2026-03-28' },
-  { id:'M002', name:'设备在线率', alias:'在线率', desc:'在线设备数占设备总数百分比', table:'dws_device_status_view', sql:'online_count/total_count*100', status:'启用', time:'2026-03-27' },
-  { id:'M003', name:'处置效率', alias:'处置率', desc:'已处置预警数占总预警数百分比', table:'dws_gsps_common_warn_info_view', sql:'disposed_count/total_count*100', status:'启用', time:'2026-03-26' },
-  { id:'M004', name:'预警数量占比', alias:'占比', desc:'各行业预警数量占总预警的百分比', table:'dws_gsps_common_warn_info_view', sql:'industry_count/total*100', status:'启用', time:'2026-03-25' },
-  { id:'M005', name:'区域预警分布', alias:'区域分布', desc:'各区域预警数量统计', table:'dws_gsps_common_warn_info_view', sql:'GROUP BY region', status:'启用', time:'2026-03-24' },
-  { id:'M006', name:'未解除预警数', alias:'活跃预警', desc:'当前状态为未解除的预警总数', table:'dws_gsps_common_warn_info_view', sql:"WHERE status='active'", status:'启用', time:'2026-03-23' },
-  { id:'M007', name:'日均预警数', alias:'日均告警', desc:'统计周期内日均产生预警数量', table:'dws_gsps_common_warn_info_view', sql:'total/days', status:'禁用', time:'2026-03-22' },
-  { id:'M008', name:'设备故障率', alias:'故障率', desc:'故障设备数占设备总数百分比', table:'dws_device_status_view', sql:'fault_count/total*100', status:'启用', time:'2026-03-21' },
+  { id:'M001', name:'预警总数', unit:'起', alias:'警情数量', desc:'统计周期内产生的预警事件总数', type:'基础指标', table:'dws_gsps_common_warn_info_view', filter:"WHERE bjczbmc IS NOT NULL AND dsbm = '340100'", sql:'COUNT(DISTINCT warn_id)', status:'已启用', time:'2026-03-28', dims:['时间维度','空间维度','所属专项'] },
+  { id:'M002', name:'设备在线率', unit:'台', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_device_status_view', filter:"WHERE device_status = 'online'", sql:'online_count/total_count*100', status:'已启用', time:'2026-03-28', dims:['时间维度','空间维度','设备类型'] },
+  { id:'M003', name:'燃气管网月度安全综合评分', unit:'分', alias:'', desc:'城市燃气管网安全的月度评分，百分制，分数越高代表管网越安全', type:'复合指标', table:'dws_gas_safety_score_view', filter:'', sql:'weighted_sum(indicators)', status:'已禁用', time:'2026-03-28', dims:['时间维度','空间维度','所属专项'] },
+  { id:'M004', name:'燃气管网长度', unit:'公里', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_gas_pipe_info_view', filter:'', sql:'SUM(pipe_length)', status:'已启用', time:'2026-03-28', dims:['空间维度','所属专项'] },
+  { id:'M005', name:'燃气场站数量', unit:'座', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_gas_station_view', filter:'', sql:'COUNT(*)', status:'已启用', time:'2026-03-28', dims:['空间维度'] },
+  { id:'M006', name:'排水管网长度', unit:'公里', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_drain_pipe_view', filter:'', sql:'SUM(pipe_length)', status:'已启用', time:'2026-03-28', dims:['空间维度','所属专项'] },
+  { id:'M007', name:'雨污合流管网长度', unit:'公里', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_drain_combined_view', filter:'', sql:'SUM(pipe_length)', status:'已启用', time:'2026-03-28', dims:['空间维度'] },
+  { id:'M008', name:'在线设备', unit:'台', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_device_status_view', filter:'', sql:"COUNT(*) WHERE status='online'", status:'已启用', time:'2026-03-28', dims:['空间维度','设备类型'] },
+  { id:'M009', name:'离线设备', unit:'台', alias:'', desc:'在线设备数占设备总数百分比', type:'基础指标', table:'dws_device_status_view', filter:'', sql:"COUNT(*) WHERE status='offline'", status:'已启用', time:'2026-03-28', dims:['空间维度','设备类型'] },
+  { id:'M010', name:'设备实时在线率', unit:'%', alias:'', desc:'在线设备数占设备总数百分比', type:'衍生指标', table:'dws_device_status_view', filter:'', sql:'在线设备/总设备数*100', status:'已启用', time:'2026-03-28', dims:['时间维度','空间维度','设备类型'] },
+  { id:'M011', name:'设备月平均在线率', unit:'%', alias:'', desc:'统计月内每日设备在线率的算术平均值', type:'衍生指标', table:'dws_device_status_view', filter:'', sql:'sum(设备日在线率)/当月天数', status:'已启用', time:'2026-03-28', dims:['时间维度','空间维度'] },
+  { id:'M012', name:'预警处置率', unit:'%', alias:'处置率', desc:'已处置预警数占总预警数百分比', type:'复合指标', table:'dws_gsps_common_warn_info_view', filter:'', sql:'disposed_count/total_count*100', status:'已启用', time:'2026-03-28', dims:['时间维度','空间维度','所属专项'] },
 ];
 
-document.getElementById('metricsBody').innerHTML = metrics.map(m => `<tr>
-  <td style="font-family:monospace;color:#6B7280">${m.id}</td>
-  <td style="color:#1F2937;font-weight:500">${m.name}</td>
-  <td>${m.alias}</td>
-  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.desc}</td>
-  <td style="font-family:monospace;font-size:12px">${m.table}</td>
-  <td><span class="status-tag ${m.status==='启用'?'enabled':'disabled'}">${m.status==='启用'?'已启用':'已禁用'}</span></td>
-  <td>${m.time}</td>
-  <td>
-    <button class="action-link" onclick="showDetail('${m.name} - 指标详情', getMetricDetail('${m.id}'))">详情</button>
-    <button class="action-link">编辑</button>
-    <button class="action-link danger">删除</button>
-  </td>
-</tr>`).join('');
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let filteredMetrics = [...metrics];
 
-function getMetricDetail(id) {
-  const m = metrics.find(x => x.id === id);
-  return `<div class="detail-row"><div class="detail-label">指标ID</div><div class="detail-value" style="font-family:monospace">${m.id}</div></div>
-  <div class="detail-row"><div class="detail-label">指标名称</div><div class="detail-value" style="font-weight:500">${m.name}</div></div>
-  <div class="detail-row"><div class="detail-label">别名</div><div class="detail-value">${m.alias}</div></div>
-  <div class="detail-row"><div class="detail-label">业务口径</div><div class="detail-value">${m.desc}</div></div>
-  <div class="detail-row"><div class="detail-label">来源物理表</div><div class="detail-value" style="font-family:monospace">${m.table}</div></div>
-  <div class="detail-row"><div class="detail-label">计算逻辑</div><div class="detail-value"><div class="code-block">${m.sql}</div></div></div>
-  <div style="margin-top:20px;"><h4 style="font-size:14px;color:#1F2937;margin-bottom:10px">版本历史</h4>
-    <div class="version-item"><div><span class="ver-tag">v2.0</span> <span style="margin-left:8px">${m.time}</span> · 张工 · 更新计算逻辑</div><button class="action-link">对比</button></div>
-    <div class="version-item"><div><span class="ver-tag">v1.0</span> <span style="margin-left:8px">2026-03-01</span> · 李工 · 初始创建</div><button class="action-link">对比</button></div>
-  </div>`;
+function filterMetrics() {
+  const typeVal = document.getElementById('filterType').value;
+  const statusVal = document.getElementById('filterStatus').value;
+  filteredMetrics = metrics.filter(m => {
+    if (typeVal && m.type !== typeVal) return false;
+    if (statusVal && m.status !== statusVal) return false;
+    return true;
+  });
+  currentPage = 1;
+  renderMetrics();
 }
 
-// Dimensions
+function renderMetrics() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageData = filteredMetrics.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(filteredMetrics.length / PAGE_SIZE) || 1;
+
+  // Update stat cards
+  document.getElementById('statTotal').textContent = metrics.length;
+  document.getElementById('statBasic').textContent = metrics.filter(m => m.type === '基础指标').length;
+  document.getElementById('statDerived').textContent = metrics.filter(m => m.type === '衍生指标').length;
+  document.getElementById('statComposite').textContent = metrics.filter(m => m.type === '复合指标').length;
+
+  document.getElementById('metricsBody').innerHTML = pageData.map(m => `<tr>
+    <td style="font-family:monospace;color:#6B7280">${m.id}</td>
+    <td style="color:#1F2937;font-weight:500">${m.name}</td>
+    <td>${m.unit}</td>
+    <td>${m.alias || ''}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${m.desc}">${m.desc}</td>
+    <td><span style="font-size:12px">${m.type}</span></td>
+    <td><span class="status-tag ${m.status==='已启用'?'enabled':'disabled'}">${m.status}</span></td>
+    <td>${m.time}</td>
+    <td>
+      <button class="action-link" onclick="showMetricDetail('${m.id}')">详情</button>
+      <button class="action-link" onclick="showMetricEdit('${m.id}')">编辑</button>
+      <button class="action-link danger" onclick="confirmDelete('${m.id}')">删除</button>
+    </td>
+  </tr>`).join('');
+
+  // Pagination
+  let pagHtml = `<span style="margin-right:auto;color:#6B7280">共 ${filteredMetrics.length} 条</span>`;
+  pagHtml += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled style="opacity:0.4;cursor:default"':''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    pagHtml += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  pagHtml += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled style="opacity:0.4;cursor:default"':''}>›</button>`;
+  document.getElementById('metricsPagination').innerHTML = pagHtml;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredMetrics.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderMetrics();
+}
+
+// ==================== BASIC METRIC DETAIL ====================
+function showMetricDetail(id) {
+  const m = metrics.find(x => x.id === id);
+  document.getElementById('basicDetailTitle').textContent = '基础指标详情页';
+  document.getElementById('basicDetailFooter').style.display = 'none';
+  renderBasicForm(m, true);
+  document.getElementById('basicDetailModal').classList.add('show');
+}
+
+function showMetricEdit(id) {
+  const m = metrics.find(x => x.id === id);
+  if (m.type === '衍生指标' || m.type === '复合指标') {
+    showDerivedEditModal(m);
+    return;
+  }
+  document.getElementById('basicDetailTitle').textContent = '基础指标编辑页';
+  document.getElementById('basicDetailFooter').style.display = 'flex';
+  renderBasicForm(m, false);
+  document.getElementById('basicDetailModal').classList.add('show');
+}
+
+function renderBasicForm(m, readonly) {
+  const ro = readonly ? 'readonly' : '';
+  const roCls = readonly ? 'readonly' : '';
+  const allDims = ['时间维度','空间维度','所属专项','设备类型','供电方式','是否自建'];
+  const selectedDims = m.dims || [];
+
+  document.getElementById('basicDetailBody').innerHTML = `
+    <div style="max-width:1000px;margin:0 auto;">
+      <div class="form-section-title">基本信息</div>
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span> 指标名称<span class="hint">建议清晰易懂，不超过50字</span></label>
+            <input class="form-input ${readonly ? '' : ''}" value="${m.name}" ${ro}>
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span> 指标编码</label>
+            <input class="form-input readonly" value="${m.id}" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label">指标别名<span class="hint">用于同一个指标的不同描述或口语化描述，多个以','隔开</span></label>
+            <input class="form-input" value="${m.alias}" placeholder="例如：预警、警情" ${ro}>
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label">指标单位</label>
+            <input class="form-input" value="${m.unit}" placeholder="例如：起、个、%" ${ro}>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 业务口径描述<span class="hint">详细描述指标的业务定义、统计范围、适用场景，不超过200字</span></label>
+        <textarea class="form-input form-textarea" ${ro} placeholder="例如：统计范围内，按照预警编号去重后的预警总数">${m.desc}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span> 指标类型</label>
+            ${readonly ?
+              `<select class="form-select" disabled><option>${m.type}</option></select>` :
+              `<select class="form-select"><option ${m.type==='基础指标'?'selected':''}>基础指标</option></select>`
+            }
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span> 指标状态</label>
+            ${readonly ?
+              `<div class="radio-group"><label><input type="radio" ${m.status==='已启用'?'checked':''} disabled> 已启用</label><label><input type="radio" ${m.status==='已禁用'?'checked':''} disabled> 已禁用</label></div>` :
+              `<div class="radio-group"><label><input type="radio" name="editStatus" ${m.status==='已启用'?'checked':''}> 已启用</label><label><input type="radio" name="editStatus" ${m.status==='已禁用'?'checked':''}> 已禁用</label></div>`
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-title" style="margin-top:24px">数据映射</div>
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 关联数据表<span class="hint">选择指标关联的底层数据表</span></label>
+        <input class="form-input readonly" value="示例：预警信息表（${m.table}）" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">默认过滤条件<span class="hint">数据查询时自动生效，支持变量$(date)代表统计日期</span></label>
+        <textarea class="form-input form-textarea" style="font-family:monospace;min-height:80px" ${readonly ? 'readonly class="form-input form-textarea readonly"' : ''}>${m.filter || ''}</textarea>
+      </div>
+
+      <div class="form-section-title" style="margin-top:24px">维度管理</div>
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 可选维度</label>
+        <div class="dim-tags">
+          ${allDims.map(d => `<div class="dim-tag ${selectedDims.includes(d)?'selected':''}" onclick="${readonly ? '' : 'toggleDim(this)'}">${d}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDim(el) {
+  el.classList.toggle('selected');
+}
+
+// ==================== DERIVED/COMPOSITE ADD/EDIT ====================
+function showAddMetricModal() {
+  document.getElementById('derivedAddTitle').textContent = '新增指标';
+  // Reset form
+  document.getElementById('drvName').value = '';
+  document.getElementById('drvCode').value = 'ZB_' + String(metrics.length + 1).padStart(3, '0');
+  document.getElementById('drvAlias').value = '';
+  document.getElementById('drvUnit').value = '';
+  document.getElementById('drvDesc').value = '';
+  document.getElementById('drvFormula').value = '';
+  document.getElementById('relatedMetricsList').innerHTML = '';
+  // Reset chat
+  document.getElementById('derivedChatArea').innerHTML = `
+    <div class="chat-msg bot">
+      <div class="chat-bubble">你好！我可以帮你配置衍生指标/复合指标的计算规则。请告诉我你想如何计算这个指标？</div>
+    </div>
+  `;
+  document.getElementById('derivedAddModal').classList.add('show');
+}
+
+function showDerivedEditModal(m) {
+  document.getElementById('derivedAddTitle').textContent = '编辑指标 - ' + m.name;
+  document.getElementById('drvName').value = m.name;
+  document.getElementById('drvCode').value = m.id;
+  document.getElementById('drvAlias').value = m.alias || '';
+  document.getElementById('drvUnit').value = m.unit;
+  document.getElementById('drvDesc').value = m.desc;
+  document.getElementById('drvType').value = m.type;
+  document.getElementById('drvFormula').value = m.sql || '';
+  document.getElementById('relatedMetricsList').innerHTML = '';
+
+  // Reset chat with context
+  document.getElementById('derivedChatArea').innerHTML = `
+    <div class="chat-msg bot">
+      <div class="chat-bubble">当前正在编辑指标"${m.name}"（${m.type}）。\n\n你可以修改右侧表单，或者告诉我你想如何调整计算规则。</div>
+    </div>
+  `;
+  document.getElementById('derivedAddModal').classList.add('show');
+}
+
+function sendDerivedChat() {
+  const input = document.getElementById('derivedChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const chatArea = document.getElementById('derivedChatArea');
+  // User message
+  chatArea.innerHTML += `<div class="chat-msg user"><div class="chat-bubble">${msg}</div></div>`;
+
+  // Simulate AI response
+  setTimeout(() => {
+    const response = generateDerivedResponse(msg);
+    chatArea.innerHTML += `<div class="chat-msg bot"><div class="chat-bubble">${response.text}</div>
+      ${response.canApply ? '<button class="chat-apply-btn" onclick="applyDerivedConfig()">应用</button>' : ''}
+      <div style="clear:both"></div>
+    </div>`;
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    if (response.autoFill) {
+      Object.entries(response.autoFill).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+  }, 800);
+
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function generateDerivedResponse(msg) {
+  if (msg.includes('月度') || msg.includes('月平均') || msg.includes('在线率')) {
+    return {
+      text: `明白了！我已经为你配置好计算规则：\n\n指标名称：设备月平均在线率\n单位：%\n关联指标：设备日在线率\n计算公式：sum(设备日在线率)/当月天数\n时间维度：月\n约束条件：无\n\n模拟数据：\n维度：月份（2026年3月）\n设备月平均在线率：86.32%\n[查看明细]\n\n你可以应用当前配置，或者继续对话的方式调整`,
+      canApply: true,
+      autoFill: {
+        drvName: '设备月平均在线率',
+        drvUnit: '%',
+        drvDesc: '统计月内每日设备在线率的算术平均值',
+        drvFormula: 'sum(设备日在线率)/当月天数'
+      }
+    };
+  }
+  if (msg.includes('处置') || msg.includes('效率')) {
+    return {
+      text: `好的，我来帮你配置预警处置率指标：\n\n指标名称：预警处置率\n单位：%\n关联指标：已处置预警数、预警总数\n计算公式：已处置预警数/预警总数×100\n\n模拟数据：\n2026年3月处置率：92.5%\n\n你可以应用或继续调整。`,
+      canApply: true,
+      autoFill: {
+        drvName: '预警处置率',
+        drvUnit: '%',
+        drvDesc: '已处置预警数占总预警数百分比',
+        drvFormula: '已处置预警数/预警总数×100'
+      }
+    };
+  }
+  return {
+    text: `收到你的需求。请再详细描述一下：\n\n1. 这个指标需要关联哪些基础指标？\n2. 具体的计算公式是什么？\n3. 需要支持哪些维度（时间/空间/专项等）？`,
+    canApply: false
+  };
+}
+
+function applyDerivedConfig() {
+  // Add a related metric card
+  const list = document.getElementById('relatedMetricsList');
+  if (!list.querySelector('.related-metric-card')) {
+    list.innerHTML = `
+      <div class="related-metric-card">
+        <div class="related-metric-icon">001</div>
+        <div class="related-metric-info">
+          <div class="related-metric-name">设备日在线率</div>
+          <div class="related-metric-meta">ZB_001 &nbsp; 单位:% &nbsp; 口径/维度:专项（燃气）</div>
+        </div>
+        <button class="related-metric-remove" onclick="this.parentElement.remove()">×</button>
+      </div>
+    `;
+  }
+  alert('配置已应用到右侧表单！');
+}
+
+function addRelatedMetric() {
+  const list = document.getElementById('relatedMetricsList');
+  const count = list.querySelectorAll('.related-metric-card').length;
+  const mockMetrics = [
+    { icon: '002', name: '预警总数', code: 'M001', unit: '起', dim: '专项（燃气）' },
+    { icon: '003', name: '在线设备数', code: 'M008', unit: '台', dim: '设备类型' },
+  ];
+  const mock = mockMetrics[count % mockMetrics.length];
+  list.innerHTML += `
+    <div class="related-metric-card">
+      <div class="related-metric-icon">${mock.icon}</div>
+      <div class="related-metric-info">
+        <div class="related-metric-name">${mock.name}</div>
+        <div class="related-metric-meta">${mock.code} &nbsp; 单位:${mock.unit} &nbsp; 口径/维度:${mock.dim}</div>
+      </div>
+      <button class="related-metric-remove" onclick="this.parentElement.remove()">×</button>
+    </div>
+  `;
+}
+
+function confirmDelete(id) {
+  if (confirm('确认要删除该指标吗？')) {
+    alert('已删除指标 ' + id);
+  }
+}
+
+// ==================== OTHER TABS DATA ====================
 const dims = [
   { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'启用', mapCount:156 },
   { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'启用', mapCount:365 },
@@ -452,7 +999,6 @@ document.getElementById('dimensionsBody').innerHTML = dims.map(d => `<tr>
   <td><button class="action-link">编辑</button><button class="action-link">值映射</button><button class="action-link danger">删除</button></td>
 </tr>`).join('');
 
-// Scenes
 const scenes = [
   { name:'城市安全态势', cat:'安全', desc:'综合评估城市生命线安全运行态势', metrics:5, rule:'安全评分=告警数×0.3+处置率×0.7', status:'启用' },
   { name:'预警趋势分析', cat:'安全', desc:'分析各行业预警数量变化趋势', metrics:3, rule:'趋势=环比增长率>20%触发预警', status:'启用' },
@@ -470,7 +1016,6 @@ document.getElementById('scenesBody').innerHTML = scenes.map(s => `<tr>
   <td><button class="action-link">编辑</button><button class="action-link">复制</button><button class="action-link danger">删除</button></td>
 </tr>`).join('');
 
-// Knowledge
 const kbs = [
   { name:'处置率预警规则', type:'阈值规则', desc:'处置率 < 80% 触发告警', status:'启用', ver:'v1.2', time:'2026-03-28' },
   { name:'告警日环比预警', type:'阈值规则', desc:'告警数日环比上升 50% 预警', status:'启用', ver:'v1.0', time:'2026-03-27' },
@@ -488,6 +1033,9 @@ document.getElementById('knowledgeBody').innerHTML = kbs.map(k => `<tr>
   <td>${k.time}</td>
   <td><button class="action-link">编辑</button><button class="action-link">测试</button><button class="action-link danger">删除</button></td>
 </tr>`).join('');
+
+// Initial render
+renderMetrics();
 </script>
 </body>
 </html>
