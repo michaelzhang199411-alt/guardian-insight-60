@@ -405,24 +405,37 @@ tr:hover td { background: #F9FAFB; }
 
       <!-- 维度库 -->
       <div class="tab-panel" id="tab-dimensions">
-        <div class="panel">
-          <div class="panel-toolbar">
-            <div class="toolbar-left">
-              <input type="text" class="toolbar-search" placeholder="搜索维度名称/ID...">
-              <select class="filter-select"><option>全部状态</option><option>已启用</option><option>已禁用</option></select>
-              <button class="btn">查询</button>
+        <div style="display:flex;gap:0;height:calc(100vh - 180px);">
+          <!-- Left: data table tree -->
+          <div style="width:300px;min-width:300px;background:#fff;border:1px solid #E5E7EB;border-radius:10px 0 0 10px;display:flex;flex-direction:column;">
+            <div style="padding:14px 16px;border-bottom:1px solid #E5E7EB;font-size:14px;font-weight:600;color:#1F2937;display:flex;align-items:center;gap:8px;">
+              <svg width="16" height="16" fill="none" stroke="#2563EB" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+              数据表清单
             </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn">批量导入</button>
-              <button class="btn">导出</button>
-              <button class="btn btn-primary" onclick="showDimModal()">+ 新增维度</button>
-            </div>
+            <div style="flex:1;overflow-y:auto;padding:8px;" id="dimTableTree"></div>
           </div>
-          <table>
-            <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
-            <tbody id="dimensionsBody"></tbody>
-          </table>
-          <div class="pagination"><span>共 6 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div></div>
+          <!-- Right: dimension list for selected table -->
+          <div style="flex:1;background:#fff;border:1px solid #E5E7EB;border-left:none;border-radius:0 10px 10px 0;display:flex;flex-direction:column;">
+            <div class="panel-toolbar">
+              <div class="toolbar-left">
+                <input type="text" class="toolbar-search" placeholder="搜索维度名称/ID..." id="dimSearchInput">
+                <select class="filter-select" id="dimStatusFilter"><option value="">全部状态</option><option>已启用</option><option>已禁用</option></select>
+                <button class="btn" onclick="renderDimTable()">查询</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn">批量导入</button>
+                <button class="btn">导出</button>
+                <button class="btn btn-primary" onclick="showDimModal()">+ 新增维度</button>
+              </div>
+            </div>
+            <div style="flex:1;overflow-y:auto;">
+              <table>
+                <thead><tr><th>维度ID</th><th>维度名称</th><th>别名</th><th>层级关系</th><th>来源维表</th><th>状态</th><th>值映射数</th><th>操作</th></tr></thead>
+                <tbody id="dimensionsBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination" id="dimPagination"></div>
+          </div>
         </div>
       </div>
 
@@ -980,24 +993,96 @@ function confirmDelete(id) {
 }
 
 // ==================== OTHER TABS DATA ====================
-const dims = [
-  { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'启用', mapCount:156 },
-  { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'启用', mapCount:365 },
-  { id:'D003', name:'行业类型', alias:'业务领域', levels:'大类→小类', table:'dim_industry', status:'启用', mapCount:12 },
-  { id:'D004', name:'设备类型', alias:'传感器类型', levels:'一级→二级', table:'dim_device_type', status:'启用', mapCount:28 },
-  { id:'D005', name:'预警级别', alias:'告警等级', levels:'—', table:'dim_warn_level', status:'启用', mapCount:4 },
-  { id:'D006', name:'处置状态', alias:'处理状态', levels:'—', table:'dim_dispose_status', status:'禁用', mapCount:5 },
+// ==================== DIMENSION DATA BY TABLE ====================
+const dataTables = [
+  { id:'dws_device_status_view', name:'设备信息表', label:'设备信息表（dws_device_status_view）' },
+  { id:'dws_gsps_common_warn_info_view', name:'预警信息表', label:'预警信息表（dws_gsps_common_warn_info_view）' },
+  { id:'dws_gsps_common_warn_info_view2', name:'报警信息表', label:'报警信息表（dws_gsps_common_warn_info_view）' },
+  { id:'dws_gas_pipe_info_view', name:'燃气管网基础信息表', label:'燃气管网基础信息表' },
+  { id:'dws_drain_pipe_view', name:'排水管基础信息表', label:'排水管基础信息表' },
+  { id:'dws_water_supply_view', name:'供水管基础信息表', label:'供水管基础信息表' },
 ];
-document.getElementById('dimensionsBody').innerHTML = dims.map(d => `<tr>
-  <td style="font-family:monospace;color:#6B7280">${d.id}</td>
-  <td style="color:#1F2937;font-weight:500">${d.name}</td>
-  <td>${d.alias}</td>
-  <td>${d.levels}</td>
-  <td style="font-family:monospace;font-size:12px">${d.table}</td>
-  <td><span class="status-tag ${d.status==='启用'?'enabled':'disabled'}">${d.status==='启用'?'已启用':'已禁用'}</span></td>
-  <td>${d.mapCount}</td>
-  <td><button class="action-link">编辑</button><button class="action-link">值映射</button><button class="action-link danger">删除</button></td>
-</tr>`).join('');
+
+const dimsByTable = {
+  'dws_device_status_view': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'已启用', mapCount:365 },
+    { id:'D003', name:'行业类型', alias:'业务领域', levels:'大类→小类', table:'dim_industry', status:'已启用', mapCount:12 },
+    { id:'D004', name:'设备类型', alias:'传感器类型', levels:'一级→二级', table:'dim_device_type', status:'已启用', mapCount:28 },
+    { id:'D005', name:'预警级别', alias:'告警等级', levels:'—', table:'dim_warn_level', status:'已启用', mapCount:4 },
+    { id:'D006', name:'处置状态', alias:'处理状态', levels:'—', table:'dim_dispose_status', status:'已禁用', mapCount:5 },
+  ],
+  'dws_gsps_common_warn_info_view': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'已启用', mapCount:365 },
+    { id:'D005', name:'预警级别', alias:'告警等级', levels:'—', table:'dim_warn_level', status:'已启用', mapCount:4 },
+    { id:'D006', name:'处置状态', alias:'处理状态', levels:'—', table:'dim_dispose_status', status:'已禁用', mapCount:5 },
+    { id:'D007', name:'预警类型', alias:'告警类别', levels:'—', table:'dim_warn_type', status:'已启用', mapCount:8 },
+  ],
+  'dws_gsps_common_warn_info_view2': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'已启用', mapCount:365 },
+    { id:'D008', name:'报警来源', alias:'报警渠道', levels:'—', table:'dim_alarm_source', status:'已启用', mapCount:6 },
+  ],
+  'dws_gas_pipe_info_view': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D009', name:'管网材质', alias:'管材类型', levels:'—', table:'dim_pipe_material', status:'已启用', mapCount:10 },
+    { id:'D010', name:'管径规格', alias:'管道口径', levels:'—', table:'dim_pipe_diameter', status:'已启用', mapCount:15 },
+    { id:'D011', name:'压力等级', alias:'管网压力', levels:'高压→中压→低压', table:'dim_pressure_level', status:'已启用', mapCount:3 },
+  ],
+  'dws_drain_pipe_view': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D012', name:'排水类型', alias:'排水方式', levels:'雨水→污水→合流', table:'dim_drain_type', status:'已启用', mapCount:3 },
+    { id:'D009', name:'管网材质', alias:'管材类型', levels:'—', table:'dim_pipe_material', status:'已启用', mapCount:10 },
+  ],
+  'dws_water_supply_view': [
+    { id:'D001', name:'行政区划', alias:'区域,地区', levels:'省→市→区县', table:'dim_region', status:'已启用', mapCount:156 },
+    { id:'D002', name:'时间', alias:'日期,时段', levels:'年→季→月→日', table:'dim_date', status:'已启用', mapCount:365 },
+    { id:'D013', name:'供水分区', alias:'供水区域', levels:'一级→二级', table:'dim_water_zone', status:'已启用', mapCount:18 },
+  ],
+};
+
+let selectedDimTable = dataTables[0].id;
+
+function renderDimTableTree() {
+  const tree = document.getElementById('dimTableTree');
+  tree.innerHTML = dataTables.map(t => `
+    <div class="nav-item ${t.id === selectedDimTable ? 'active' : ''}" onclick="selectDimTable('${t.id}')" style="font-size:13px;padding:8px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${t.label}">
+      ${t.label}
+    </div>
+  `).join('');
+}
+
+function selectDimTable(tableId) {
+  selectedDimTable = tableId;
+  renderDimTableTree();
+  renderDimTable();
+}
+
+function renderDimTable() {
+  const dims = dimsByTable[selectedDimTable] || [];
+  const statusFilter = document.getElementById('dimStatusFilter').value;
+  const searchVal = document.getElementById('dimSearchInput').value.trim().toLowerCase();
+  const filtered = dims.filter(d => {
+    if (statusFilter && d.status !== statusFilter) return false;
+    if (searchVal && !d.name.toLowerCase().includes(searchVal) && !d.id.toLowerCase().includes(searchVal)) return false;
+    return true;
+  });
+  document.getElementById('dimensionsBody').innerHTML = filtered.map(d => `<tr>
+    <td style="font-family:monospace;color:#6B7280">${d.id}</td>
+    <td style="color:#1F2937;font-weight:500">${d.name}</td>
+    <td>${d.alias}</td>
+    <td>${d.levels}</td>
+    <td style="font-family:monospace;font-size:12px">${d.table}</td>
+    <td><span class="status-tag ${d.status==='已启用'?'enabled':'disabled'}">${d.status}</span></td>
+    <td>${d.mapCount}</td>
+    <td><button class="action-link">编辑</button><button class="action-link">值映射</button><button class="action-link danger">删除</button></td>
+  </tr>`).join('');
+  document.getElementById('dimPagination').innerHTML = `<span style="margin-right:auto;color:#6B7280">共 ${filtered.length} 条</span><div style="display:flex;gap:4px"><button class="page-btn active">1</button></div>`;
+}
+
+renderDimTableTree();
+renderDimTable();
 
 const scenes = [
   { name:'城市安全态势', cat:'安全', desc:'综合评估城市生命线安全运行态势', metrics:5, rule:'安全评分=告警数×0.3+处置率×0.7', status:'启用' },
