@@ -961,6 +961,64 @@ body {
 }
 .btn-dialog-confirm:hover { background: #DC2626; }
 
+/* ========== Spreadsheet Panel ========== */
+.spreadsheet-panel-body {
+  flex: 1; overflow: auto; padding: 0; background: #fff;
+}
+.spreadsheet-toolbar {
+  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: #F9FAFB; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap;
+}
+.spreadsheet-toolbar button, .spreadsheet-toolbar select {
+  height: 28px; border: 1px solid #E5E7EB; border-radius: 4px;
+  background: #fff; font-size: 12px; color: #4B5563; cursor: pointer;
+  padding: 0 8px; transition: all 0.15s;
+}
+.spreadsheet-toolbar button:hover { background: #EFF6FF; border-color: #2563EB; color: #2563EB; }
+.spreadsheet-toolbar .tb-sep { width: 1px; height: 20px; background: #E5E7EB; }
+.spreadsheet-wrap {
+  overflow: auto; flex: 1; position: relative;
+}
+.spreadsheet-table {
+  border-collapse: collapse; font-size: 13px; width: max-content; min-width: 100%;
+}
+.spreadsheet-table th, .spreadsheet-table td {
+  border: 1px solid #D1D5DB; padding: 6px 10px; text-align: left;
+  white-space: nowrap; position: relative; min-width: 60px;
+  transition: background 0.1s;
+}
+.spreadsheet-table th {
+  background: #F3F4F6; color: #374151; font-weight: 600;
+  position: sticky; top: 0; z-index: 2; user-select: none; cursor: pointer;
+}
+.spreadsheet-table th:hover { background: #E5E7EB; }
+.spreadsheet-table th .col-resize {
+  position: absolute; right: -2px; top: 0; bottom: 0; width: 5px;
+  cursor: col-resize; z-index: 3;
+}
+.spreadsheet-table td { color: #4B5563; }
+.spreadsheet-table tr:hover td { background: #F9FAFB; }
+.spreadsheet-table td.selected { background: #DBEAFE !important; outline: 2px solid #2563EB; outline-offset: -2px; }
+.spreadsheet-table td:focus { background: #EFF6FF; outline: 2px solid #2563EB; outline-offset: -2px; }
+.spreadsheet-table .row-num {
+  background: #F9FAFB; color: #9CA3AF; text-align: center;
+  font-size: 12px; min-width: 40px; width: 40px; user-select: none;
+  position: sticky; left: 0; z-index: 1;
+}
+.spreadsheet-table th.row-num-header {
+  position: sticky; left: 0; z-index: 3; min-width: 40px; width: 40px;
+}
+.spreadsheet-status-bar {
+  display: flex; align-items: center; gap: 12px; padding: 6px 16px;
+  background: #F9FAFB; border-top: 1px solid #E5E7EB; font-size: 12px; color: #9CA3AF;
+}
+.sheet-tab {
+  padding: 4px 16px; font-size: 12px; color: #4B5563; cursor: pointer;
+  border: 1px solid #E5E7EB; border-bottom: none; border-radius: 6px 6px 0 0;
+  background: #F9FAFB; margin-right: -1px; transition: all 0.15s;
+}
+.sheet-tab.active { background: #fff; color: #2563EB; font-weight: 500; border-bottom: 1px solid #fff; margin-bottom: -1px; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1455,10 +1513,10 @@ const agentSuggestions = {
     '生成上个月的供水专项安全运行月报',
   ],
   '智能报表': [
-    '生成上个月的燃气二级以上报警点位清单表',
-    '生成本季度各专项预警数量统计报表',
-    '生成全市监测设备在线率月度报表',
-    '生成各区域报警处置时效汇总表',
+    '异常设备巡检清单表',
+    '城市生命线安全工程监测运营统计表',
+    '液化气每周考核评价表',
+    '液化气省级月度评价指标表',
   ],
   '系统巡检': [
     '启动全系统智能巡检',
@@ -1587,9 +1645,6 @@ function matchKnowledgeQA(text) {
 
 // ========== Other Agent Responses ==========
 const otherAgentResponses = {
-  '智能报表': {
-    content: '好的，我将为您生成报表。正在查询数据库并汇总统计数据...\n\n📊 报表已生成完成，包含以下内容：\n• 数据时间范围：2026年2月\n• 统计维度：按区域、按专项、按报警等级\n• 数据行数：共<strong>156条</strong>记录\n\n报表已在右侧展示区打开，您可以直接查看和下载。',
-  },
   '系统巡检': {
     content: '🔍 <strong>系统智能巡检已启动</strong>\n\n正在对全市监测系统进行全面检查...\n\n<strong>✅ 数据采集链路</strong>：正常（4G/NB-IoT信号覆盖率 98.7%）\n<strong>✅ 平台服务状态</strong>：全部正常运行（CPU 23% / 内存 45%）\n<strong>✅ 数据库服务</strong>：正常（主从同步延迟 < 100ms）\n<strong>⚠️ 设备在线状态</strong>：发现<strong>18台</strong>设备离线\n　　- 燃气监测仪：12台（集中在蜀山区，疑似批次通信模块故障）\n　　- 供水压力计：4台（包河区，电池电量不足）\n　　- 桥梁传感器：2台（经开区，通信天线损坏）\n<strong>✅ 预警服务</strong>：正常（近24h处理预警 47条，平均响应 1.2秒）\n<strong>✅ 报告生成服务</strong>：正常\n\n📋 <strong>巡检总结</strong>：系统整体运行正常，建议安排蜀山区12台燃气监测仪的通信模块检修。',
   },
@@ -1907,7 +1962,7 @@ function sendMessage(openReport) {
   const agentAtSend = currentAgent;
   isGenerating = true;
   const typingEl = addTypingIndicator();
-  const shouldOpenReport = openReport || (agentAtSend === '智能报告') || (agentAtSend === '智能报表');
+  const shouldOpenReport = openReport || (agentAtSend === '智能报告');
 
   setTimeout(() => {
     typingEl.remove();
@@ -1920,11 +1975,13 @@ function sendMessage(openReport) {
     } else if (kqaData) {
       const agent = agentAtSend || '知识问答';
       addStreamingTextResponse(kqaData.content, kqaData.suggestions ? kqaData.suggestions.map(s => ({label: s, action: () => sendQuickQ(s)})) : null, agent);
+    } else if (agentAtSend === '智能报表') {
+      handleSpreadsheetRequest(text);
     } else if (agentAtSend === '系统巡检' && otherAgentResponses['系统巡检']) {
       addStreamingTextResponse(otherAgentResponses['系统巡检'].content, null, agentAtSend);
     } else if (agentAtSend === '分析决策' && otherAgentResponses['分析决策']) {
       addStreamingTextResponse(otherAgentResponses['分析决策'].content, null, agentAtSend);
-    } else if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
+    } else if (shouldOpenReport || text.includes('月报')) {
       const reportTitle = text.includes('报表') ? '监测数据统计报表' : '燃气监测运营月度报告';
       addAIResponseWithReport(text, reportTitle, agentAtSend);
       openReportPanel(reportTitle);
@@ -2448,6 +2505,250 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+// ========== Spreadsheet Data & Functions ==========
+const spreadsheetData = {
+  '异常设备巡检清单表': {
+    headers: ['序号','设备号','设备类型','地址','设备是否有异常','异常情况备注'],
+    rows: [
+      [1,'GP92110225207','漏失在线监测设备','086乡道路东友谊水库对面树林里','存在异常','设备套管脱落'],
+      [2,'GP92110225197','漏失在线监测设备','086乡道与新城大道交口向北800米路东农田内','存在异常','传感器支架卡死，井为枯井'],
+      [3,'GP92110225191','漏失在线监测设备','安徽省滁州市南谯区，明湖文旅项目二期附近两百米','存在异常','设备信号差'],
+      [4,'220301290','消火栓智能监测仪','安徽省滁州市南谯区横兴路与仁和路交口东北角向北20米草地上','存在异常','传感器支架卡死'],
+      [5,'231000081','消火栓智能监测仪','安徽省滁州市南谯区仁和路与明湖大道交口西北角向北100米处','存在异常','设备信号差'],
+      [6,'220301432','智慧消火栓监测设备','昌辉路与永乐路交口向西120米','存在异常','设备安装点长期被车压住'],
+      [7,'GP92111210021','漏失在线监测设备','滁宁快速与滁州大道交口向南40米路西绿化带内','存在异常','设备信号差'],
+      [8,'GP92110225206','漏失在线监测设备','滁阳路32号电缆柱边绿化带内','存在异常','设备套管脱落'],
+      [9,'220520001','高频压力计','滁阳路北侧，滁州大道至滁马扬','存在异常','设备信号差'],
+      [10,'M05220117','外夹式超声波流量计','滁阳路北侧，滁州大道至滁马扬','存在异常','设备信号差'],
+      [11,'GP92110225214','漏失在线监测设备','滁阳路与南谯路交口东南角绿化带内','存在异常','设备信号差'],
+      [12,'220302288','智慧消火栓监测设备','滁阳路与仁义路交口向东北侧10米','存在异常','设备套管脱落'],
+      [13,'GP92110225284','漏失在线监测设备','滁州大道奥体中心对面北侧绿化带内','存在异常','修路把井内填满，建议换点，待安装（需下井安装）'],
+      [14,'GP92110225011','漏失在线监测设备','滁州大道欢乐明湖西边','存在异常','设备信号差'],
+      [15,'220520026','高频压力计','滁州大道与滁宁快速路交口西北','存在异常','设备套管脱落'],
+      [16,'M05220093','外夹式超声波流量计','滁州大道与滁宁快速路交口西北','存在异常','设备套管脱落'],
+      [17,'GP92110225226','漏失在线监测设备','滁州大道与滁阳路交口东南角绿化带内','存在异常','设备套管脱落'],
+      [18,'220301513','智慧消火栓监测设备','滁州大道与滁中路交口向西150米','存在异常','设备信号差'],
+      [19,'GP92110225161','漏失在线监测设备','滁州大道与恒兴路交口西北角绿化带内','存在异常','设备套管脱落'],
+      [20,'GP92110225234','漏失在线监测设备','滁州大道与洪武路交叉口向北500米路西绿化带内','存在异常','设备信号差'],
+      [21,'220511005','高频压力计','滁州大道与龙兴路交叉口','存在异常','设备信号差'],
+      [22,'M05220216','外夹式超声波流量计','滁州大道与龙兴路交叉口','存在异常','设备套管脱落'],
+      [23,'220511019','高频压力计','滁州大道与明湖大道交叉口西南','存在异常','设备套管脱落'],
+      [24,'M05220184','外夹式超声波流量计','滁州大道与明湖大道交叉口西南','存在异常','设备套管脱落'],
+      [25,'GP92110225270','漏失在线监测设备','滁州大道与明湖大道交口西北角人行道上','存在异常','设备井无井盖，且为枯井'],
+      [26,'220302370','智慧消火栓监测设备','滁州大道与明湖大道交口向南550米','存在异常','传感器支架卡死'],
+      [27,'GP92110225163','漏失在线监测设备','滁州大道与万水桥路交叉口西南角绿化带内','存在异常','设备已拆回，井内环境恶劣（需清淤）'],
+      [28,'220520006','高频压力计','丰乐大道滁州花博园东侧','存在异常','设备套管脱落'],
+      [29,'M05220135','外夹式超声波流量计','丰乐大道滁州花博园东侧','存在异常','设备套管脱落'],
+      [30,'220520008','高频压力计','丰乐大道滁州花博园西侧','存在异常','设备信号差'],
+      [31,'M05220113','外夹式超声波流量计','丰乐大道滁州花博园西侧','存在异常','设备信号差'],
+      [32,'DQ022200091','管段式流量计','丰乐大道东侧(京华园南苑)','存在异常','设备信号差'],
+      [33,'220520025','高频压力计','丰乐大道交光辉路南侧300米','存在异常','设备损坏拆回修复(支架被施工破坏，且井内无安装条件）'],
+      [34,'M05220087','外夹式超声波流量计','丰乐大道交光辉路南侧300米','存在异常','设备套管脱落'],
+      [35,'220302263','智慧消火栓监测设备','丰乐大道与昌辉路交口南侧','存在异常','传感器支架卡死'],
+      [36,'220511004','高频压力计','丰乐大道与滁阳路交口西北角','存在异常','传感器支架卡死'],
+      [37,'M05220092','外夹式超声波流量计','丰乐大道与滁阳路交口西北角','存在异常','传感器支架卡死'],
+      [38,'220511031','高频压力计','丰乐大道与滁阳路交口西南角','存在异常','传感器支架卡死'],
+      [39,'M05220090','外夹式超声波流量计','丰乐大道与滁阳路交口西南角','存在异常','传感器支架卡死'],
+      [40,'GP92110225263','漏失在线监测设备','丰乐大道与光辉路交口向北220米路西绿化带内','存在异常','传感器损坏（已维修）'],
+      [41,'GP92110225152','漏失在线监测设备','丰乐大道与恒丰路交口东北角人行道上','存在异常','传感器支架卡死'],
+      [42,'GP92110225077','漏失在线监测设备','丰乐大道与恒丰路交口东南角人行道上','存在异常','设备套管脱落'],
+      [43,'220301706','智慧消火栓监测设备','丰乐大道与敬梓路交叉口向南220米','存在异常','传感器支架卡死'],
+      [44,'220301542','智慧消火栓监测设备','丰乐大道与敬梓路交口向北200米','存在异常','设备套管脱落'],
+      [45,'220302150','智慧消火栓监测设备','丰乐大道与龙兴路交口向南320米','存在异常','设备套管脱落'],
+      [46,'220301729','智慧消火栓监测设备','丰乐大道与明湖路交口向北350米','存在异常','设备套管脱落'],
+      [47,'220301526','智慧消火栓监测设备','丰乐大道与祈福寺路交口向北200米','存在异常','设备套管脱落'],
+      [48,'GP92110225021','漏失在线监测设备','丰乐大道与西涧路交口西南角人行道上','存在异常','设备套管脱落'],
+      [49,'GP92110225262','漏失在线监测设备','光辉路与086乡道交口西边农田里','存在异常','设备天线无固定'],
+      [50,'220511007','高频压力计','恒兴路北侧，滁州大道西','存在异常','设备套管脱落'],
+    ]
+  },
+  '城市生命线安全工程监测运营统计表': {
+    headers: ['序号','统计项目','燃气','供水','排水','桥梁','综合管廊','合计'],
+    rows: [
+      [1,'监测点位数（个）',3256,1842,2105,386,128,7717],
+      [2,'在线设备数（台）',3104,1756,1980,372,125,7337],
+      [3,'设备在线率（%）','95.3%','95.3%','94.1%','96.4%','97.7%','95.1%'],
+      [4,'本月新增点位（个）',45,22,18,5,2,92],
+      [5,'预警总数（起）',128,67,89,12,3,299],
+      [6,'一级预警（起）',8,3,5,1,0,17],
+      [7,'二级预警（起）',23,12,18,3,1,57],
+      [8,'三级预警（起）',97,52,66,8,2,225],
+      [9,'已处置预警（起）',125,65,86,12,3,291],
+      [10,'处置率（%）','97.7%','97.0%','96.6%','100%','100%','97.3%'],
+      [11,'平均处置时长（h）',2.3,1.8,2.5,1.2,0.8,2.1],
+      [12,'巡检任务数（次）',186,124,156,48,16,530],
+      [13,'巡检完成率（%）','98.4%','97.6%','96.8%','100%','100%','97.9%'],
+      [14,'报告生成数（份）',12,8,10,4,2,36],
+      [15,'数据采集量（万条）',892.5,534.2,678.3,124.6,42.8,2272.4],
+    ]
+  },
+  '液化气每周考核评价表': {
+    headers: ['序号','考核项目','满分','第1周','第2周','第3周','第4周','月度均分'],
+    rows: [
+      [1,'安全巡检完成率',20,18.5,19.0,17.5,19.5,18.6],
+      [2,'隐患整改及时率',15,14.0,13.5,14.5,14.0,14.0],
+      [3,'设备维护保养',15,13.5,14.0,13.0,14.5,13.8],
+      [4,'应急演练执行',10,9.0,8.5,9.5,9.0,9.0],
+      [5,'安全培训覆盖率',10,9.5,9.0,8.5,9.5,9.1],
+      [6,'事故/险情报告',10,10.0,9.5,10.0,10.0,9.9],
+      [7,'客户投诉处理',10,8.5,9.0,8.0,9.0,8.6],
+      [8,'台账资料管理',5,4.5,4.0,4.5,4.5,4.4],
+      [9,'信息化系统使用',5,4.5,4.5,4.0,4.5,4.4],
+      [10,'合计',100,92.0,91.0,89.5,94.5,91.8],
+    ]
+  },
+  '液化气省级月度评价指标表': {
+    headers: ['序号','评价指标','单位','目标值','1月','2月','3月','达标情况'],
+    rows: [
+      [1,'安全生产事故数','起',0,0,0,0,'达标'],
+      [2,'隐患排查数量','条','≥50',62,58,65,'达标'],
+      [3,'隐患整改率','%','≥95%','97.3%','96.8%','98.1%','达标'],
+      [4,'从业人员持证率','%','100%','100%','100%','100%','达标'],
+      [5,'安全培训完成率','%','≥90%','95.2%','93.8%','96.1%','达标'],
+      [6,'应急预案演练','次/季','≥1',1,0,1,'达标'],
+      [7,'气瓶检测合格率','%','≥98%','99.1%','98.7%','99.3%','达标'],
+      [8,'配送车辆合规率','%','100%','100%','100%','100%','达标'],
+      [9,'用户安检覆盖率','%','≥85%','88.5%','86.2%','90.1%','达标'],
+      [10,'投诉处理及时率','%','≥95%','96.7%','95.3%','97.2%','达标'],
+      [11,'信息化报送及时率','%','≥95%','97.5%','96.0%','98.3%','达标'],
+      [12,'安全费用投入','万元','≥10',12.5,11.8,13.2,'达标'],
+    ]
+  }
+};
+
+function handleSpreadsheetRequest(text) {
+  let matchedTable = null;
+  for (const key in spreadsheetData) {
+    if (text.includes(key)) { matchedTable = key; break; }
+  }
+  if (!matchedTable) matchedTable = '异常设备巡检清单表';
+
+  const data = spreadsheetData[matchedTable];
+  const contentHtml = '好的，我已为您生成「<strong>' + matchedTable + '</strong>」，共 <strong>' + data.rows.length + '</strong> 条数据记录。报表已在右侧展示区打开，您可以查看、编辑和导出。';
+
+  addStreamingTextResponse(contentHtml, [
+    { label: '导出为Excel文件', action: () => sendQuickQ('请导出' + matchedTable) },
+    { label: '按异常类型统计分布', action: () => sendQuickQ('统计' + matchedTable + '中各类异常的数量分布') },
+  ], '智能报表');
+
+  openSpreadsheetPanel(matchedTable);
+}
+
+function openSpreadsheetPanel(tableName) {
+  const panel = document.getElementById('reportPanel');
+  document.getElementById('reportTitle').textContent = tableName;
+  panel.classList.add('open');
+  document.querySelector('.app-layout').classList.add('report-open');
+
+  const toc = document.getElementById('reportToc');
+  toc.innerHTML = '';
+  toc.style.display = 'none';
+  document.getElementById('tocExpandBtn').style.display = 'none';
+
+  const body = document.getElementById('reportBody');
+  body.contentEditable = 'false';
+  body.style.padding = '0';
+  body.innerHTML = '<div style="display:flex;flex-direction:column;height:100%;">' +
+    '<div class="spreadsheet-toolbar" id="ssToolbar">' +
+      '<button onclick="ssUndo()" title="撤销">↩ 撤销</button>' +
+      '<button onclick="ssRedo()" title="重做">↪ 重做</button>' +
+      '<div class="tb-sep"></div>' +
+      '<button onclick="ssBold()" title="加粗"><b>B</b></button>' +
+      '<button onclick="ssItalic()" title="斜体"><i>I</i></button>' +
+      '<button onclick="ssUnderline()" title="下划线"><u>U</u></button>' +
+      '<div class="tb-sep"></div>' +
+      '<select onchange="ssFontSize(this.value)" title="字号"><option value="">字号</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="16">16</option></select>' +
+      '<div class="tb-sep"></div>' +
+      '<button onclick="ssAlignLeft()" title="左对齐">≡←</button>' +
+      '<button onclick="ssAlignCenter()" title="居中">≡</button>' +
+      '<button onclick="ssAlignRight()" title="右对齐">→≡</button>' +
+      '<div class="tb-sep"></div>' +
+      '<button onclick="ssCopy()" title="复制">📋 复制</button>' +
+      '<button onclick="ssPaste()" title="粘贴">📄 粘贴</button>' +
+    '</div>' +
+    '<div class="spreadsheet-wrap" id="ssWrap"></div>' +
+    '<div class="spreadsheet-status-bar" id="ssStatus">' +
+      '<span class="sheet-tab active">Sheet1</span>' +
+      '<span style="flex:1"></span>' +
+      '<span id="ssCellInfo">就绪</span>' +
+      '<span>共 ' + spreadsheetData[tableName].rows.length + ' 行</span>' +
+    '</div>' +
+  '</div>';
+
+  setTimeout(() => renderSpreadsheet(tableName), 200);
+}
+
+function renderSpreadsheet(tableName) {
+  const data = spreadsheetData[tableName];
+  const wrap = document.getElementById('ssWrap');
+  let html = '<table class="spreadsheet-table" id="ssTable"><thead><tr><th class="row-num-header"></th>';
+  data.headers.forEach((h, i) => {
+    html += '<th>' + h + '<div class="col-resize" data-col="' + i + '"></div></th>';
+  });
+  html += '</tr></thead><tbody>';
+  data.rows.forEach((row, ri) => {
+    html += '<tr><td class="row-num">' + (ri + 1) + '</td>';
+    row.forEach((cell, ci) => {
+      html += '<td contenteditable="true" data-r="' + ri + '" data-c="' + ci + '" onclick="ssSelectCell(this)">' + cell + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  // Column resize
+  wrap.querySelectorAll('.col-resize').forEach(handle => {
+    handle.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      const colIdx = parseInt(this.dataset.col);
+      const th = this.parentElement;
+      const startX = e.clientX;
+      const startW = th.offsetWidth;
+      const onMove = (ev) => { th.style.width = Math.max(40, startW + ev.clientX - startX) + 'px'; th.style.minWidth = th.style.width; };
+      const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+}
+
+let ssSelectedCell = null;
+function ssSelectCell(td) {
+  if (ssSelectedCell) ssSelectedCell.classList.remove('selected');
+  td.classList.add('selected');
+  ssSelectedCell = td;
+  const r = parseInt(td.dataset.r) + 1;
+  const c = parseInt(td.dataset.c);
+  const colLetter = String.fromCharCode(65 + c);
+  document.getElementById('ssCellInfo').textContent = colLetter + r + ' | ' + td.textContent;
+}
+
+function ssBold() { document.execCommand('bold'); }
+function ssItalic() { document.execCommand('italic'); }
+function ssUnderline() { document.execCommand('underline'); }
+function ssUndo() { document.execCommand('undo'); }
+function ssRedo() { document.execCommand('redo'); }
+function ssFontSize(v) { if (v && ssSelectedCell) ssSelectedCell.style.fontSize = v + 'px'; }
+function ssAlignLeft() { if (ssSelectedCell) ssSelectedCell.style.textAlign = 'left'; }
+function ssAlignCenter() { if (ssSelectedCell) ssSelectedCell.style.textAlign = 'center'; }
+function ssAlignRight() { if (ssSelectedCell) ssSelectedCell.style.textAlign = 'right'; }
+function ssCopy() { const sel = window.getSelection().toString() || (ssSelectedCell ? ssSelectedCell.textContent : ''); navigator.clipboard.writeText(sel); }
+function ssPaste() { navigator.clipboard.readText().then(t => { if (ssSelectedCell) ssSelectedCell.textContent = t; }); }
+
+// Override closeReport to reset spreadsheet state
+const _origCloseReport = closeReport;
+function closeReportReset() {
+  _origCloseReport();
+  const toc = document.getElementById('reportToc');
+  toc.style.display = '';
+  document.getElementById('tocExpandBtn').style.display = '';
+  const body = document.getElementById('reportBody');
+  body.contentEditable = 'true';
+  body.style.padding = '24px';
+}
+// Patch closeReport
+closeReport = closeReportReset;
+
 </script>
 </body>
 </html>
