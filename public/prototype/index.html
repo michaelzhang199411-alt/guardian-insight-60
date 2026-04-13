@@ -1071,6 +1071,37 @@ body {
 .sqa-kpi-trend.up { color: #EF4444; }
 .sqa-kpi-trend.down { color: #10B981; }
 
+/* System Inspection Report */
+.inspect-report { font-size: 13px; color: #23313e; line-height: 1.6; }
+.inspect-report h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+.inspect-report .inspect-meta { font-size: 12px; color: #8c9bab; margin-bottom: 16px; }
+.inspect-report .inspect-section-title { font-size: 14px; font-weight: 600; margin: 16px 0 8px; color: #23313e; }
+.inspect-infra-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.inspect-infra-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #e8ecf0; border-radius: 8px; background: #fff; }
+.inspect-infra-card .infra-icon { font-size: 18px; color: #5d6b81; }
+.inspect-infra-card .infra-info { flex: 1; }
+.inspect-infra-card .infra-name { font-size: 13px; font-weight: 600; color: #23313e; }
+.inspect-infra-card .infra-detail { font-size: 11px; color: #8c9bab; margin-top: 2px; }
+.inspect-infra-card .infra-status { font-size: 16px; }
+.inspect-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.inspect-stat-card { padding: 14px 16px; border: 1px solid #e8ecf0; border-radius: 8px; background: #fff; }
+.inspect-stat-card .stat-label { font-size: 12px; color: #8c9bab; }
+.inspect-stat-card .stat-value { font-size: 28px; font-weight: 700; margin-top: 2px; }
+.inspect-stat-card .stat-icon { float: right; font-size: 20px; margin-top: -4px; }
+.inspect-stat-card.total .stat-value { color: #23313e; }
+.inspect-stat-card.normal .stat-value { color: #2395ff; }
+.inspect-stat-card.warn .stat-value { color: #e8720b; }
+.inspect-detail-section { border: 1px solid #e8ecf0; border-radius: 8px; padding: 16px; background: #fff; margin-bottom: 16px; }
+.inspect-detail-section h4 { font-size: 14px; font-weight: 600; margin: 0 0 10px; color: #23313e; }
+.inspect-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.inspect-table th { text-align: left; padding: 8px 10px; color: #8c9bab; font-weight: 500; border-bottom: 1px solid #e8ecf0; background: #f8f9fb; }
+.inspect-table td { padding: 8px 10px; border-bottom: 1px solid #f0f2f5; color: #23313e; }
+.inspect-table tr.group-row td { font-weight: 600; background: #fafbfc; }
+.inspect-table tr.sub-row td:first-child { padding-left: 28px; }
+.inspect-table .status-ok { color: #10B981; font-weight: 500; }
+.inspect-table .status-warn { color: #e8720b; font-weight: 500; }
+.inspect-summary-bar { padding: 10px 16px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; font-size: 12px; color: #8c6d1f; margin-top: 12px; }
+
 /* Line Chart */
 .sqa-chart-area {
   padding: 16px 20px;
@@ -1646,7 +1677,48 @@ function matchKnowledgeQA(text) {
 // ========== Other Agent Responses ==========
 const otherAgentResponses = {
   '系统巡检': {
-    content: '🔍 <strong>系统智能巡检已启动</strong>\n\n正在对全市监测系统进行全面检查...\n\n<strong>✅ 数据采集链路</strong>：正常（4G/NB-IoT信号覆盖率 98.7%）\n<strong>✅ 平台服务状态</strong>：全部正常运行（CPU 23% / 内存 45%）\n<strong>✅ 数据库服务</strong>：正常（主从同步延迟 < 100ms）\n<strong>⚠️ 设备在线状态</strong>：发现<strong>18台</strong>设备离线\n　　- 燃气监测仪：12台（集中在蜀山区，疑似批次通信模块故障）\n　　- 供水压力计：4台（包河区，电池电量不足）\n　　- 桥梁传感器：2台（经开区，通信天线损坏）\n<strong>✅ 预警服务</strong>：正常（近24h处理预警 47条，平均响应 1.2秒）\n<strong>✅ 报告生成服务</strong>：正常\n\n📋 <strong>巡检总结</strong>：系统整体运行正常，建议安排蜀山区12台燃气监测仪的通信模块检修。',
+    content: '',
+    getContent: function(question) {
+      const now = '2026-04-13 14:25:32';
+      return '<div class="inspect-report">' +
+        '<h3>系统功能自动巡检报告</h3>' +
+        '<div class="inspect-meta">⏱ 巡检时间：' + now + ' &nbsp;|&nbsp; 巡检耗时：2.6秒</div>' +
+        '<div class="inspect-section-title">基础设施状态</div>' +
+        '<div class="inspect-infra-grid">' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🖥</span><div class="infra-info"><div class="infra-name">应用服务器</div><div class="infra-detail">CPU 23% / 内存 45%</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🗄</span><div class="infra-info"><div class="infra-name">数据库服务</div><div class="infra-detail">正常 (从库延迟 < 100ms)</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🗄</span><div class="infra-info"><div class="infra-name">缓存服务</div><div class="infra-detail">命中率 98.7%</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">📡</span><div class="infra-info"><div class="infra-name">网络连接</div><div class="infra-detail">12台设备离线</div></div><span class="infra-status">⚠️</span></div>' +
+        '</div>' +
+        '<div class="inspect-stats-grid">' +
+          '<div class="inspect-stat-card total"><div class="stat-label">检测总数</div><div class="stat-value">18 <span class="stat-icon">📈</span></div></div>' +
+          '<div class="inspect-stat-card normal"><div class="stat-label">正常</div><div class="stat-value">15 <span class="stat-icon">✅</span></div></div>' +
+          '<div class="inspect-stat-card warn"><div class="stat-label">异常/警告</div><div class="stat-value">3 <span class="stat-icon">⚠️</span></div></div>' +
+        '</div>' +
+        '<div class="inspect-detail-section"><h4>功能巡检详情</h4>' +
+        '<table class="inspect-table"><thead><tr><th>功能模块</th><th>巡检状态</th><th>详细信息</th><th>检测时间</th></tr></thead><tbody>' +
+        '<tr class="group-row"><td>∨ 设备管理系统</td><td class="status-warn">⚠ 部分功能异常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>设备列表</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:23:15</td></tr>' +
+        '<tr class="sub-row"><td>设备详情</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:23:18</td></tr>' +
+        '<tr class="group-row"><td>∨ 设备状态监控</td><td class="status-warn">⚠ 12台设备离线</td><td>包含8台供气设备，4台电池电量不足设备</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="sub-row"><td>在线设备</td><td class="status-ok">✅ 124台在线</td><td>-</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="sub-row"><td>离线设备</td><td class="status-warn">⚠ 12台离线</td><td>建议立即排查网络连接</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="group-row"><td>∨ 数据报表系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="group-row"><td>∨ 运营数据报表</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:05</td></tr>' +
+        '<tr class="sub-row"><td>日报</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:05</td></tr>' +
+        '<tr class="sub-row"><td>月报</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:08</td></tr>' +
+        '<tr class="sub-row"><td>季度分析报告</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:12</td></tr>' +
+        '<tr class="group-row"><td>∨ 安全监控系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>探查规则管理</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:45</td></tr>' +
+        '<tr class="sub-row"><td>告警配置</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:48</td></tr>' +
+        '<tr class="sub-row"><td>日志审计</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:52</td></tr>' +
+        '<tr class="group-row"><td>∨ 智能分析系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>月度分析</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:25:15</td></tr>' +
+        '<tr class="sub-row"><td>趋势预测</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:25:18</td></tr>' +
+        '</tbody></table></div>' +
+        '<div class="inspect-summary-bar">巡检总结：系统整体运行正常，发现 3 项需要关注的问题。建议立即处理设备离线问题，确保所有设备正常连接。</div>' +
+      '</div>';
+    }
   },
   '分析决策': {
     content: '🧠 <strong>智能分析研判报告</strong>\n\n基于多维度数据综合分析，当前城市生命线安全态势研判如下：\n\n<strong>一、整体风险评估</strong>\n当前全市综合风险指数为<strong>32.5</strong>（满分100），处于<strong style="color:#10B981">低风险</strong>水平。\n\n<strong>二、重点风险识别</strong>\n1. <strong style="color:#EF4444">蜀山区燃气管网</strong>（风险指数 58）：近期预警频次上升35%，主要集中在长江西路沿线老旧管段。建议启动专项巡检。\n2. <strong style="color:#F59E0B">庐阳区供水管网</strong>（风险指数 45）：夜间最小流量异常偏高，疑似存在隐性漏损点。建议安排夜间排查。\n\n<strong>三、趋势预测</strong>\n基于ARIMA时序模型预测，未来7天燃气预警数量预计<strong>8-12起</strong>，较本周持平。\n4月份随气温回升，沼气聚集风险将有所上升，预计预警量环比增加<strong>15-20%</strong>。\n\n<strong>四、决策建议</strong>\n• 短期：安排蜀山区长江西路管段专项巡检\n• 中期：启动庐阳区供水管网漏损排查\n• 长期：制定4月份汛前排水系统压力测试方案',
@@ -1978,7 +2050,8 @@ function sendMessage(openReport) {
     } else if (agentAtSend === '智能报表') {
       handleSpreadsheetRequest(text);
     } else if (agentAtSend === '系统巡检' && otherAgentResponses['系统巡检']) {
-      addStreamingTextResponse(otherAgentResponses['系统巡检'].content, null, agentAtSend);
+      const inspectContent = otherAgentResponses['系统巡检'].getContent(text);
+      addStreamingTextResponse(inspectContent, null, agentAtSend);
     } else if (agentAtSend === '分析决策' && otherAgentResponses['分析决策']) {
       addStreamingTextResponse(otherAgentResponses['分析决策'].content, null, agentAtSend);
     } else if (shouldOpenReport || text.includes('月报')) {
