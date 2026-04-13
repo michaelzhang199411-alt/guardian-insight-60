@@ -1677,7 +1677,48 @@ function matchKnowledgeQA(text) {
 // ========== Other Agent Responses ==========
 const otherAgentResponses = {
   '系统巡检': {
-    content: '🔍 <strong>系统智能巡检已启动</strong>\n\n正在对全市监测系统进行全面检查...\n\n<strong>✅ 数据采集链路</strong>：正常（4G/NB-IoT信号覆盖率 98.7%）\n<strong>✅ 平台服务状态</strong>：全部正常运行（CPU 23% / 内存 45%）\n<strong>✅ 数据库服务</strong>：正常（主从同步延迟 < 100ms）\n<strong>⚠️ 设备在线状态</strong>：发现<strong>18台</strong>设备离线\n　　- 燃气监测仪：12台（集中在蜀山区，疑似批次通信模块故障）\n　　- 供水压力计：4台（包河区，电池电量不足）\n　　- 桥梁传感器：2台（经开区，通信天线损坏）\n<strong>✅ 预警服务</strong>：正常（近24h处理预警 47条，平均响应 1.2秒）\n<strong>✅ 报告生成服务</strong>：正常\n\n📋 <strong>巡检总结</strong>：系统整体运行正常，建议安排蜀山区12台燃气监测仪的通信模块检修。',
+    content: '',
+    getContent: function(question) {
+      const now = '2026-04-13 14:25:32';
+      return '<div class="inspect-report">' +
+        '<h3>系统功能自动巡检报告</h3>' +
+        '<div class="inspect-meta">⏱ 巡检时间：' + now + ' &nbsp;|&nbsp; 巡检耗时：2.6秒</div>' +
+        '<div class="inspect-section-title">基础设施状态</div>' +
+        '<div class="inspect-infra-grid">' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🖥</span><div class="infra-info"><div class="infra-name">应用服务器</div><div class="infra-detail">CPU 23% / 内存 45%</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🗄</span><div class="infra-info"><div class="infra-name">数据库服务</div><div class="infra-detail">正常 (从库延迟 < 100ms)</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">🗄</span><div class="infra-info"><div class="infra-name">缓存服务</div><div class="infra-detail">命中率 98.7%</div></div><span class="infra-status">✅</span></div>' +
+          '<div class="inspect-infra-card"><span class="infra-icon">📡</span><div class="infra-info"><div class="infra-name">网络连接</div><div class="infra-detail">12台设备离线</div></div><span class="infra-status">⚠️</span></div>' +
+        '</div>' +
+        '<div class="inspect-stats-grid">' +
+          '<div class="inspect-stat-card total"><div class="stat-label">检测总数</div><div class="stat-value">18 <span class="stat-icon">📈</span></div></div>' +
+          '<div class="inspect-stat-card normal"><div class="stat-label">正常</div><div class="stat-value">15 <span class="stat-icon">✅</span></div></div>' +
+          '<div class="inspect-stat-card warn"><div class="stat-label">异常/警告</div><div class="stat-value">3 <span class="stat-icon">⚠️</span></div></div>' +
+        '</div>' +
+        '<div class="inspect-detail-section"><h4>功能巡检详情</h4>' +
+        '<table class="inspect-table"><thead><tr><th>功能模块</th><th>巡检状态</th><th>详细信息</th><th>检测时间</th></tr></thead><tbody>' +
+        '<tr class="group-row"><td>∨ 设备管理系统</td><td class="status-warn">⚠ 部分功能异常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>设备列表</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:23:15</td></tr>' +
+        '<tr class="sub-row"><td>设备详情</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:23:18</td></tr>' +
+        '<tr class="group-row"><td>∨ 设备状态监控</td><td class="status-warn">⚠ 12台设备离线</td><td>包含8台供气设备，4台电池电量不足设备</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="sub-row"><td>在线设备</td><td class="status-ok">✅ 124台在线</td><td>-</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="sub-row"><td>离线设备</td><td class="status-warn">⚠ 12台离线</td><td>建议立即排查网络连接</td><td>2026-04-13 14:23:22</td></tr>' +
+        '<tr class="group-row"><td>∨ 数据报表系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="group-row"><td>∨ 运营数据报表</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:05</td></tr>' +
+        '<tr class="sub-row"><td>日报</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:05</td></tr>' +
+        '<tr class="sub-row"><td>月报</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:08</td></tr>' +
+        '<tr class="sub-row"><td>季度分析报告</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:12</td></tr>' +
+        '<tr class="group-row"><td>∨ 安全监控系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>探查规则管理</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:45</td></tr>' +
+        '<tr class="sub-row"><td>告警配置</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:48</td></tr>' +
+        '<tr class="sub-row"><td>日志审计</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:24:52</td></tr>' +
+        '<tr class="group-row"><td>∨ 智能分析系统</td><td class="status-ok">✅ 正常</td><td>-</td><td>-</td></tr>' +
+        '<tr class="sub-row"><td>月度分析</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:25:15</td></tr>' +
+        '<tr class="sub-row"><td>趋势预测</td><td class="status-ok">✅ 正常</td><td>-</td><td>2026-04-13 14:25:18</td></tr>' +
+        '</tbody></table></div>' +
+        '<div class="inspect-summary-bar">巡检总结：系统整体运行正常，发现 3 项需要关注的问题。建议立即处理设备离线问题，确保所有设备正常连接。</div>' +
+      '</div>';
+    }
   },
   '分析决策': {
     content: '🧠 <strong>智能分析研判报告</strong>\n\n基于多维度数据综合分析，当前城市生命线安全态势研判如下：\n\n<strong>一、整体风险评估</strong>\n当前全市综合风险指数为<strong>32.5</strong>（满分100），处于<strong style="color:#10B981">低风险</strong>水平。\n\n<strong>二、重点风险识别</strong>\n1. <strong style="color:#EF4444">蜀山区燃气管网</strong>（风险指数 58）：近期预警频次上升35%，主要集中在长江西路沿线老旧管段。建议启动专项巡检。\n2. <strong style="color:#F59E0B">庐阳区供水管网</strong>（风险指数 45）：夜间最小流量异常偏高，疑似存在隐性漏损点。建议安排夜间排查。\n\n<strong>三、趋势预测</strong>\n基于ARIMA时序模型预测，未来7天燃气预警数量预计<strong>8-12起</strong>，较本周持平。\n4月份随气温回升，沼气聚集风险将有所上升，预计预警量环比增加<strong>15-20%</strong>。\n\n<strong>四、决策建议</strong>\n• 短期：安排蜀山区长江西路管段专项巡检\n• 中期：启动庐阳区供水管网漏损排查\n• 长期：制定4月份汛前排水系统压力测试方案',
