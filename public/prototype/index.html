@@ -1904,7 +1904,7 @@ function sendMessage(openReport) {
   const agentAtSend = currentAgent;
   isGenerating = true;
   const typingEl = addTypingIndicator();
-  const shouldOpenReport = openReport || (agentAtSend === '智能报告') || (agentAtSend === '智能报表');
+  const shouldOpenReport = openReport || (agentAtSend === '智能报告');
 
   setTimeout(() => {
     typingEl.remove();
@@ -1917,11 +1917,13 @@ function sendMessage(openReport) {
     } else if (kqaData) {
       const agent = agentAtSend || '知识问答';
       addStreamingTextResponse(kqaData.content, kqaData.suggestions ? kqaData.suggestions.map(s => ({label: s, action: () => sendQuickQ(s)})) : null, agent);
+    } else if (agentAtSend === '智能报表') {
+      handleSpreadsheetRequest(text);
     } else if (agentAtSend === '系统巡检' && otherAgentResponses['系统巡检']) {
       addStreamingTextResponse(otherAgentResponses['系统巡检'].content, null, agentAtSend);
     } else if (agentAtSend === '分析决策' && otherAgentResponses['分析决策']) {
       addStreamingTextResponse(otherAgentResponses['分析决策'].content, null, agentAtSend);
-    } else if (shouldOpenReport || text.includes('月报') || text.includes('报表')) {
+    } else if (shouldOpenReport || text.includes('月报')) {
       const reportTitle = text.includes('报表') ? '监测数据统计报表' : '燃气监测运营月度报告';
       addAIResponseWithReport(text, reportTitle, agentAtSend);
       openReportPanel(reportTitle);
