@@ -2698,11 +2698,17 @@ function openSpreadsheetPanel(tableName) {
 function renderSpreadsheet(tableName) {
   const data = spreadsheetData[tableName];
   const wrap = document.getElementById('ssWrap');
-  let html = '<table class="spreadsheet-table" id="ssTable"><thead><tr><th class="row-num-header"></th>';
-  data.headers.forEach((h, i) => {
-    html += '<th>' + h + '<div class="col-resize" data-col="' + i + '"></div></th>';
-  });
-  html += '</tr></thead><tbody>';
+  let html = '<table class="spreadsheet-table" id="ssTable"><thead>';
+  if (data.customHeader) {
+    html += data.headerHtml;
+  } else {
+    html += '<tr><th class="row-num-header"></th>';
+    data.headers.forEach((h, i) => {
+      html += '<th>' + h + '<div class="col-resize" data-col="' + i + '"></div></th>';
+    });
+    html += '</tr>';
+  }
+  html += '</thead><tbody>';
   data.rows.forEach((row, ri) => {
     html += '<tr><td class="row-num">' + (ri + 1) + '</td>';
     row.forEach((cell, ci) => {
@@ -2717,7 +2723,6 @@ function renderSpreadsheet(tableName) {
   wrap.querySelectorAll('.col-resize').forEach(handle => {
     handle.addEventListener('mousedown', function(e) {
       e.preventDefault(); e.stopPropagation();
-      const colIdx = parseInt(this.dataset.col);
       const th = this.parentElement;
       const startX = e.clientX;
       const startW = th.offsetWidth;
