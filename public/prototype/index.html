@@ -2050,7 +2050,8 @@ function sendMessage(openReport) {
     } else if (agentAtSend === '智能报表') {
       handleSpreadsheetRequest(text);
     } else if (agentAtSend === '系统巡检' && otherAgentResponses['系统巡检']) {
-      addStreamingTextResponse(otherAgentResponses['系统巡检'].content, null, agentAtSend);
+      const inspectContent = otherAgentResponses['系统巡检'].getContent(text);
+      addStreamingTextResponse(inspectContent, null, agentAtSend);
     } else if (agentAtSend === '分析决策' && otherAgentResponses['分析决策']) {
       addStreamingTextResponse(otherAgentResponses['分析决策'].content, null, agentAtSend);
     } else if (shouldOpenReport || text.includes('月报')) {
